@@ -7,6 +7,9 @@ Este é o dashboard standalone da PRPGI projetado para ser incorporado via ifram
 O dashboard está hospedado no GitHub Pages e pode ser acessado em:
 [https://prof-davifr.github.io/dashboard-prpgi/](https://prof-davifr.github.io/dashboard-prpgi/)
 
+## 📊 Fonte de Dados
+
+O dashboard é alimentado por dados provenientes dos lattes dos pesquisadores e do espelhos dos grupos de pesquisa.
 
 ## Estrutura do Projeto
 
