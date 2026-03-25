@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard PRPGI</title>
+    <style>
+        :root {
+            --bg: #f4f7f6;
+            --card-bg: #ffffff;
+            --text: #333333;
+            --accent: hsl(210, 80%, 45%);
+            --accent-hover: hsl(210, 80%, 35%);
+            --gradient: linear-gradient(135deg, hsl(210,80%,55%), hsl(260,80%,65%));
+            --border-radius: 12px;
+            --shadow: 0 4px 15px rgba(0,0,0,0.05);
+            --border-color: #e0e0e0;
+        }
+        body { margin:0; padding:0; font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); }
+        h1, h2, h3 { margin-top: 0; }
+        header { background: var(--gradient); padding: 1.5rem; text-align:center; box-shadow: 0 4px 10px rgba(0,0,0,0.1); color: white; }
+        .header-title { font-size:1.8rem; font-weight:700; margin-bottom: 0.5rem; letter-spacing: 1px; }
+        
+        /* Filters */
+        .controls { display: flex; justify-content: center; gap: 1rem; padding: 1rem; flex-wrap: wrap; background: #ffffff; border-bottom: 1px solid var(--border-color); }
+        select { background: #fafafa; color: #333; border: 1px solid #ccc; padding: 0.5rem 1rem; border-radius: 6px; font-family: inherit; font-size: 1rem; outline: none; transition: border-color 0.2s; }
+        select:focus { border-color: var(--accent); white-space: nowrap;}
+        
+        /* Loading Overlay */
+        #loading { position: fixed; inset: 0; background: rgba(255,255,255,0.9); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 1000; }
+        .spinner { width: 50px; height: 50px; border: 4px solid rgba(0,0,0,0.1); border-top-color: var(--accent); border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        
+        /* Tabs */
+        .tabs { display: flex; justify-content: center; gap: 0.5rem; padding: 1rem; flex-wrap: wrap; background: #eaeff2; border-bottom: 1px solid var(--border-color); }
+        .tab-btn { background: transparent; color: #555; border: none; padding: 0.75rem 1.5rem; font-size: 1rem; font-weight: 600; cursor: pointer; border-radius: 6px 6px 0 0; transition: all 0.3s; }
+        .tab-btn:hover { color: var(--accent); background: rgba(0,0,0,0.03); }
+        .tab-btn.active { color: var(--accent); background: var(--card-bg); border-bottom: 3px solid var(--accent); box-shadow: 0 -2px 5px rgba(0,0,0,0.02); }
+        
+        /* Tab Content */
+        .tab-content { display: none; padding: 2rem; max-width: 1000px; margin: 0 auto; }
+        .tab-content.active { display: block; animation: fadeIn 0.4s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        /* KPIs Grid */
+        .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
+        .kpi-card { background: var(--card-bg); border-radius: var(--border-radius); padding: 1.5rem; text-align: center; border: 1px solid var(--border-color); box-shadow: var(--shadow); transition: transform 0.2s, box-shadow 0.2s; }
+        .kpi-card:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(0,0,0,0.08); }
+        .kpi-label { font-size: 0.9rem; color: #666; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.5rem; font-weight: 600; }
+        .kpi-value { font-size: 2.5rem; font-weight: 800; color: var(--accent); line-height: 1; }
+        
+        /* Charts Grid Layout */
+        .charts-container { display: flex; flex-direction: column; gap: 2rem; }
+        .chart-row-full { width: 100%; }
+        .chart-row-split { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
+        @media (max-width: 900px) { .chart-row-split { grid-template-columns: 1fr; } }
+        
+        .chart-card { background: var(--card-bg); border-radius: var(--border-radius); padding: 1.5rem; border: 1px solid var(--border-color); box-shadow: var(--shadow); }
+        .chart-title { font-size: 1.1rem; font-weight: 600; margin-bottom: 1rem; color: #444; text-align: center; }
+        .chart-wrapper { position: relative; height: 350px; width: 100%; }
+        .chart-wrapper.large { height: 450px; }
+        
+        /* Leaflet Maps */
+        .map-container { position: relative; height: 350px; width: 100%; border-radius: 8px; z-index: 0; border: 1px solid var(--border-color); overflow: hidden; }
+        #map-grupos { height: 100%; width: 100%; }
+        
+        footer { margin-top: 3rem; text-align: center; padding: 2rem; color: #666; font-size: 0.9rem; border-top: 1px solid var(--border-color); background: #ffffff;}
+    </style>
+    <!-- SheetJS, ChartJS, Leaflet -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+</head>
+<body>
+
+    <div id="loading">
+        <div class="spinner"></div>
+        <p style="margin-top:20px; font-weight:600; font-size:1.2rem; color:var(--accent);" id="loading-text">Carregando dados dos campi...</p>
+    </div>
+
+    <header>
+        <div class="header-title">Dashboard PRPGI – IFBA</div>
+        <!-- Global Controls -->
+    </header>
+    
+    <div class="controls">
+        <select id="period-filter">
+            <option value="all">Todo o Período (1947-2027)</option>
+            <option value="1">Último Ano (2025)</option>
+            <option value="2">Últimos 2 Anos (2024-2025)</option>
+            <option value="5">Últimos 5 Anos (2021-2025)</option>
+            <option value="10">Últimos 10 Anos (2016-2025)</option>
+        </select>
+        
+        <label style="display: flex; align-items: center; gap: 0.5rem; color: #444; font-weight: 600; cursor: pointer;">
+            <input type="checkbox" id="unique-toggle" style="width: 18px; height: 18px;"> 
+            Exibir Apenas Produções Únicas (Desduplicar Coautorias)
+        </label>
+    </div>
+
+    <!-- Tabs Navigation -->
+    <div class="tabs">
+        <button class="tab-btn active" data-target="tab-cientifica">Produção Científica</button>
+        <button class="tab-btn" data-target="tab-tecnica">Produção Técnica</button>
+        <button class="tab-btn" data-target="tab-inovacao">Inovação</button>
+        <button class="tab-btn" data-target="tab-grupos">Grupos de Pesquisa</button>
+        <button class="tab-btn" data-target="tab-orientacoes">Pesquisadores e Orientações</button>
+    </div>
+
+    <!-- Tab 1: Produção Científica -->
+    <section id="tab-cientifica" class="tab-content active">
+        <div class="kpi-grid" id="kpi-cientifica"></div>
+        <div class="charts-container">
+            <div class="chart-row-full chart-card">
+                <div class="chart-title">Evolução Temporal da Produção Científica</div>
+                <div class="chart-wrapper large"><canvas id="chart-cientifica-evolucao"></canvas></div>
+            </div>
+            <div class="chart-row-split">
+                <div class="chart-card">
+                    <div class="chart-title">Distribuição Qualis</div>
+                    <div class="chart-wrapper"><canvas id="chart-cientifica-pie"></canvas></div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-title">Distribuição Geográfica</div>
+                    <div class="map-container"><div id="map-cientifica" style="height: 100%; width: 100%;"></div></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Tab 2: Produção Técnica -->
+    <section id="tab-tecnica" class="tab-content">
+        <div class="kpi-grid" id="kpi-tecnica"></div>
+        <div class="charts-container">
+            <div class="chart-row-full chart-card">
+                <div class="chart-title">Evolução Temporal da Produção Técnica</div>
+                <div class="chart-wrapper large"><canvas id="chart-tecnica-evolucao"></canvas></div>
+            </div>
+            <div class="chart-row-split">
+                <div class="chart-card">
+                    <div class="chart-title">Tipos de Produção Técnica</div>
+                    <div class="chart-wrapper"><canvas id="chart-tecnica-pie"></canvas></div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-title">Distribuição Geográfica</div>
+                    <div class="map-container"><div id="map-tecnica" style="height: 100%; width: 100%;"></div></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Tab 3: Inovação -->
+    <section id="tab-inovacao" class="tab-content">
+        <div class="kpi-grid" id="kpi-inovacao"></div>
+        <div class="charts-container">
+            <div class="chart-row-split">
+                <div class="chart-card">
+                    <div class="chart-title">Evolução: Patentes e Softwares</div>
+                    <div class="chart-wrapper"><canvas id="chart-inovacao-evo-1"></canvas></div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-title">Evolução: Marcas e Outros</div>
+                    <div class="chart-wrapper"><canvas id="chart-inovacao-evo-2"></canvas></div>
+                </div>
+            </div>
+            <div class="chart-row-split">
+                <div class="chart-card">
+                    <div class="chart-title">Registros por Tipo</div>
+                    <div class="chart-wrapper"><canvas id="chart-inovacao-pie"></canvas></div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-title">Distribuição Geográfica</div>
+                    <div class="map-container"><div id="map-inovacao" style="height: 100%; width: 100%;"></div></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Tab 4: Grupos de Pesquisa -->
+    <section id="tab-grupos" class="tab-content">
+        <div class="kpi-grid" id="kpi-grupos"></div>
+        <div class="charts-container">
+            <div class="chart-row-split">
+                <div class="chart-card">
+                    <div class="chart-title">Evolução: Grupos Criados</div>
+                    <div class="chart-wrapper"><canvas id="chart-grupos-evo-1"></canvas></div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-title">Evolução: Grupos Ativos (Acumulado)</div>
+                    <div class="chart-wrapper"><canvas id="chart-grupos-evo-2"></canvas></div>
+                </div>
+            </div>
+            <div class="chart-row-split">
+                <div class="chart-card">
+                    <div class="chart-title">Grupos por Área</div>
+                    <div class="chart-wrapper"><canvas id="chart-grupos-pie"></canvas></div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-title">Distribuição Geográfica</div>
+                    <div class="map-container"><div id="map-grupos" style="height: 100%; width: 100%;"></div></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Tab 5: Pesquisadores e Orientações -->
+    <section id="tab-orientacoes" class="tab-content">
+        <div class="kpi-grid" id="kpi-orientacoes"></div>
+        <div class="charts-container">
+            <div class="chart-row-split">
+                <div class="chart-card">
+                    <div class="chart-title">Evolução: Orientações Concluídas</div>
+                    <div class="chart-wrapper"><canvas id="chart-orientacoes-evo-1"></canvas></div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-title">Evolução: Orientações em Andamento</div>
+                    <div class="chart-wrapper"><canvas id="chart-orientacoes-evo-2"></canvas></div>
+                </div>
+            </div>
+            <div class="chart-row-split">
+                <div class="chart-card">
+                    <div class="chart-title">Nível de Orientação</div>
+                    <div class="chart-wrapper"><canvas id="chart-orientacoes-pie"></canvas></div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-title">Distribuição Geográfica</div>
+                    <div class="map-container"><div id="map-orientacoes" style="height: 100%; width: 100%;"></div></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>© IFBA – PRPGI – <span id="year"></span></footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
