@@ -7,18 +7,6 @@ Este é o dashboard standalone da PRPGI projetado para ser incorporado via ifram
 O dashboard está hospedado no GitHub Pages e pode ser acessado em:
 [https://prof-davifr.github.io/dashboard-prpgi/](https://prof-davifr.github.io/dashboard-prpgi/)
 
-## 💻 Como Executar Localmente
-
-### Pré-requisitos
-- Um servidor web simples (ex: `live-server`, `http-server`, ou a extensão Live Server do VS Code).
-
-### Passos
-1. Clone o repositório:
-   ```bash
-   git clone https://github.com/prof-davifr/dashboard-prpgi.git
-   ```
-2. Abra a pasta do projeto e inicie um servidor web local.
-3. O dashboard estará disponível no endereço fornecido pelo seu servidor (geralmente `http://localhost:5500` or `http://127.0.0.1:8080`).
 
 ## Estrutura do Projeto
 
