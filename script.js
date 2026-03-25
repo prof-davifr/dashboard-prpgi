@@ -61,12 +61,15 @@ async function loadExcelSheets(fileName) {
       return XLSX.utils.sheet_to_json(workbook.Sheets[shName], { raw: false, defval: null });
     };
 
+    const campusCode = fileName.split('_')[0];
+    const addCampus = arr => arr.map(r => ({ ...r, campus: campusCode }));
+
     return {
-      bibliografica: getSheet("Produções Bibliográficas"),
-      tecnica: getSheet("Produções Técnicas"),
-      inovacao: getSheet("Registros e Patentes"), // IF exists (innovations are usually somewhere)
-      concluidas: getSheet("Orientações Concluídas"),
-      andamento: getSheet("Orientações em Andamento")
+      bibliografica: addCampus(getSheet("Produções Bibliográficas")),
+      tecnica: addCampus(getSheet("Produções Técnicas")),
+      inovacao: addCampus(getSheet("Registros e Patentes")),
+      concluidas: addCampus(getSheet("Orientações Concluídas")),
+      andamento: addCampus(getSheet("Orientações em Andamento"))
     };
   } catch(e) {
     console.warn("Failed to load or parse " + fileName, e);
@@ -149,9 +152,43 @@ function processData() {
   }
   const endYear = 2027;
 
-  const filterPeriod = arr => arr.filter(r => {
-    const y = parseInt(r["Ano"], 10);
-    return !isNaN(y) && y >= startYear && y <= endYear;
+  const campusVal = $('campus-filter').value;
+
+  const filterPeriodAndCampus = arr => arr.filter(r => {
+    // Year filter (if it has "Ano")
+    if (r["Ano"]) {
+        const y = parseInt(r["Ano"], 10);
+        const inPeriod = !isNaN(y) && y >= startYear && y <= endYear;
+        if (!inPeriod) return false;
+    }
+
+    // Campus filter
+    if (campusVal === 'all') return true;
+    
+    // For Lattes data (Excel) tagged with campus
+    if (r.campus) return r.campus === campusVal;
+
+    // For DGP data (CSV) - map Unidade to campus code
+    let rCampus = "";
+    if (r["Unidade"]) {
+      const u = r["Unidade"].toUpperCase();
+      Object.entries(CAMPUS_TO_CITY).forEach(([code, city]) => {
+        if (u.includes(city)) rCampus = code;
+      });
+    }
+    return rCampus === campusVal;
+  });
+
+  const filterGroupsCampus = arr => arr.filter(r => {
+    if (campusVal === 'all') return true;
+    let rCampus = "";
+    if (r["Unidade"]) {
+      const u = r["Unidade"].toUpperCase();
+      Object.entries(CAMPUS_TO_CITY).forEach(([code, city]) => {
+         if (u.includes(city)) rCampus = code;
+      });
+    }
+    return rCampus === campusVal;
   });
 
   // Fuzzy deduplication: extract key from 'Publicação' (full citation) or 'Título' 
@@ -208,12 +245,12 @@ function processData() {
   };
 
   STATE.filtered = {
-    bibliografica: filterUnique(filterPeriod(STATE.raw.bibliografica)),
-    tecnica: filterUnique(filterPeriod(STATE.raw.tecnica)),
-    inovacao: filterUnique(STATE.raw.inovacao),
-    concluidas: filterUnique(filterPeriod(STATE.raw.concluidas)),
-    andamento: filterUnique(filterPeriod(STATE.raw.andamento)),
-    grupos: STATE.raw.grupos // Groups don't need this, DGP generates one line per group
+    bibliografica: filterUnique(filterPeriodAndCampus(STATE.raw.bibliografica)),
+    tecnica: filterUnique(filterPeriodAndCampus(STATE.raw.tecnica)),
+    inovacao: filterUnique(filterPeriodAndCampus(STATE.raw.inovacao)),
+    concluidas: filterUnique(filterPeriodAndCampus(STATE.raw.concluidas)),
+    andamento: filterUnique(filterPeriodAndCampus(STATE.raw.andamento)),
+    grupos: filterGroupsCampus(STATE.raw.grupos)
   };
 
 // Main initialization
@@ -400,7 +437,7 @@ const CAMPUS_TO_CITY = {
   "JEQ": "JEQUIÉ", "SAM": "SANTO AMARO", "SEA": "SEABRA", "SF": "SIMÕES FILHO", 
   "UBA": "UBATÃ", "VAL": "VALENÇA", "VC": "VITÓRIA DA CONQUISTA", 
   "SAJ": "SANTO ANTÔNIO DE JESUS", "JUA": "JUAZEIRO", "PA": "PAULO AFONSO",
-  "PS": "PORTO SEGURO"
+  "PS": "PORTO SEGURO", "SSA": "SALVADOR"
 };
 
 function lookupCoords(city) {
@@ -633,6 +670,7 @@ async function initDashboard() {
     });
 
     $('period-filter').addEventListener('change', processData);
+    $('campus-filter').addEventListener('change', processData);
     $('unique-toggle').addEventListener('change', processData);
 
     $('loading').style.display = 'none';
