@@ -3,4 +3,5 @@ __pycache__/
 .DS_Store
 *.log
 Mockup do Dashboard.pdf
+.env
 
