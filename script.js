@@ -6,8 +6,8 @@ const EXCEL_FILES = [
   "BAR_1947_2027.xls", "BRU_1947_2027.xls", "CAM_1947_2027.xls", "CFO_1947_2027.xls", 
   "EC_1947_2027.xls", "EUN_1947_2027.xls", "FS_1947_2027.xls", "ILH_1947_2027.xls", 
   "IRE_1947_2027.xls", "JAC_1947_2027.xls", "JAG_1947_2027.xls", "JEQ_1947_2027.xls", 
-  "SAM_1947_2027.xls", "SEA_1947_2027.xls", "SF_1947_2027.xls", "UBA_1947_2027.xls", 
-  "VAL_1947_2027.xls", "VC_1947_2027.xls"
+  "SAM_1947_2027.xls", "SEA_1947_2027.xls", "SF_1947_2027.xls", "SSA_1947_2027.xls",
+  "UBA_1947_2027.xls", "VAL_1947_2027.xls", "VC_1947_2027.xls"
 ];
 const CSV_FILE = "coletor_dgp_ifba.csv";
 
