@@ -1,9 +1,6 @@
 // script.js – PRPGI Dashboard core logic
+// Data is pre-built into data.json by build.js (run: npm run build)
 
-const DATA_PATH = "dados/";
-// All valid campus files from list
-let EXCEL_FILES = [];
-const CSV_FILE = "coletor_dgp_ifba.csv";
 
 const STATE = {
   raw: {
@@ -43,70 +40,13 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
   });
 });
 
-async function loadExcelSheets(fileName) {
-  try {
-    const resp = await fetch(DATA_PATH + fileName);
-    if (!resp.ok) return null;
-    const arrayBuffer = await resp.arrayBuffer();
-    const data = new Uint8Array(arrayBuffer);
-    const workbook = XLSX.read(data, { type: "array" });
-    
-    const getSheet = name => {
-      let shName = workbook.SheetNames.find(s => s.trim().toLowerCase() === name.toLowerCase());
-      if (!shName) return [];
-      return XLSX.utils.sheet_to_json(workbook.Sheets[shName], { raw: false, defval: null });
-    };
 
-    const campusCode = fileName.includes('-') ? fileName.split('-')[0] : fileName.split('_')[0];
-    const addCampus = arr => arr.map(r => ({ ...r, campus: campusCode }));
-
-    return {
-      bibliografica: addCampus(getSheet("Produções Bibliográficas")),
-      tecnica: addCampus(getSheet("Produções Técnicas")),
-      inovacao: addCampus(getSheet("Registros e Patentes")),
-      concluidas: addCampus(getSheet("Orientações Concluídas")),
-      andamento: addCampus(getSheet("Orientações em Andamento"))
-    };
-  } catch(e) {
-    console.warn("Failed to load or parse " + fileName, e);
-    return null;
-  }
-}
-
-async function loadCSV(fileName) {
-  try {
-    const resp = await fetch(DATA_PATH + fileName);
-    const text = await resp.text();
-    const rows = text.split("\n").map(r => r.trim()).filter(r => r);
-    const headers = rows[0].split(",");
-    return rows.slice(1).map(line => {
-      // Very basic CSV parsing (ignoring quotes for simplicity of DGP extract)
-      const cols = line.split('","').map(c => c.replace(/^"|"$/g, ''));
-      if(cols.length === 1) {
-          // fallback if not quoted
-          let fallback = line.split(",");
-          const obj = {};
-          headers.forEach((h,i) => obj[h.trim()] = fallback[i]);
-          return obj;
-      }
-      const obj = {};
-      headers.forEach((h,i) => obj[h.replace(/^"|"$/g, '').trim()] = cols[i]);
-      return obj;
-    });
-  } catch(e){
-    console.error("CSV error", e);
-    return [];
-  }
-}
 
 // Extract distinct Servidor ID
 function extractServidorIds(records) {
   const ids = new Set();
   records.forEach(r => {
-    const srv = r["Servidor"];
-    if (!srv) return;
-    const match = srv.match(/(\d{7,})/);
-    if (match) ids.add(match[1]);
+    if (r["Servidor"]) ids.add(r["Servidor"]);
   });
   return ids;
 }
@@ -183,38 +123,6 @@ function processData() {
     return rCampus === campusVal;
   });
 
-  // Fuzzy deduplication: extract key from 'Publicação' (full citation) or 'Título' 
-  // Similarity using Jaro–Winkler-style by comparing first 150 chars normalized
-  const strSimilarity = (a, b) => {
-    if (!a || !b) return 0;
-    if (a === b) return 1;
-    const longer = a.length > b.length ? a : b;
-    const shorter = a.length > b.length ? b : a;
-    if (longer.length === 0) return 1;
-    // Simple edit-distance-based similarity
-    const editDist = (s, t) => {
-      const m = s.length, n = t.length;
-      const dp = Array.from({length: m+1}, (_, i) => [i, ...Array(n).fill(0)]);
-      for(let j = 0; j <= n; j++) dp[0][j] = j;
-      for(let i = 1; i <= m; i++) for(let j = 1; j <= n; j++)
-        dp[i][j] = s[i-1] === t[j-1] ? dp[i-1][j-1] : 1 + Math.min(dp[i-1][j], dp[i][j-1], dp[i-1][j-1]);
-      return dp[m][n];
-    };
-    return (longer.length - editDist(longer, shorter)) / longer.length;
-  };
-
-  const normalizeKey = r => {
-    // Prefer Título field if present; otherwise use start of Publicação (first 150 chars)
-    const raw = r["Título"] || r["Nome"] || (r["Publicação"] || "").substring(0, 150);
-    if (!raw) return "";
-    // Strong normalization: remove all non-alphanumeric, lowercase, and trim
-    return raw.toLowerCase()
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "") // Remove accents
-      .replace(/[^a-z0-9]/gi, "")
-      .substring(0, 150);
-  };
-
   const filterUnique = arr => {
     if (!uniqueOnly) return arr;
     
@@ -222,7 +130,7 @@ function processData() {
     const result = [];
     
     for (const r of arr) {
-      const key = normalizeKey(r);
+      const key = r.dedupKey;
       if (!key) {
         result.push(r);
         continue;
@@ -459,12 +367,8 @@ function renderGenericMap(data, mapId, color, label) {
     let city = "";
     if (r["Unidade"] || r["Cidade"]) {
       city = (r["Unidade"] || r["Cidade"]).trim().toUpperCase();
-    } else if (r["Servidor"]) {
-      const campusMatch = r["Servidor"].match(/\(([A-Z]{2,4})\)/);
-      if (campusMatch) {
-         const abbr = campusMatch[1];
-         city = CAMPUS_TO_CITY[abbr] || abbr;
-      }
+    } else if (r.campus) {
+      city = CAMPUS_TO_CITY[r.campus] || r.campus;
     }
     if (city) cityCount[city] = (cityCount[city] || 0) + 1;
   });
@@ -625,10 +529,8 @@ function renderKPIsOrientacoes() {
   const allIdsArray = [];
   [STATE.filtered.bibliografica, STATE.filtered.tecnica, concluidas, andamento].forEach(arr => {
     arr.forEach(r => {
-      const srv = r["Servidor"];
-      if (srv) {
-        const m = srv.match(/(\d{7,})/);
-        if(m) allIdsArray.push(m[1]);
+      if (r["Servidor"]) {
+        allIdsArray.push(r["Servidor"]);
       }
     });
   });
@@ -644,78 +546,36 @@ function renderKPIsOrientacoes() {
 
 async function initDashboard() {
   try {
-    $('loading-text').innerText = "Baixando dados DGP...";
-    STATE.raw.grupos = await loadCSV(CSV_FILE);
+    $('loading-text').innerText = "Carregando dados...";
 
-    $('loading-text').innerText = "Identificando arquivos de dados...";
-    try {
-      // 1. Try fetching local directory index (works with live-server, python http.server, etc.)
-      const fileResp = await fetch(DATA_PATH);
-      if (fileResp.ok) {
-        const text = await fileResp.text();
-        // Simple regex to find hrefs ending in .xls
-        const matches = text.match(/href="([^"]+\.xls)"/gi);
-        if (matches) {
-          EXCEL_FILES = matches.map(m => m.split('"')[1].split('/').pop()).filter(f => !f.startsWith('.~lock'));
-        }
-      }
-      
-      // 2. Fallback to GitHub API if local index fetching failed or returned no files (e.g. on GitHub Pages)
-      if (EXCEL_FILES.length === 0) {
-        const ghResp = await fetch('https://api.github.com/repos/prof-davifr/dashboard-prpgi/contents/dados');
-        if (ghResp.ok) {
-          const ghData = await ghResp.json();
-          EXCEL_FILES = ghData.map(f => f.name).filter(name => name.endsWith('.xls') && !name.startsWith('.~lock'));
-        }
-      }
-    } catch (e) {
-      console.error("Error identifying data files:", e);
+    const resp = await fetch('data.json');
+    if (!resp.ok) {
+      $('loading-text').innerText = "Erro: data.json não encontrado. Execute 'npm run build' primeiro.";
+      return;
     }
+    const data = await resp.json();
 
-    if (EXCEL_FILES.length === 0) {
-        $('loading-text').innerText = "Erro: Nenhum arquivo de dados encontrado.";
-        console.warn("No data files found. Please ensure 'dados/' directory is accessible.");
-        return;
-    }
+    // Populate raw state from pre-built JSON
+    STATE.raw.bibliografica = data.bibliografica || [];
+    STATE.raw.tecnica = data.tecnica || [];
+    STATE.raw.inovacao = data.inovacao || [];
+    STATE.raw.concluidas = data.concluidas || [];
+    STATE.raw.andamento = data.andamento || [];
+    STATE.raw.grupos = data.grupos || [];
 
-    // Automatically determine start and end years from filenames to dynamically adjust labels!
-    let minYear = 9999;
-    let maxYear = 0;
-    EXCEL_FILES.forEach(f => {
-      const match = f.match(/-(\d{4})-(\d{4})\.xls/);
-      if (match) {
-        if (parseInt(match[1]) < minYear) minYear = parseInt(match[1]);
-        if (parseInt(match[2]) > maxYear) maxYear = parseInt(match[2]);
-      }
-    });
-
-    if (minYear !== 9999 && maxYear !== 0) {
-      STATE.minYear = minYear;
-      STATE.maxYear = maxYear;
+    // Set period labels from metadata
+    if (data.meta) {
+      STATE.minYear = data.meta.minYear;
+      STATE.maxYear = data.meta.maxYear;
       const select = $('period-filter');
       select.innerHTML = `
-        <option value="all">Todo o Período (${minYear}-${maxYear})</option>
-        <option value="1">Último Ano (${maxYear})</option>
-        <option value="2">Últimos 2 Anos (${maxYear - 1}-${maxYear})</option>
-        <option value="5">Últimos 5 Anos (${maxYear - 4}-${maxYear})</option>
-        <option value="10">Últimos 10 Anos (${maxYear - 9}-${maxYear})</option>
+        <option value="all">Todo o Período (${data.meta.minYear}-${data.meta.maxYear})</option>
+        <option value="1">Último Ano (${data.meta.maxYear})</option>
+        <option value="2">Últimos 2 Anos (${data.meta.maxYear - 1}-${data.meta.maxYear})</option>
+        <option value="5">Últimos 5 Anos (${data.meta.maxYear - 4}-${data.meta.maxYear})</option>
+        <option value="10">Últimos 10 Anos (${data.meta.maxYear - 9}-${data.meta.maxYear})</option>
       `;
     }
-
-    $('loading-text').innerText = "Lendo tabelas de todos os campi (isso pode levar alguns instantes)...";
-    
-    // Load campuses concurrently
-    const promises = EXCEL_FILES.map(f => loadExcelSheets(f));
-    const results = await Promise.all(promises);
-    
-    results.forEach(res => {
-      if(!res) return;
-      STATE.raw.bibliografica.push(...res.bibliografica);
-      STATE.raw.tecnica.push(...res.tecnica);
-      if(res.inovacao) STATE.raw.inovacao.push(...res.inovacao);
-      STATE.raw.concluidas.push(...res.concluidas);
-      STATE.raw.andamento.push(...res.andamento);
-    });
 
     $('period-filter').addEventListener('change', processData);
     $('campus-filter').addEventListener('change', processData);
