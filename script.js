@@ -2,13 +2,7 @@
 
 const DATA_PATH = "dados/";
 // All valid campus files from list
-const EXCEL_FILES = [
-  "BAR_1947_2027.xls", "BRU_1947_2027.xls", "CAM_1947_2027.xls", "CFO_1947_2027.xls", 
-  "EC_1947_2027.xls", "EUN_1947_2027.xls", "FS_1947_2027.xls", "ILH_1947_2027.xls", 
-  "IRE_1947_2027.xls", "JAC_1947_2027.xls", "JAG_1947_2027.xls", "JEQ_1947_2027.xls", 
-  "SAM_1947_2027.xls", "SEA_1947_2027.xls", "SF_1947_2027.xls", "SSA_1947_2027.xls",
-  "UBA_1947_2027.xls", "VAL_1947_2027.xls", "VC_1947_2027.xls"
-];
+let EXCEL_FILES = [];
 const CSV_FILE = "coletor_dgp_ifba.csv";
 
 const STATE = {
@@ -22,7 +16,9 @@ const STATE = {
   },
   filtered: {},
   charts: {},
-  leafMaps: {}
+  leafMaps: {},
+  minYear: 1947,
+  maxYear: new Date().getFullYear()
 };
 
 // Utilities for DOM
@@ -61,7 +57,7 @@ async function loadExcelSheets(fileName) {
       return XLSX.utils.sheet_to_json(workbook.Sheets[shName], { raw: false, defval: null });
     };
 
-    const campusCode = fileName.split('_')[0];
+    const campusCode = fileName.includes('-') ? fileName.split('-')[0] : fileName.split('_')[0];
     const addCampus = arr => arr.map(r => ({ ...r, campus: campusCode }));
 
     return {
@@ -140,17 +136,13 @@ function createChart(ctxId, type, data, options = {}) {
 function processData() {
   const filterVal = $('period-filter').value;
   const uniqueOnly = $('unique-toggle') ? $('unique-toggle').checked : false;
-  const currentYear = new Date().getFullYear();
-  let startYear = 1947;
+  
+  let startYear = STATE.minYear;
+  const endYear = STATE.maxYear;
   
   if (filterVal !== 'all') {
-    startYear = currentYear - parseInt(filterVal) + 1;
-    if(filterVal == "1") startYear = 2025;
-    if(filterVal == "2") startYear = 2024;
-    if(filterVal == "5") startYear = 2021;
-    if(filterVal == "10") startYear = 2016;
+    startYear = endYear - parseInt(filterVal) + 1;
   }
-  const endYear = 2027;
 
   const campusVal = $('campus-filter').value;
 
@@ -654,6 +646,61 @@ async function initDashboard() {
   try {
     $('loading-text').innerText = "Baixando dados DGP...";
     STATE.raw.grupos = await loadCSV(CSV_FILE);
+
+    $('loading-text').innerText = "Identificando arquivos de dados...";
+    try {
+      // 1. Try fetching local directory index (works with live-server, python http.server, etc.)
+      const fileResp = await fetch(DATA_PATH);
+      if (fileResp.ok) {
+        const text = await fileResp.text();
+        // Simple regex to find hrefs ending in .xls
+        const matches = text.match(/href="([^"]+\.xls)"/gi);
+        if (matches) {
+          EXCEL_FILES = matches.map(m => m.split('"')[1].split('/').pop()).filter(f => !f.startsWith('.~lock'));
+        }
+      }
+      
+      // 2. Fallback to GitHub API if local index fetching failed or returned no files (e.g. on GitHub Pages)
+      if (EXCEL_FILES.length === 0) {
+        const ghResp = await fetch('https://api.github.com/repos/prof-davifr/dashboard-prpgi/contents/dados');
+        if (ghResp.ok) {
+          const ghData = await ghResp.json();
+          EXCEL_FILES = ghData.map(f => f.name).filter(name => name.endsWith('.xls') && !name.startsWith('.~lock'));
+        }
+      }
+    } catch (e) {
+      console.error("Error identifying data files:", e);
+    }
+
+    if (EXCEL_FILES.length === 0) {
+        $('loading-text').innerText = "Erro: Nenhum arquivo de dados encontrado.";
+        console.warn("No data files found. Please ensure 'dados/' directory is accessible.");
+        return;
+    }
+
+    // Automatically determine start and end years from filenames to dynamically adjust labels!
+    let minYear = 9999;
+    let maxYear = 0;
+    EXCEL_FILES.forEach(f => {
+      const match = f.match(/-(\d{4})-(\d{4})\.xls/);
+      if (match) {
+        if (parseInt(match[1]) < minYear) minYear = parseInt(match[1]);
+        if (parseInt(match[2]) > maxYear) maxYear = parseInt(match[2]);
+      }
+    });
+
+    if (minYear !== 9999 && maxYear !== 0) {
+      STATE.minYear = minYear;
+      STATE.maxYear = maxYear;
+      const select = $('period-filter');
+      select.innerHTML = `
+        <option value="all">Todo o Período (${minYear}-${maxYear})</option>
+        <option value="1">Último Ano (${maxYear})</option>
+        <option value="2">Últimos 2 Anos (${maxYear - 1}-${maxYear})</option>
+        <option value="5">Últimos 5 Anos (${maxYear - 4}-${maxYear})</option>
+        <option value="10">Últimos 10 Anos (${maxYear - 9}-${maxYear})</option>
+      `;
+    }
 
     $('loading-text').innerText = "Lendo tabelas de todos os campi (isso pode levar alguns instantes)...";
     
