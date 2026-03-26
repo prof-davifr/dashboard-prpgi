@@ -373,12 +373,21 @@ function renderGenericMap(data, mapId, color, label) {
     if (city) cityCount[city] = (cityCount[city] || 0) + 1;
   });
 
+  const counts = Object.values(cityCount);
+  const maxCount = counts.length > 0 ? Math.max(...counts) : 1;
+  const minRadius = 6;
+  const maxRadius = 35;
+
   Object.entries(cityCount).forEach(([city, count]) => {
     const latlng = lookupCoords(city);
     if (!latlng) return; // Hide unknown cities
 
+    // Normalize area (using sqrt) strictly proportional to the max count observed
+    // This perfectly distinguishes 10000 from 1000
+    const normalizedRadius = minRadius + (Math.sqrt(count) / Math.sqrt(maxCount)) * (maxRadius - minRadius);
+
     L.circleMarker(latlng, {
-      radius: Math.min(Math.max(count * 0.5, 6), 35),
+      radius: normalizedRadius,
       fillColor: color,
       color: "#fff",
       weight: 1,
