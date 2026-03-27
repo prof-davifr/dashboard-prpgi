@@ -174,14 +174,12 @@ function renderKPIsCientifica() {
     const t = (r["Tipo"]||"");
     return t.includes("Livros") || t.includes("Capítulos");
   }).length;
-  const a1a2 = data.filter(r => ["A1","A2"].includes((r["Estrato"]||"").trim())).length;
   const servidores = extractServidorIds(data).size;
 
   $('kpi-cientifica').innerHTML = `
     <div class="kpi-card"><div class="kpi-label">Produções</div><div class="kpi-value">${total}</div></div>
     <div class="kpi-card"><div class="kpi-label">Artigos</div><div class="kpi-value">${artigos}</div></div>
     <div class="kpi-card"><div class="kpi-label">Livros/Capítulos</div><div class="kpi-value">${livros}</div></div>
-    <div class="kpi-card"><div class="kpi-label">Qualis A1/A2</div><div class="kpi-value">${a1a2}</div></div>
     <div class="kpi-card"><div class="kpi-label">Servidores Ativos</div><div class="kpi-value">${servidores}</div></div>
   `;
 }
@@ -276,10 +274,13 @@ function renderChartsTecnica() {
 function renderKPIsTecnica() {
   const data = STATE.filtered.tecnica;
   const total = data.length;
-  const apresentacoes = data.filter(r => (r["Tipo"]||"").includes("Apresentação de Trabalho")).length;
+  const apresentacoes = data.filter(r => {
+    const t = (r["Tipo"]||"").toLowerCase();
+    return t.includes("apresentação") || t.includes("apresentacao");
+  }).length;
   const cursos = data.filter(r => {
-    const t = (r["Tipo"]||"");
-    return t.includes("Curso") || t.includes("Organização de Evento");
+    const t = (r["Tipo"]||"").toLowerCase();
+    return t.includes("curso") || t.includes("organização") || t.includes("organizacao");
   }).length;
   
   const typesSet = new Set();
