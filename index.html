@@ -113,9 +113,10 @@
             <option value="VC">Vitória da Conquista</option>
         </select>
         
-        <label style="display: flex; align-items: center; gap: 0.5rem; color: #444; font-weight: 600; cursor: pointer;">
-            <input type="checkbox" id="unique-toggle" style="width: 18px; height: 18px;"> 
+        <label style="display: flex; align-items: center; gap: 0.5rem; color: #444; font-weight: 600; cursor: pointer;" title="Remove a contagem duplicada de trabalhos (como artigos e livros) que possuem múltiplos servidores como coautores.">
+            <input type="checkbox" id="unique-toggle" checked style="width: 18px; height: 18px;"> 
             Exibir Apenas Produções Únicas (Desduplicar Coautorias)
+            <span style="font-size: 0.85rem; background: var(--accent); color: white; border-radius: 50%; width: 18px; height: 18px; display: inline-flex; justify-content: center; align-items: center; font-weight: bold; cursor: help;" title="Evita que o mesmo trabalho seja contado múltiplas vezes quando há coautoria entre servidores.">?</span>
         </label>
     </div>
 
