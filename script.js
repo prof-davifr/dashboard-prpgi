@@ -276,7 +276,7 @@ function renderKPIsTecnica() {
   const total = data.length;
   const apresentacoes = data.filter(r => {
     const t = (r["Tipo"]||"").toLowerCase();
-    return t.includes("apresentação") || t.includes("apresentacao");
+    return t.includes("apresentaç") || t.includes("apresentac");
   }).length;
   const cursos = data.filter(r => {
     const t = (r["Tipo"]||"").toLowerCase();
