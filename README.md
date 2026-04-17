@@ -1,6 +1,6 @@
 # Dashboard PRPGI – IFBA
 
-Este é o dashboard standalone da PRPGI projetado para ser incorporado via iframe.
+ Este é o dashboard standalone da PRPGI projetado para ser incorporado via iframe.
 
 ## Demonstração Online
 
