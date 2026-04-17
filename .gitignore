@@ -4,4 +4,3 @@ __pycache__/
 *.log
 Mockup do Dashboard.pdf
 .env
-data.json
