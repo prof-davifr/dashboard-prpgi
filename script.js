@@ -9,7 +9,8 @@ const STATE = {
     inovacao: [],
     concluidas: [],
     andamento: [],
-    grupos: []
+    grupos: [],
+    posgraduacao: []
   },
   filtered: {},
   charts: {},
@@ -23,20 +24,76 @@ const $ = id => document.getElementById(id);
 
 document.getElementById('year').textContent = new Date().getFullYear();
 
+function formatDateTimePtBr(isoString) {
+  if (!isoString) return "não disponível";
+  const d = new Date(isoString);
+  if (Number.isNaN(d.getTime())) return "não disponível";
+  return d.toLocaleString('pt-BR', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit'
+  });
+}
+
+function renderSourceUpdates(meta) {
+  const sourceDates = meta && meta.sourceDates ? meta.sourceDates : {};
+  const entries = Object.values(sourceDates)
+    .sort((a, b) => (a.label || '').localeCompare(b.label || '', 'pt-BR'))
+    .map(source => `${source.label}: criação ${formatDateTimePtBr(source.createdAt)} | modificação ${formatDateTimePtBr(source.modifiedAt)}`);
+
+  const text = entries.length > 0
+    ? `Fontes: ${entries.join(' | ')}`
+    : 'Fontes: não disponível';
+
+  if ($('source-updates-display')) $('source-updates-display').textContent = text;
+  if ($('source-updates-modal')) $('source-updates-modal').textContent = `Atualização por fonte: ${entries.length > 0 ? entries.join(' | ') : 'não disponível'}.`;
+}
+
 // Tab switching
 document.querySelectorAll('.tab-btn').forEach(btn => {
   btn.addEventListener('click', (e) => {
+    const previousActiveTab = document.querySelector('.tab-btn.active');
+    const switchingToPosGraduacao = e.target.dataset.target === 'tab-posgraduacao';
+    const switchingFromPosGraduacao = previousActiveTab && previousActiveTab.dataset.target === 'tab-posgraduacao';
+    const switchingToPesquisadores = e.target.dataset.target === 'tab-pesquisadores';
+
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
     document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
     e.target.classList.add('active');
     $(e.target.dataset.target).classList.add('active');
-    
+
     // Fix for Leaflet maps in hidden tabs
     setTimeout(() => {
       Object.values(STATE.leafMaps).forEach(m => {
         if (m) m.invalidateSize();
       });
     }, 100);
+
+    // Reset post-graduation filters if switching away from that tab
+    if (switchingFromPosGraduacao && !switchingToPosGraduacao) {
+      const posgradFilters = ['posgrad-categoria-filter', 'posgrad-status-filter', 'posgrad-campus-filter', 'posgrad-curso-filter'];
+      posgradFilters.forEach(id => {
+        const elem = $(id);
+        if (elem && elem.value !== 'all') {
+          elem.value = 'all';
+        }
+      });
+      if ($('posgrad-matured-only-toggle')) $('posgrad-matured-only-toggle').checked = true;
+      processData();
+    }
+
+    // Re-render post-graduation charts if that tab is now active
+    if (switchingToPosGraduacao) {
+      renderChartsPosGraduacao();
+    }
+    
+    // Re-render pesquisadores charts if that tab is now active
+    if (switchingToPesquisadores) {
+      renderChartsPesquisadores();
+    }
   });
 });
 
@@ -49,6 +106,54 @@ function extractServidorIds(records) {
     if (r["Servidor"]) ids.add(r["Servidor"]);
   });
   return ids;
+}
+
+// Get count of distinct servidores per campus
+function getServidoresPerCampus(records) {
+  const campusMap = {}; // campus -> Set of servidor IDs
+  records.forEach(r => {
+    if (r["Servidor"] && r.campus) {
+      if (!campusMap[r.campus]) campusMap[r.campus] = new Set();
+      campusMap[r.campus].add(r["Servidor"]);
+    }
+  });
+  // Convert Sets to counts
+  const result = {};
+  Object.keys(campusMap).forEach(campus => {
+    result[campus] = campusMap[campus].size;
+  });
+  return result;
+}
+
+// Get total distinct servidores across all campuses
+function getTotalServidores(records) {
+  return extractServidorIds(records).size;
+}
+
+// Get total active researchers across ALL data sources (for relative metrics divisor)
+function getTotalActiveResearchers() {
+  const allIdsArray = [];
+  [STATE.filtered.bibliografica, STATE.filtered.tecnica, STATE.filtered.concluidas, STATE.filtered.andamento].forEach(arr => {
+    arr.forEach(r => {
+      if (r["Servidor"]) {
+        allIdsArray.push(r["Servidor"]);
+      }
+    });
+  });
+  return new Set(allIdsArray).size;
+}
+
+// Check if relative metrics mode is active
+function isRelativeMetricsEnabled() {
+  const toggle = $('relative-metrics-toggle');
+  return toggle ? toggle.checked : false;
+}
+
+// Format relative metric value (with 2 decimal places)
+function formatRelativeValue(value, divisor) {
+  if (divisor === 0 || divisor === null || divisor === undefined) return '0';
+  const result = value / divisor;
+  return result.toFixed(2);
 }
 
 // Chart configuration generator
@@ -76,15 +181,44 @@ function createChart(ctxId, type, data, options = {}) {
 function processData() {
   const filterVal = $('period-filter').value;
   const uniqueOnly = $('unique-toggle') ? $('unique-toggle').checked : false;
-  
+
   let startYear = STATE.minYear;
   const endYear = STATE.maxYear;
-  
+
   if (filterVal !== 'all') {
-    startYear = endYear - parseInt(filterVal) + 1;
+    const filterNum = parseInt(filterVal);
+    if (filterNum === 0) {
+      // Current year only
+      startYear = endYear;
+    } else if (filterNum === 1) {
+      // Last year only (previous calendar year)
+      startYear = endYear - 1;
+    } else {
+      // Last N years (5, 10)
+      startYear = endYear - filterNum + 1;
+    }
   }
 
   const campusVal = $('campus-filter').value;
+  
+  // Check if post-graduation tab is active
+  const isPosGraduacaoTab = $('tab-posgraduacao') && 
+                           $('tab-posgraduacao').classList.contains('active');
+  
+  // Post-graduation specific filters - only get values if on post-graduation tab
+  let categoriaVal = 'all';
+  let statusVal = 'all';
+  let posgradCampusVal = 'all';
+  let posgradCursoVal = 'all';
+  let maturedOnly = true;
+  
+  if (isPosGraduacaoTab) {
+    categoriaVal = $('posgrad-categoria-filter') ? $('posgrad-categoria-filter').value : 'all';
+    statusVal = $('posgrad-status-filter') ? $('posgrad-status-filter').value : 'all';
+    posgradCampusVal = $('posgrad-campus-filter') ? $('posgrad-campus-filter').value : 'all';
+    posgradCursoVal = $('posgrad-curso-filter') ? $('posgrad-curso-filter').value : 'all';
+    maturedOnly = $('posgrad-matured-only-toggle') ? $('posgrad-matured-only-toggle').checked : true;
+  }
 
   const filterPeriodAndCampus = arr => arr.filter(r => {
     // Year filter (if it has "Ano")
@@ -123,6 +257,34 @@ function processData() {
     return rCampus === campusVal;
   });
 
+  // Post-graduation filter function
+  const filterPosGraduacao = arr => arr.filter(r => {
+    const status = normalizePosGraduacaoStatus(r.situacao);
+    const cohortYear = parseInt(r.ano, 10);
+    const isMature = isPosGraduacaoMature(r);
+    
+    // Campus filter (tab-local filter first, then global fallback when local is all)
+    const effectiveCampus = posgradCampusVal !== 'all' ? posgradCampusVal : campusVal;
+    if (effectiveCampus !== 'all' && r.campus !== effectiveCampus) return false;
+
+    // Program filter
+    if (posgradCursoVal !== 'all' && (r.curso || '').trim() !== posgradCursoVal) return false;
+    
+    // Categoria filter
+    if (categoriaVal !== 'all' && r.categoria !== categoriaVal) return false;
+    
+    // Status filter
+    if (statusVal !== 'all' && status !== statusVal) return false;
+
+    // Only cohorts mature enough to expect an outcome (default on)
+    if (maturedOnly && !isMature) return false;
+
+    // Guard against invalid cohort year
+    if (Number.isNaN(cohortYear)) return false;
+    
+    return true;
+  });
+
   const filterUnique = arr => {
     if (!uniqueOnly) return arr;
     
@@ -150,7 +312,8 @@ function processData() {
     inovacao: filterUnique(filterPeriodAndCampus(STATE.raw.inovacao)),
     concluidas: filterUnique(filterPeriodAndCampus(STATE.raw.concluidas)),
     andamento: filterUnique(filterPeriodAndCampus(STATE.raw.andamento)),
-    grupos: filterGroupsCampus(STATE.raw.grupos)
+    grupos: filterGroupsCampus(STATE.raw.grupos),
+    posgraduacao: filterPosGraduacao(STATE.raw.posgraduacao)
   };
 
 // Main initialization
@@ -162,8 +325,18 @@ function processData() {
   renderChartsInovacao();
   renderKPIsGrupos();
   renderChartsGrupos();
+  renderKPIsPesquisadores();
+  renderChartsPesquisadores();
   renderKPIsOrientacoes();
   renderChartsOrientacoes();
+  
+  // Render tables
+  renderTables();
+
+  // Render post-graduation if tab is active
+  if ($('tab-posgraduacao') && $('tab-posgraduacao').classList.contains('active')) {
+    renderChartsPosGraduacao();
+  }
 }
 
 function renderKPIsCientifica() {
@@ -174,13 +347,26 @@ function renderKPIsCientifica() {
     const t = (r["Tipo"]||"");
     return t.includes("Livros") || t.includes("Capítulos");
   }).length;
-  const servidores = extractServidorIds(data).size;
+  const totalPesquisadoresAtivos = getTotalActiveResearchers();
+
+  const relativeMode = isRelativeMetricsEnabled();
+  const labelSuffix = relativeMode ? '/Pesquisador' : '';
+
+  let producaoDisplay = total;
+  let artigosDisplay = artigos;
+  let livrosDisplay = livros;
+
+  // Use total active researchers as divisor for fair comparison across categories
+  if (relativeMode && totalPesquisadoresAtivos > 0) {
+    producaoDisplay = formatRelativeValue(total, totalPesquisadoresAtivos);
+    artigosDisplay = formatRelativeValue(artigos, totalPesquisadoresAtivos);
+    livrosDisplay = formatRelativeValue(livros, totalPesquisadoresAtivos);
+  }
 
   $('kpi-cientifica').innerHTML = `
-    <div class="kpi-card"><div class="kpi-label">Produções</div><div class="kpi-value">${total}</div></div>
-    <div class="kpi-card"><div class="kpi-label">Artigos</div><div class="kpi-value">${artigos}</div></div>
-    <div class="kpi-card"><div class="kpi-label">Livros/Capítulos</div><div class="kpi-value">${livros}</div></div>
-    <div class="kpi-card"><div class="kpi-label">Servidores Ativos</div><div class="kpi-value">${servidores}</div></div>
+    <div class="kpi-card"><div class="kpi-label">Produções${labelSuffix}</div><div class="kpi-value">${producaoDisplay}</div></div>
+    <div class="kpi-card"><div class="kpi-label">Artigos${labelSuffix}</div><div class="kpi-value">${artigosDisplay}</div></div>
+    <div class="kpi-card"><div class="kpi-label">Livros/Capítulos${labelSuffix}</div><div class="kpi-value">${livrosDisplay}</div></div>
   `;
 }
 
@@ -254,21 +440,23 @@ function renderChartsCientifica() {
     }]
   });
 
-  // Map
-  renderGenericMap(data, 'map-cientifica', "#4CAF50", "Produções Científicas");
+  // Map - show relative values using total active researchers per campus
+  const cientificaPesquisadores = getServidoresPerCampus(STATE.filtered.bibliografica);
+  renderGenericMap(data, 'map-cientifica', "#4CAF50", "Produções Científicas", cientificaPesquisadores);
 }
 
 function renderChartsTecnica() {
   const data = STATE.filtered.tecnica;
-  
+
   // Evolução Temporal (Todas as Categorias)
   processEvolucao(data, "chart-tecnica-evolucao");
-  
+
   // Pie: Tipos
   processTipos(data, "chart-tecnica-pie");
 
-  // Map
-  renderGenericMap(data, 'map-tecnica', "#1b5e20", "Produções Técnicas");
+  // Map - show relative values using total active researchers per campus
+  const tecnicaPesquisadores = getServidoresPerCampus(STATE.filtered.tecnica);
+  renderGenericMap(data, 'map-tecnica', "#1b5e20", "Produções Técnicas", tecnicaPesquisadores);
 }
 
 function renderKPIsTecnica() {
@@ -282,15 +470,26 @@ function renderKPIsTecnica() {
     const t = (r["Tipo"]||"").toLowerCase();
     return t.includes("curso") || t.includes("organização") || t.includes("organizacao");
   }).length;
-  
-  const typesSet = new Set();
-  data.forEach(r => { if(r["Tipo"]) typesSet.add(r["Tipo"]); });
+
+  const totalPesquisadoresAtivos = getTotalActiveResearchers();
+  const relativeMode = isRelativeMetricsEnabled();
+  const labelSuffix = relativeMode ? '/Pesquisador' : '';
+
+  let totalDisplay = total;
+  let apresentacoesDisplay = apresentacoes;
+  let cursosDisplay = cursos;
+
+  // Use total active researchers as divisor for fair comparison
+  if (relativeMode && totalPesquisadoresAtivos > 0) {
+    totalDisplay = formatRelativeValue(total, totalPesquisadoresAtivos);
+    apresentacoesDisplay = formatRelativeValue(apresentacoes, totalPesquisadoresAtivos);
+    cursosDisplay = formatRelativeValue(cursos, totalPesquisadoresAtivos);
+  }
 
   $('kpi-tecnica').innerHTML = `
-    <div class="kpi-card"><div class="kpi-label">Total Produções</div><div class="kpi-value">${total}</div></div>
-    <div class="kpi-card"><div class="kpi-label">Apresentações</div><div class="kpi-value">${apresentacoes}</div></div>
-    <div class="kpi-card"><div class="kpi-label">Cursos/Eventos</div><div class="kpi-value">${cursos}</div></div>
-    <div class="kpi-card"><div class="kpi-label">Diversidade (Tipos)</div><div class="kpi-value">${typesSet.size}</div></div>
+    <div class="kpi-card"><div class="kpi-label">Total Produções${labelSuffix}</div><div class="kpi-value">${totalDisplay}</div></div>
+    <div class="kpi-card"><div class="kpi-label">Apresentações${labelSuffix}</div><div class="kpi-value">${apresentacoesDisplay}</div></div>
+    <div class="kpi-card"><div class="kpi-label">Cursos/Eventos${labelSuffix}</div><div class="kpi-value">${cursosDisplay}</div></div>
   `;
 }
 
@@ -348,11 +547,11 @@ function lookupCoords(city) {
   return IFBA_COORDS[city] || IFBA_COORDS[norm] || null;
 }
 
-function renderGenericMap(data, mapId, color, label) {
+function renderGenericMap(data, mapId, color, label, pesquisadoresData = null) {
   if (STATE.leafMaps[mapId]) {
     STATE.leafMaps[mapId].remove();
   }
-  
+
   const mapElement = $(mapId);
   if (!mapElement) return;
 
@@ -374,10 +573,23 @@ function renderGenericMap(data, mapId, color, label) {
     if (city) cityCount[city] = (cityCount[city] || 0) + 1;
   });
 
+  // Calculate pesquisadores per city if relative data is provided
+  const cityPesquisadores = {};
+  if (pesquisadoresData) {
+    Object.entries(pesquisadoresData).forEach(([campus, count]) => {
+      const city = CAMPUS_TO_CITY[campus] || campus;
+      if (city) {
+        cityPesquisadores[city] = (cityPesquisadores[city] || 0) + count;
+      }
+    });
+  }
+
   const counts = Object.values(cityCount);
   const maxCount = counts.length > 0 ? Math.max(...counts) : 1;
   const minRadius = 6;
   const maxRadius = 35;
+
+  const relativeMode = isRelativeMetricsEnabled();
 
   Object.entries(cityCount).forEach(([city, count]) => {
     const latlng = lookupCoords(city);
@@ -387,13 +599,20 @@ function renderGenericMap(data, mapId, color, label) {
     // This perfectly distinguishes 10000 from 1000
     const normalizedRadius = minRadius + (Math.sqrt(count) / Math.sqrt(maxCount)) * (maxRadius - minRadius);
 
+    // Calculate relative value if mode is enabled and we have researcher data
+    let popupContent = `<b>${city}</b><br>${count} ${label}`;
+    if (relativeMode && cityPesquisadores[city] && cityPesquisadores[city] > 0) {
+      const relativeValue = (count / cityPesquisadores[city]).toFixed(2);
+      popupContent += ` (${relativeValue}/pesquisador)`;
+    }
+
     L.circleMarker(latlng, {
       radius: normalizedRadius,
       fillColor: color,
       color: "#fff",
       weight: 1,
       fillOpacity: 0.7
-    }).addTo(m).bindPopup(`<b>${city}</b><br>${count} ${label}`);
+    }).addTo(m).bindPopup(popupContent);
   });
 }
 
@@ -426,8 +645,9 @@ function renderChartsInovacao() {
   // Pie: Tipos
   processTipos(data, "chart-inovacao-pie");
 
-  // Map
-  renderGenericMap(data, 'map-inovacao', "#9C27B0", "Registros de PI");
+  // Map - show relative values using total active researchers per campus
+  const inovacaoPesquisadores = getServidoresPerCampus(STATE.filtered.inovacao);
+  renderGenericMap(data, 'map-inovacao', "#9C27B0", "Registros de PI", inovacaoPesquisadores);
 }
 
 function renderChartsGrupos() {
@@ -487,7 +707,7 @@ function renderChartsGrupos() {
     datasets: [{ data: Object.values(areaMap), backgroundColor: ["#9C27B0","#E91E63","#FF9800","#00BCD4","#4CAF50"] }]
   });
 
-  // Map
+  // Map - For grupos, use pesquisadores count from groups data
   renderGenericMap(data, 'map-grupos', "#00BCD4", "Grupos de Pesquisa");
 }
 
@@ -524,7 +744,7 @@ function renderChartsOrientacoes() {
   // Pie: Nível
   processTipos([...concluidas, ...andamento], "chart-orientacoes-pie");
 
-  // Map
+  // Map - Using grupos data for researcher distribution
   renderGenericMap(STATE.filtered.grupos, 'map-orientacoes', "#E91E63", "Pesquisadores (aprox.)");
 }
 
@@ -536,35 +756,75 @@ function renderKPIsOrientacoes() {
   const totalAndamento = andamento.length;
   const total = combined.length;
 
-  const allIdsArray = [];
-  [STATE.filtered.bibliografica, STATE.filtered.tecnica, concluidas, andamento].forEach(arr => {
-    arr.forEach(r => {
-      if (r["Servidor"]) {
-        allIdsArray.push(r["Servidor"]);
-      }
-    });
-  });
-  const totalPesquisadores = new Set(allIdsArray).size;
+  const totalPesquisadoresAtivos = getTotalActiveResearchers();
+  const relativeMode = isRelativeMetricsEnabled();
+  const labelSuffix = relativeMode ? '/Pesquisador' : '';
+
+  let totalDisplay = total;
+  let concluidasDisplay = totalConcluidas;
+  let andamentoDisplay = totalAndamento;
+
+  // Use total active researchers as divisor for fair comparison
+  if (relativeMode && totalPesquisadoresAtivos > 0) {
+    totalDisplay = formatRelativeValue(total, totalPesquisadoresAtivos);
+    concluidasDisplay = formatRelativeValue(totalConcluidas, totalPesquisadoresAtivos);
+    andamentoDisplay = formatRelativeValue(totalAndamento, totalPesquisadoresAtivos);
+  }
 
   $('kpi-orientacoes').innerHTML = `
-    <div class="kpi-card"><div class="kpi-label">Pesquisadores (Ativos)</div><div class="kpi-value">${totalPesquisadores}</div></div>
-    <div class="kpi-card"><div class="kpi-label">Total de Orientações</div><div class="kpi-value">${total}</div></div>
-    <div class="kpi-card"><div class="kpi-label">Concluídas</div><div class="kpi-value">${totalConcluidas}</div></div>
-    <div class="kpi-card"><div class="kpi-label">Em Andamento</div><div class="kpi-value">${totalAndamento}</div></div>
+    <div class="kpi-card"><div class="kpi-label">Total de Orientações${labelSuffix}</div><div class="kpi-value">${totalDisplay}</div></div>
+    <div class="kpi-card"><div class="kpi-label">Concluídas${labelSuffix}</div><div class="kpi-value">${concluidasDisplay}</div></div>
+    <div class="kpi-card"><div class="kpi-label">Em Andamento${labelSuffix}</div><div class="kpi-value">${andamentoDisplay}</div></div>
   `;
 }
+
+// =====================
+// Tab: Pesquisadores
+// =====================
+
 
 async function initDashboard() {
   try {
     $('loading-text').innerText = "Carregando dados...";
+    const cacheName = 'dashboard-prpgi-v1';
+    const jsonUrl = 'data.json';
+    let data;
 
-    const resp = await fetch('data.json');
-    if (!resp.ok) {
-      $('loading-text').innerText = "Erro: data.json não encontrado. Execute 'npm run build' primeiro.";
-      return;
+    try {
+      const cache = await caches.open(cacheName);
+      let cachedResp = await cache.match(jsonUrl);
+      
+      if (cachedResp) {
+        data = await cachedResp.json();
+        // Background validation (Stale-While-Revalidate)
+        fetch(jsonUrl).then(async networkResp => {
+          if (networkResp.ok) {
+            const networkData = await networkResp.clone().json();
+            if (networkData.meta && data.meta && networkData.meta.generatedAt !== data.meta.generatedAt) {
+              await cache.put(jsonUrl, networkResp);
+              console.log('Cache atualizado em background. Atualize a página para ver novos dados.');
+            }
+          }
+        }).catch(err => console.log('Background fetch failed', err));
+      } else {
+        const resp = await fetch(jsonUrl);
+        if (!resp.ok) {
+          $('loading-text').innerText = "Erro: data.json não encontrado. Execute 'npm run build' primeiro.";
+          return;
+        }
+        await cache.put(jsonUrl, resp.clone());
+        data = await resp.json();
+      }
+    } catch (e) {
+      // Fallback
+      console.warn('Cache API indísponivel, fallback para fetch tradicional', e);
+      const resp = await fetch(jsonUrl);
+      if (!resp.ok) {
+        $('loading-text').innerText = "Erro: data.json não encontrado. Execute 'npm run build' primeiro.";
+        return;
+      }
+      data = await resp.json();
     }
-    const data = await resp.json();
-
     // Populate raw state from pre-built JSON
     STATE.raw.bibliografica = data.bibliografica || [];
     STATE.raw.tecnica = data.tecnica || [];
@@ -572,24 +832,75 @@ async function initDashboard() {
     STATE.raw.concluidas = data.concluidas || [];
     STATE.raw.andamento = data.andamento || [];
     STATE.raw.grupos = data.grupos || [];
+    STATE.raw.posgraduacao = data.posgraduacao || [];
 
     // Set period labels from metadata
     if (data.meta) {
       STATE.minYear = data.meta.minYear;
       STATE.maxYear = data.meta.maxYear;
+      const updatedText = formatDateTimePtBr(data.meta.generatedAt);
+      if ($('last-update-display')) $('last-update-display').textContent = updatedText;
+      if ($('last-update-modal')) $('last-update-modal').textContent = updatedText;
+      renderSourceUpdates(data.meta);
+      const currentYear = STATE.maxYear;
       const select = $('period-filter');
       select.innerHTML = `
         <option value="all">Todo o Período (${data.meta.minYear}-${data.meta.maxYear})</option>
-        <option value="1">Último Ano (${data.meta.maxYear})</option>
-        <option value="2">Últimos 2 Anos (${data.meta.maxYear - 1}-${data.meta.maxYear})</option>
-        <option value="5">Últimos 5 Anos (${data.meta.maxYear - 4}-${data.meta.maxYear})</option>
-        <option value="10">Últimos 10 Anos (${data.meta.maxYear - 9}-${data.meta.maxYear})</option>
+        <option value="0">Ano Atual (${currentYear})</option>
+        <option value="1">Último Ano (${currentYear - 1})</option>
+        <option value="5">Últimos 5 Anos (${currentYear - 4}-${currentYear})</option>
+        <option value="10">Últimos 10 Anos (${currentYear - 9}-${currentYear})</option>
       `;
     }
 
     $('period-filter').addEventListener('change', processData);
     $('campus-filter').addEventListener('change', processData);
     $('unique-toggle').addEventListener('change', processData);
+    
+    // Relative metrics toggle - re-renders KPIs and tables without re-fetching data
+    if ($('relative-metrics-toggle')) {
+      $('relative-metrics-toggle').addEventListener('change', () => {
+        renderKPIsCientifica();
+        renderKPIsTecnica();
+        renderKPIsGrupos();
+        renderKPIsInovacao();
+        renderKPIsOrientacoes();
+        renderKPIsPesquisadores();
+        renderTables();
+      });
+    }
+    
+    // Post-graduation filter event listeners
+    ['posgrad-categoria-filter', 'posgrad-status-filter', 'posgrad-campus-filter', 'posgrad-curso-filter', 'posgrad-matured-only-toggle']
+      .forEach(id => {
+        const elem = $(id);
+        if (elem) elem.addEventListener('change', processData);
+      });
+    
+    // Subtabs event listeners
+    document.querySelectorAll('.sub-tab-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const subtarget = e.target.dataset.subtarget;
+        // Update active subtab
+        document.querySelectorAll('.sub-tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.subtab-content').forEach(c => c.classList.remove('active'));
+        e.target.classList.add('active');
+        $(subtarget).classList.add('active');
+        
+        // Re-render post-graduation charts for the new subtab
+        if ($('tab-posgraduacao') && $('tab-posgraduacao').classList.contains('active')) {
+          renderChartsPosGraduacao();
+        }
+      });
+    });
+    
+    // Update filter visibility based on active tab
+    updateFilterVisibility();
+    
+    // Re-run updateFilterVisibility when tabs change
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', updateFilterVisibility);
+    });
 
     $('loading').style.display = 'none';
     processData();
@@ -597,6 +908,258 @@ async function initDashboard() {
     $('loading-text').innerText = "Erro ao carregar os arquivos.";
     console.error(e);
   }
+}
+
+// Update filter visibility based on active tab
+function updateFilterVisibility() {
+  const activeTab = document.querySelector('.tab-btn.active');
+  if (!activeTab) return;
+  
+  const isPosGraduacaoTab = activeTab.dataset.target === 'tab-posgraduacao';
+  const periodFilter = $('period-filter');
+  
+  // Show/hide unique toggle (not needed for post-graduation)
+  const uniqueToggle = $('unique-toggle');
+  if (uniqueToggle) {
+    uniqueToggle.parentElement.style.display = isPosGraduacaoTab ? 'none' : 'flex';
+  }
+  if (periodFilter) {
+    periodFilter.style.display = isPosGraduacaoTab ? 'none' : '';
+  }
+}
+
+function getChartColors(count) {
+  const palette = ["#4D90FE", "#F44336", "#4CAF50", "#FFC107", "#9C27B0", "#00BCD4", "#E91E63", "#FF9800", "#795548", "#607D8B"];
+  return Array.from({ length: count }, (_, index) => palette[index % palette.length]);
+}
+
+
+// Methodology Modal
+document.addEventListener('DOMContentLoaded', () => {
+  const modalBtn = document.getElementById('methodology-btn');
+  const modal = document.getElementById('methodology-modal');
+  const modalClose = document.getElementById('modal-close');
+
+  if (modalBtn && modal) {
+    modalBtn.addEventListener('click', () => {
+      modal.classList.add('active');
+      document.body.style.overflow = 'hidden';
+      // Update year display
+      document.getElementById('min-year-display').textContent = STATE.minYear;
+      document.getElementById('max-year-display').textContent = STATE.maxYear;
+    });
+  }
+
+  if (modalClose && modal) {
+    modalClose.addEventListener('click', () => {
+      modal.classList.remove('active');
+      document.body.style.overflow = '';
+    });
+  }
+
+  // Close on overlay click
+  if (modal) {
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) {
+        modal.classList.remove('active');
+        document.body.style.overflow = '';
+      }
+    });
+  }
+
+  // Close on Escape key
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && modal && modal.classList.contains('active')) {
+      modal.classList.remove('active');
+      document.body.style.overflow = '';
+    }
+  });
+});
+
+// =====================
+// Table Functions
+// =====================
+
+// Toggle table visibility
+function toggleTable(containerId, btn) {
+  const container = document.getElementById(containerId);
+  const isActive = container.classList.contains('active');
+  container.classList.toggle('active');
+  btn.textContent = isActive ? '📊 Exibir Tabela Detalhada por Campus/Ano' : '📊 Ocultar Tabela Detalhada';
+}
+
+// Generate campus x year table for a given dataset
+function generateCampusYearTable(data, containerId, label, useServidorCount = false) {
+  const container = $(containerId);
+  if (!container) return;
+
+  // Group by campus and year
+  const campusYearData = {};
+  const years = new Set();
+  const campuses = new Set();
+
+  data.forEach(r => {
+    const year = r["Ano"];
+    const campus = r.campus;
+    if (!year || !campus) return;
+
+    years.add(year);
+    campuses.add(campus);
+
+    if (!campusYearData[campus]) campusYearData[campus] = {};
+    campusYearData[campus][year] = (campusYearData[campus][year] || 0) + 1;
+  });
+
+  const sortedYears = Array.from(years).sort();
+  const sortedCampuses = Array.from(campuses).sort();
+
+  // Get total active researchers per campus (across ALL data sources) for fair comparison
+  let campusPesquisadores = {};
+  if (useServidorCount) {
+    // Combine all sources to get total active researchers per campus
+    const allData = [...STATE.filtered.bibliografica, ...STATE.filtered.tecnica, ...STATE.filtered.concluidas, ...STATE.filtered.andamento];
+    campusPesquisadores = getServidoresPerCampus(allData);
+  }
+
+  const relativeMode = isRelativeMetricsEnabled();
+
+  // Build table HTML
+  let html = '<table class="data-table"><thead><tr><th>Campus</th>';
+  sortedYears.forEach(y => {
+    html += `<th>${y}</th>`;
+  });
+  html += '<th>Total</th></tr></thead><tbody>';
+
+  sortedCampuses.forEach(campus => {
+    const campusName = CAMPUS_TO_CITY[campus] || campus;
+    html += `<tr><td>${campusName} (${campus})</td>`;
+
+    let total = 0;
+    sortedYears.forEach(year => {
+      const count = campusYearData[campus]?.[year] || 0;
+      total += count;
+
+      let displayValue = count;
+      // Divide by total active researchers at this campus (not just those with production in this category)
+      if (relativeMode && campusPesquisadores[campus] && campusPesquisadores[campus] > 0) {
+        displayValue = (count / campusPesquisadores[campus]).toFixed(2);
+      }
+
+      html += `<td>${displayValue}</td>`;
+    });
+
+    // Total column
+    let totalDisplay = total;
+    if (relativeMode && campusPesquisadores[campus] && campusPesquisadores[campus] > 0) {
+      totalDisplay = (total / campusPesquisadores[campus]).toFixed(2);
+    }
+    html += `<td><strong>${totalDisplay}</strong></td>`;
+
+    html += '</tr>';
+  });
+
+  html += '</tbody></table>';
+
+  const relativeNote = relativeMode ? '<p style="margin-top:0.5rem;font-size:0.85rem;color:#666;">* Valores normalizados por total de pesquisadores ativos em cada campus (considerando todas as fontes)</p>' : '';
+  container.innerHTML = html + relativeNote;
+}
+
+// Render tables for each tab
+function renderTables() {
+  renderTableCientifica();
+  renderTableTecnica();
+  renderTableInovacao();
+  renderTableGrupos();
+  renderTablePesquisadores();
+  renderTableOrientacoes();
+}
+
+function renderTableCientifica() {
+  generateCampusYearTable(STATE.filtered.bibliografica, 'table-cientifica-content', 'Produção Científica', true);
+}
+
+function renderTableTecnica() {
+  generateCampusYearTable(STATE.filtered.tecnica, 'table-tecnica-content', 'Produção Técnica', true);
+}
+
+function renderTableInovacao() {
+  generateCampusYearTable(STATE.filtered.inovacao, 'table-inovacao-content', 'Inovação', true);
+}
+
+function renderTableGrupos() {
+  // For grupos, we use "Ano Formação" instead of "Ano"
+  const container = $('table-grupos-content');
+  if (!container) return;
+
+  const data = STATE.filtered.grupos;
+  const campusYearData = {};
+  const years = new Set();
+  const campuses = new Set();
+
+  data.forEach(r => {
+    const year = parseInt(r["Ano Formação"], 10);
+    const unidade = r["Unidade"] || "";
+    // Map unidade to campus code
+    let campus = "";
+    Object.entries(CAMPUS_TO_CITY).forEach(([code, city]) => {
+      if (unidade.includes(city)) campus = code;
+    });
+    
+    if (!year || !campus) return;
+    
+    years.add(year);
+    campuses.add(campus);
+    
+    if (!campusYearData[campus]) campusYearData[campus] = {};
+    campusYearData[campus][year] = (campusYearData[campus][year] || 0) + 1;
+  });
+
+  const sortedYears = Array.from(years).sort();
+  const sortedCampuses = Array.from(campuses).sort();
+
+  let html = '<table class="data-table"><thead><tr><th>Campus</th>';
+  sortedYears.forEach(y => {
+    html += `<th>${y}</th>`;
+  });
+  html += '<th>Total</th></tr></thead><tbody>';
+
+  sortedCampuses.forEach(campus => {
+    const campusName = CAMPUS_TO_CITY[campus] || campus;
+    html += `<tr><td>${campusName} (${campus})</td>`;
+    
+    let total = 0;
+    sortedYears.forEach(year => {
+      const count = campusYearData[campus]?.[year] || 0;
+      total += count;
+      html += `<td>${count}</td>`;
+    });
+    html += `<td><strong>${total}</strong></td></tr>`;
+  });
+
+  html += '</tbody></table>';
+  container.innerHTML = html;
+}
+
+
+function renderTableOrientacoes() {
+  const allData = [...STATE.filtered.concluidas, ...STATE.filtered.andamento];
+  generateCampusYearTable(allData, 'table-orientacoes-content', 'Orientações', true);
+}
+
+function exportTableToExcel(tableContainerId, filename) {
+  const container = document.getElementById(tableContainerId);
+  if (!container) return;
+  const table = container.querySelector('table');
+  if (!table) {
+    alert("Tabela ainda não foi renderizada.");
+    return;
+  }
+  
+  // SheetJS: convert HTML table to workbook
+  const wb = XLSX.utils.table_to_book(table, { sheet: "Dados" });
+  
+  // Generate and download
+  XLSX.writeFile(wb, filename + ".xlsx");
 }
 
 window.addEventListener("DOMContentLoaded", initDashboard);

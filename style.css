@@ -200,6 +200,13 @@ main {
     color: var(--text-main);
 }
 
+.kpi-help {
+    color: var(--text-dim);
+    font-size: 0.7rem;
+    line-height: 1.3;
+    margin-top: 0.5rem;
+}
+
 /* Charts and Maps */
 .visualization-row {
     display: grid;
