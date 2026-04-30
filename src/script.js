@@ -494,6 +494,8 @@ function renderKPIsTecnica() {
 }
 
 // Shared precise coordinates for all IFBA cities
+// ⚠️ This dashboard covers IFBA (Instituto Federal da Bahia) only.
+// Do NOT add coordinates for IFBaiano (Instituto Federal Baiano) campuses.
 const IFBA_COORDS = {
   "SALVADOR": [-12.9714, -38.5014],
   "FEIRA DE SANTANA": [-12.2666, -38.9666],
@@ -528,17 +530,20 @@ const IFBA_COORDS = {
   "UBATA": [-14.2255, -39.3245],
   "JAGUAQUARA": [-13.5283, -39.9713],
   "PORTO SEGURO": [-16.4442, -39.0644],
-  "CAMPO FORMOSO": [-10.5100, -40.3200]
+  "CAMPO FORMOSO": [-10.5100, -40.3200],
+  "LAURO DE FREITAS": [-12.8967, -38.3286],
+  "POLO DE INOVAÇÃO SALVADOR": [-12.9714, -38.5014],
+  "POLO DE INOVACAO SALVADOR": [-12.9714, -38.5014]
 };
 
 const CAMPUS_TO_CITY = {
   "BAR": "BARREIRAS", "BRU": "BRUMADO", "CAM": "CAMAÇARI", "CFO": "CAMPO FORMOSO", 
   "EC": "EUCLIDES DA CUNHA", "EUN": "EUNÁPOLIS", "FS": "FEIRA DE SANTANA", 
   "ILH": "ILHÉUS", "IRE": "IRECÊ", "JAC": "JACOBINA", "JAG": "JAGUAQUARA", 
-  "JEQ": "JEQUIÉ", "SAM": "SANTO AMARO", "SEA": "SEABRA", "SF": "SIMÕES FILHO", 
-  "UBA": "UBATÃ", "VAL": "VALENÇA", "VC": "VITÓRIA DA CONQUISTA", 
+  "JEQ": "JEQUIÉ", "LF": "LAURO DE FREITAS", "SAM": "SANTO AMARO", "SEA": "SEABRA",
+  "SF": "SIMÕES FILHO", "UBA": "UBATÃ", "VAL": "VALENÇA", "VC": "VITÓRIA DA CONQUISTA", 
   "SAJ": "SANTO ANTÔNIO DE JESUS", "JUA": "JUAZEIRO", "PA": "PAULO AFONSO",
-  "PS": "PORTO SEGURO", "SSA": "SALVADOR"
+  "PIS": "POLO DE INOVAÇÃO SALVADOR", "PS": "PORTO SEGURO", "SSA": "SALVADOR"
 };
 
 function lookupCoords(city) {
@@ -783,6 +788,25 @@ function renderKPIsOrientacoes() {
 // =====================
 
 
+// =====================
+// Toast notification
+// =====================
+
+function showToast(message, durationMs = 6000) {
+  const container = $('toast-container');
+  if (!container) return;
+  const toast = document.createElement('div');
+  toast.className = 'toast';
+  toast.textContent = message;
+  container.appendChild(toast);
+  // Trigger animation
+  requestAnimationFrame(() => toast.classList.add('toast--visible'));
+  setTimeout(() => {
+    toast.classList.remove('toast--visible');
+    toast.addEventListener('transitionend', () => toast.remove(), { once: true });
+  }, durationMs);
+}
+
 async function initDashboard() {
   try {
     $('loading-text').innerText = "Carregando dados...";
@@ -802,7 +826,7 @@ async function initDashboard() {
             const networkData = await networkResp.clone().json();
             if (networkData.meta && data.meta && networkData.meta.generatedAt !== data.meta.generatedAt) {
               await cache.put(jsonUrl, networkResp);
-              console.log('Cache atualizado em background. Atualize a página para ver novos dados.');
+              showToast('Dados atualizados em segundo plano. Recarregue a página para ver as novidades.');
             }
           }
         }).catch(err => console.log('Background fetch failed', err));
