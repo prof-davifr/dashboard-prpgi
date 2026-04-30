@@ -42,7 +42,7 @@ function renderSourceUpdates(meta) {
   const sourceDates = meta && meta.sourceDates ? meta.sourceDates : {};
   const entries = Object.values(sourceDates)
     .sort((a, b) => (a.label || '').localeCompare(b.label || '', 'pt-BR'))
-    .map(source => `${source.label}: criação ${formatDateTimePtBr(source.createdAt)} | modificação ${formatDateTimePtBr(source.modifiedAt)}`);
+    .map(source => `${source.label}: ${formatDateTimePtBr(source.modifiedAt)}`);
 
   const text = entries.length > 0
     ? `Fontes: ${entries.join(' | ')}`
@@ -380,15 +380,59 @@ function processEvolucao(data, idChart) {
     yearsMap[y][t] = (yearsMap[y][t]||0) + 1;
   });
   const sortedYears = Object.keys(yearsMap).sort();
-  const allTypesSet = new Set();
-  Object.values(yearsMap).forEach(v => Object.keys(v).forEach(t => allTypesSet.add(t)));
-  const allTypes = Array.from(allTypesSet);
-  
+
+  // Compute total per type and grand total
+  const typeTotals = {};
+  let grandTotal = 0;
+  Object.values(yearsMap).forEach(yearData => {
+    Object.entries(yearData).forEach(([type, count]) => {
+      typeTotals[type] = (typeTotals[type]||0) + count;
+      grandTotal += count;
+    });
+  });
+
+  // Determine small types (<2% of grand total)
+  const threshold = 0.02 * grandTotal;
+  const smallTypes = new Set();
+  Object.entries(typeTotals).forEach(([type, total]) => {
+    if (total < threshold) smallTypes.add(type);
+  });
+
+  // Find existing "Outras" category to merge with (case-insensitive)
+  let existingOutras = null;
+  Object.keys(typeTotals).forEach(type => {
+    if (type.toLowerCase().startsWith('outras') || type.toLowerCase().startsWith('outros')) {
+      existingOutras = type;
+    }
+  });
+
+  // Create mapping to aggregated type
+  const typeToAgg = {};
+  const targetOutras = existingOutras || "Outras";
+  Object.keys(typeTotals).forEach(type => {
+    typeToAgg[type] = smallTypes.has(type) ? targetOutras : type;
+  });
+
+  // Build aggregated years map
+  const aggYearsMap = {};
+  sortedYears.forEach(y => {
+    aggYearsMap[y] = {};
+    Object.entries(yearsMap[y]).forEach(([type, count]) => {
+      const aggType = typeToAgg[type];
+      aggYearsMap[y][aggType] = (aggYearsMap[y][aggType]||0) + count;
+    });
+  });
+
+  // Get unique aggregated types
+  const aggTypesSet = new Set();
+  Object.values(aggYearsMap).forEach(v => Object.keys(v).forEach(t => aggTypesSet.add(t)));
+  const aggTypes = Array.from(aggTypesSet);
+
   const colors = ["#4D90FE", "#F44336", "#4CAF50", "#FFC107", "#9C27B0", "#00BCD4", "#E91E63", "#FF9800", "#795548", "#607D8B"];
-  
-  const datasetsEvo = allTypes.map((t, i) => ({
+
+  const datasetsEvo = aggTypes.map((t, i) => ({
     label: t.length > 40 ? t.substring(0,40)+"..." : t,
-    data: sortedYears.map(y => yearsMap[y][t] || 0),
+    data: sortedYears.map(y => aggYearsMap[y][t] || 0),
     backgroundColor: colors[i % colors.length]
   }));
 
@@ -396,9 +440,12 @@ function processEvolucao(data, idChart) {
     labels: sortedYears,
     datasets: datasetsEvo
   }, {
-    scales: { 
-      x: { stacked: true, ticks: {color:'#555'} }, 
-      y: { stacked: true, ticks: {color:'#555'} } 
+    scales: {
+      x: { stacked: true, ticks: {color:'#555'} },
+      y: { stacked: true, ticks: {color:'#555'} }
+    },
+    plugins: {
+      legend: { position: 'bottom', labels: { color: '#444' } }
     }
   });
   return colors;
@@ -410,10 +457,33 @@ function processTipos(data, idChart, colors) {
     const t = r["Tipo"] || "Outros";
     typeMap[t] = (typeMap[t]||0)+1;
   });
+
+  // Aggregate small types (<2%) into "Outras" (merge with existing if present)
+  const grandTotal = Object.values(typeMap).reduce((sum, v) => sum + v, 0);
+  const threshold = 0.02 * grandTotal;
+  const smallTypes = new Set();
+  Object.entries(typeMap).forEach(([type, total]) => {
+    if (total < threshold) smallTypes.add(type);
+  });
+
+  let existingOutras = null;
+  Object.keys(typeMap).forEach(type => {
+    if (type.toLowerCase().startsWith('outras') || type.toLowerCase().startsWith('outros')) {
+      existingOutras = type;
+    }
+  });
+
+  const targetOutras = existingOutras || "Outras";
+  const aggMap = {};
+  Object.entries(typeMap).forEach(([type, count]) => {
+    const aggType = smallTypes.has(type) ? targetOutras : type;
+    aggMap[aggType] = (aggMap[aggType]||0) + count;
+  });
+
   createChart(idChart, "pie", {
-    labels: Object.keys(typeMap).map(l => l.length>40 ? l.substring(0,40)+"..." : l),
+    labels: Object.keys(aggMap).map(l => l.length>40 ? l.substring(0,40)+"..." : l),
     datasets: [{
-      data: Object.values(typeMap),
+      data: Object.values(aggMap),
       backgroundColor: colors || ["#4D90FE", "#F44336", "#4CAF50", "#FFC107", "#9C27B0", "#00BCD4", "#E91E63"]
     }]
   });
@@ -494,7 +564,7 @@ function renderKPIsTecnica() {
 }
 
 // Shared precise coordinates for all IFBA cities
-// ⚠️ This dashboard covers IFBA (Instituto Federal da Bahia) only.
+// This dashboard covers IFBA (Instituto Federal da Bahia) only.
 // Do NOT add coordinates for IFBaiano (Instituto Federal Baiano) campuses.
 const IFBA_COORDS = {
   "SALVADOR": [-12.9714, -38.5014],
@@ -526,8 +596,7 @@ const IFBA_COORDS = {
   "SANTO ANTONIO DE JESUS": [-12.9680, -39.2618],
   "SEABRA": [-12.4187, -41.7702],
   "EUCLIDES DA CUNHA": [-10.5085, -39.0150],
-  "UBATÃ": [-14.2255, -39.3245],
-  "UBATA": [-14.2255, -39.3245],
+  "UBABAITABA": [-14.2255, -39.3245],
   "JAGUAQUARA": [-13.5283, -39.9713],
   "PORTO SEGURO": [-16.4442, -39.0644],
   "CAMPO FORMOSO": [-10.5100, -40.3200],
@@ -541,7 +610,7 @@ const CAMPUS_TO_CITY = {
   "EC": "EUCLIDES DA CUNHA", "EUN": "EUNÁPOLIS", "FS": "FEIRA DE SANTANA", 
   "ILH": "ILHÉUS", "IRE": "IRECÊ", "JAC": "JACOBINA", "JAG": "JAGUAQUARA", 
   "JEQ": "JEQUIÉ", "LF": "LAURO DE FREITAS", "SAM": "SANTO AMARO", "SEA": "SEABRA",
-  "SF": "SIMÕES FILHO", "UBA": "UBATÃ", "VAL": "VALENÇA", "VC": "VITÓRIA DA CONQUISTA", 
+  "SF": "SIMÕES FILHO", "UBA": "UBAITABA", "VAL": "VALENÇA", "VC": "VITÓRIA DA CONQUISTA", 
   "SAJ": "SANTO ANTÔNIO DE JESUS", "JUA": "JUAZEIRO", "PA": "PAULO AFONSO",
   "PIS": "POLO DE INOVAÇÃO SALVADOR", "PS": "PORTO SEGURO", "SSA": "SALVADOR"
 };
@@ -560,7 +629,12 @@ function renderGenericMap(data, mapId, color, label, pesquisadoresData = null) {
   const mapElement = $(mapId);
   if (!mapElement) return;
 
-  const m = L.map(mapId).setView([-12.50, -41.50], 6);
+  const bahiaBounds = [[-16.0, -46.0], [-8.0, -34.0]];
+  const m = L.map(mapId, {
+    maxBounds: bahiaBounds,
+    minZoom: 5,
+    maxBoundsViscosity: 1.0
+  }).setView([-12.50, -41.50], 6);
   L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
     attribution: '&copy; CARTO'
   }).addTo(m);
@@ -1009,7 +1083,7 @@ function toggleTable(containerId, btn) {
   const container = document.getElementById(containerId);
   const isActive = container.classList.contains('active');
   container.classList.toggle('active');
-  btn.textContent = isActive ? '📊 Exibir Tabela Detalhada por Campus/Ano' : '📊 Ocultar Tabela Detalhada';
+  btn.textContent = isActive ? '✅ Exibir Tabela Detalhada por Campus/Ano' : '❌ Ocultar Tabela Detalhada';
 }
 
 // Generate campus x year table for a given dataset

@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// build.js – Pre-processes all XLS + CSV data files into a single data.json
+// build.js  Pre-processes all XLS + CSV data files into a single data.json
 // Run: node build.js   (or: npm run build)
 
 const XLSX = require('xlsx');
@@ -11,7 +11,7 @@ const OUTPUT_FILE = path.join(__dirname, 'data.json');
 const SOURCE_LABELS = {
   'scraper-SUAPCNPQ': 'SUAP CNPq (Lattes)',
   'scraper-DGP': 'DGP',
-  'scraper-SUAPPos': 'SUAP Pós-Graduação'
+  'scraper-SUAPPos': 'SUAP Ps-Graduao'
 };
 
 const SHEET_MAP = {
@@ -142,7 +142,7 @@ function registerSourceFile(meta, filePath, fileName) {
 }
 
 function main() {
-  console.log('🔍 Scanning dados/ for .xls and .csv files recursively...');
+  console.log(' Scanning dados/ for .xls and .csv files recursively...');
 
   const xlsFiles = findFiles(DADOS_DIR, '.xls');
   const csvFiles = findFiles(DADOS_DIR, '.csv');
@@ -186,7 +186,7 @@ function main() {
       result.meta.campuses.push(campusCode);
     }
 
-    console.log(`   📄 Processing ${fileName} (campus: ${campusCode})...`);
+    console.log(`    Processing ${fileName} (campus: ${campusCode})...`);
 
     try {
       const workbook = XLSX.readFile(filePath);
@@ -198,7 +198,7 @@ function main() {
         const rows = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName], { raw: false, defval: null });
         
         const normalizeKey = r => {
-          const raw = r["Título"] || r["Nome"] || (r["Publicação"] || "").substring(0, 150);
+          const raw = r["Ttulo"] || r["Nome"] || (r["Publicao"] || "").substring(0, 150);
           if (!raw) return "";
           return raw.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]/gi, "").substring(0, 150);
         };
@@ -230,14 +230,14 @@ function main() {
         result[key].push(...tagged);
       }
     } catch (e) {
-      console.warn(`   ⚠️  Failed to parse ${fileName}: ${e.message}`);
+      console.warn(`     Failed to parse ${fileName}: ${e.message}`);
     }
   }
 
   // Process CSV files
   for (const { fileName, filePath } of csvFiles) {
     registerSourceFile(result.meta, filePath, fileName);
-    console.log(`   📄 Processing ${fileName}...`);
+    console.log(`    Processing ${fileName}...`);
     try {
       const rows = parseCSV(filePath);
       
@@ -269,11 +269,11 @@ function main() {
           }
           
           // If categoria is empty or invalid, infer from curso name
-          if (!categoria || !['Mestrado', 'Doutorado', 'Especialização'].includes(categoria)) {
+          if (!categoria || !['Mestrado', 'Doutorado', 'Especializao'].includes(categoria)) {
             const cursoLower = curso.toLowerCase();
             if (cursoLower.includes('doutorado')) categoria = 'Doutorado';
             else if (cursoLower.includes('mestrado')) categoria = 'Mestrado';
-            else if (cursoLower.includes('especialização') || cursoLower.includes('lato sensu') || cursoLower.includes('pós-graduação')) categoria = 'Especialização';
+            else if (cursoLower.includes('especializao') || cursoLower.includes('lato sensu') || cursoLower.includes('ps-graduao')) categoria = 'Especializao';
             else categoria = 'Outro'; // Fallback
           }
           
@@ -309,12 +309,12 @@ function main() {
           const campusMap = {
             'Salvador': 'SSA',
             'Brumado': 'BRU',
-            'Camaçari': 'CAM', 
-            'Jequié': 'JEQ',
+            'Camaari': 'CAM', 
+            'Jequi': 'JEQ',
             'Porto Seguro': 'PS',
             'Ubaitaba': 'UBA',
-            'Valença': 'VAL',
-            'Vitória da Conquista': 'VC',
+            'Valena': 'VAL',
+            'Vitria da Conquista': 'VC',
             'Bom Jesus da Lapa': 'BJL',
             'Itabuna': 'ITB',
             'Juazeiro': 'JUA',
@@ -333,7 +333,7 @@ function main() {
           }
           
           // Clean up status field
-          let situacao = r["situação"] || "";
+          let situacao = r["situao"] || "";
           situacao = situacao.replace(/^"|"$/g, '').trim();
           // Remove malformed suffixes
           if (situacao.includes('(')) {
@@ -342,34 +342,34 @@ function main() {
           
           return {
             nome: r["nome"],
-            matricula: r["matrícula"],
+            matricula: r["matrcula"],
             curso: curso_simplificado,
             curso_original: curso,
             campus: campus,
             polo: r["polo"],
             situacao: situacao,
-            email_academico: r["e-mail_acadêmico"],
+            email_academico: r["e-mail_acadmico"],
             email_pessoal: r["e-mail_pessoal"],
             ano: ano,
             semestre: semestre,
             ano_periodo: anoPeriodo,
             modalidade: r["modalidade"],
             categoria: categoria,
-            dedupKey: r["matrícula"] // Use matricula as dedup key
+            dedupKey: r["matrcula"] // Use matricula as dedup key
           };
         });
         result.posgraduacao.push(...mapped);
       } else {
-        // Process research groups data — only IFBA groups
-        // ⚠️ Guard against IFBaiano contamination: skip rows not from IFBA.
-        // IFBA = "Instituto Federal da Bahia - IFBA" or "Instituto Federal de Educação...da Bahia"
-        // IFBaiano = "Instituto Federal Baiano" — a completely different institution.
+        // Process research groups data  only IFBA groups
+        //  Guard against IFBaiano contamination: skip rows not from IFBA.
+        // IFBA = "Instituto Federal da Bahia - IFBA" or "Instituto Federal de Educao...da Bahia"
+        // IFBaiano = "Instituto Federal Baiano"  a completely different institution.
         let skipped = 0;
         const mapped = rows.reduce((acc, r) => {
-          const instituicao = (r["Instituição"] || "").toUpperCase();
+          const instituicao = (r["Instituio"] || "").toUpperCase();
           if (!instituicao.includes("IFBA") && !instituicao.includes("INSTITUTO FEDERAL DA BAHIA")) {
             skipped++;
-            console.warn(`   ⚠️  Skipping non-IFBA group (Instituição: "${r["Instituição"]}")`);
+            console.warn(`     Skipping non-IFBA group (Instituio: "${r["Instituio"]}")`);
             return acc;
           }
 
@@ -378,42 +378,42 @@ function main() {
           let unidade = (r["Unidade"] || "").trim();
           if (!unidade ||
               unidade.toLowerCase().startsWith("instituto federal da bahia") ||
-              unidade.toLowerCase().startsWith("instituto federal de educação")) {
+              unidade.toLowerCase().startsWith("instituto federal de educao")) {
             unidade = "Salvador";
           }
 
           acc.push({
-            Situação: r["Situação"],
-            "Ano Formação": r["Ano Formação"],
+            Situao: r["Situao"],
+            "Ano Formao": r["Ano Formao"],
             Pesquisadores: r["Pesquisadores"],
             Estudantes: r["Estudantes"],
-            Área: r["Área"],
-            "Último Envio": r["Último Envio"],
+            rea: r["rea"],
+            "ltimo Envio": r["ltimo Envio"],
             Unidade: unidade
           });
           return acc;
         }, []);
         if (skipped > 0) {
-          console.warn(`   ⚠️  ${skipped} non-IFBA group(s) skipped in ${fileName}.`);
+          console.warn(`     ${skipped} non-IFBA group(s) skipped in ${fileName}.`);
         }
         result.grupos.push(...mapped);
       }
     } catch (e) {
-      console.warn(`   ⚠️  Failed to parse ${fileName}: ${e.message}`);
+      console.warn(`     Failed to parse ${fileName}: ${e.message}`);
     }
   }
 
   result.meta.campuses.sort();
 
-  // Write output – strip null values to reduce size
+  // Write output  strip null values to reduce size
   const jsonStr = JSON.stringify(result, (key, value) => value === null ? undefined : value);
   fs.writeFileSync(OUTPUT_FILE, jsonStr);
 
   const sizeMB = (Buffer.byteLength(jsonStr) / 1024 / 1024).toFixed(2);
-  console.log(`\n✅ Built data.json (${sizeMB} MB)`);
-  console.log(`   ${result.bibliografica.length} bibliográfica, ${result.tecnica.length} técnica, ${result.inovacao.length} inovação`);
-  console.log(`   ${result.concluidas.length} concluídas, ${result.andamento.length} andamento, ${result.grupos.length} grupos`);
-  console.log(`   ${result.posgraduacao.length} pós-graduação`);
+  console.log(`\n Built data.json (${sizeMB} MB)`);
+  console.log(`   ${result.bibliografica.length} bibliogrfica, ${result.tecnica.length} tcnica, ${result.inovacao.length} inovao`);
+  console.log(`   ${result.concluidas.length} concludas, ${result.andamento.length} andamento, ${result.grupos.length} grupos`);
+  console.log(`   ${result.posgraduacao.length} ps-graduao`);
   console.log(`   Period: ${result.meta.minYear}-${result.meta.maxYear}`);
   console.log(`   Updated at (UTC): ${result.meta.generatedAt}`);
   console.log(`   Campuses: ${result.meta.campuses.join(', ')}`);

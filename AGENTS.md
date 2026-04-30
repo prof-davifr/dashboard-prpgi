@@ -34,7 +34,7 @@ Any new data source integration **must** verify `Instituição` contains `"IFBA"
 | SEA | Seabra |
 | SF | Simões Filho |
 | SSA | Salvador |
-| UBA | Ubatã |
+| UBA | Ubaitaba |
 | VAL | Valença |
 | VC | Vitória da Conquista |
 
@@ -66,6 +66,6 @@ Any new data source integration **must** verify `Instituição` contains `"IFBA"
 
 - Excel processing uses `xlsx` library via Node.js
 - `server.py` is legacy (now in `archive/`); use `npm start` for development
-- `data.json` is git-ignored due to size; generated fresh on build
+- `data.json` is tracked in the repo (required for GitHub Pages); regenerate with `node build.js`
 - Campus codes extracted from filename prefixes (e.g., `SSA-2000-2026.xls` → `SSA`)
 - The `CAMPUS_TO_CITY` map and `IFBA_COORDS` object in `src/script.js` must be kept in sync with the campus code table above
