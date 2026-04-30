@@ -123,7 +123,7 @@ function countBy(data, getter) {
 
 function populateCourseSelector(data = STATE.raw.posgraduacao) {
   const selector = $('posgrad-curso-filter');
-  if (!selector) return;
+  if (!selector || selector.options.length > 1) return; // Already populated
 
   const previousValue = selector.value || 'all';
   const courses = Array.from(
@@ -149,7 +149,7 @@ function populateCourseSelector(data = STATE.raw.posgraduacao) {
 
 function populateCampusSelector(data = STATE.raw.posgraduacao) {
   const selector = $('posgrad-campus-filter');
-  if (!selector) return;
+  if (!selector || selector.options.length > 1) return; // Already populated
 
   const previousValue = selector.value || 'all';
   const campuses = Array.from(

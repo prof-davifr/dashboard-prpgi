@@ -48,21 +48,21 @@
             <option value="SAM">Santo Amaro</option>
             <option value="SEA">Seabra</option>
             <option value="SF">Simões Filho</option>
-            <option value="UBA">Ubatã</option>
+            <option value="UBA">Ubaitaba</option>
             <option value="VAL">Valença</option>
             <option value="VC">Vitória da Conquista</option>
         </select>
         
-        <label style="display: flex; align-items: center; gap: 0.5rem; color: #444; font-weight: 600; cursor: pointer;" title="Remove a contagem duplicada de trabalhos (como artigos e livros) que possuem múltiplos servidores como coautores.">
-            <input type="checkbox" id="unique-toggle" checked style="width: 18px; height: 18px;">
-            Exibir Apenas Produções Únicas (Desduplicar Coautorias)
-            <span style="font-size: 0.85rem; background: var(--accent); color: white; border-radius: 50%; width: 18px; height: 18px; display: inline-flex; justify-content: center; align-items: center; font-weight: bold; cursor: help;" title="Evita que o mesmo trabalho seja contado múltiplas vezes quando há coautoria entre servidores.">?</span>
+        <label style="display: flex; align-items: center; gap: 0.4rem; color: #444; font-weight: 600; font-size: 0.85rem; cursor: pointer;" title="Evita que o mesmo trabalho seja contado múltiplas vezes quando há coautoria entre servidores.">
+            <input type="checkbox" id="unique-toggle" checked style="width: 16px; height: 16px;">
+            Desduplicar
+            <span style="font-size: 0.8rem; background: #32a041; color: white; border-radius: 50%; width: 16px; height: 16px; display: inline-flex; justify-content: center; align-items: center; font-weight: bold; cursor: help;" title="Evita que o mesmo trabalho seja contado múltiplas vezes quando há coautoria entre servidores.">?</span>
         </label>
 
-        <label style="display: flex; align-items: center; gap: 0.5rem; color: #444; font-weight: 600; cursor: pointer;" title="Normaliza as métricas pelo número de servidores ativos em cada campus, permitindo comparações justas.">
-            <input type="checkbox" id="relative-metrics-toggle" style="width: 18px; height: 18px;">
-            Exibir Métricas Relativas (por servidor)
-            <span style="font-size: 0.85rem; background: var(--accent); color: white; border-radius: 50%; width: 18px; height: 18px; display: inline-flex; justify-content: center; align-items: center; font-weight: bold; cursor: help;" title="Divide os valores pelo número de servidores ativos em cada campus para comparação justa.">?</span>
+        <label style="display: flex; align-items: center; gap: 0.4rem; color: #444; font-weight: 600; font-size: 0.85rem; cursor: pointer;" title="Divide os valores pelo número de servidores ativos em cada campus para comparação justa.">
+            <input type="checkbox" id="relative-metrics-toggle" style="width: 16px; height: 16px;">
+            p/ Servidor
+            <span style="font-size: 0.8rem; background: #32a041; color: white; border-radius: 50%; width: 16px; height: 16px; display: inline-flex; justify-content: center; align-items: center; font-weight: bold; cursor: help;" title="Divide os valores pelo número de servidores ativos em cada campus para comparação justa.">?</span>
         </label>
     </div>
 
@@ -97,8 +97,10 @@
             </div>
         </div>
         <div class="table-section">
-            <button class="table-toggle-btn" onclick="toggleTable('table-cientifica-container', this)">📊 Exibir Tabela Detalhada por Campus/Ano</button>
-            <button class="export-btn" onclick="exportTableToExcel('table-cientifica-container', 'Producao_Cientifica_IFBA')">⬇️ Exportar para Excel</button>
+            <div class="table-actions">
+            <button class="table-toggle-btn" onclick="toggleTable('table-cientifica-container', this)">Exibir Tabela Detalhada por Campus/Ano</button>
+            <button class="export-btn" onclick="exportTableToExcel('table-cientifica-container', 'Producao_Cientifica_IFBA')">Exportar para Excel</button>
+            </div>
             <div id="table-cientifica-container" class="table-container">
                 <div id="table-cientifica-content"></div>
             </div>
@@ -125,8 +127,10 @@
             </div>
         </div>
         <div class="table-section">
-            <button class="table-toggle-btn" onclick="toggleTable('table-tecnica-container', this)">📊 Exibir Tabela Detalhada por Campus/Ano</button>
-            <button class="export-btn" onclick="exportTableToExcel('table-tecnica-container', 'Producao_Tecnica_IFBA')">⬇️ Exportar para Excel</button>
+            <div class="table-actions">
+            <button class="table-toggle-btn" onclick="toggleTable('table-tecnica-container', this)">Exibir Tabela Detalhada por Campus/Ano</button>
+            <button class="export-btn" onclick="exportTableToExcel('table-tecnica-container', 'Producao_Tecnica_IFBA')">Exportar para Excel</button>
+            </div>
             <div id="table-tecnica-container" class="table-container">
                 <div id="table-tecnica-content"></div>
                 <p style="margin-top:0.5rem;font-size:0.85rem;color:#666;">* Valores normalizados por total de pesquisadores ativos em cada campus (considerando todas as fontes)</p>
@@ -160,8 +164,10 @@
             </div>
         </div>
         <div class="table-section">
-            <button class="table-toggle-btn" onclick="toggleTable('table-inovacao-container', this)">📊 Exibir Tabela Detalhada por Campus/Ano</button>
-            <button class="export-btn" onclick="exportTableToExcel('table-inovacao-container', 'Inovacao_IFBA')">⬇️ Exportar para Excel</button>
+            <div class="table-actions">
+            <button class="table-toggle-btn" onclick="toggleTable('table-inovacao-container', this)">Exibir Tabela Detalhada por Campus/Ano</button>
+            <button class="export-btn" onclick="exportTableToExcel('table-inovacao-container', 'Inovacao_IFBA')">Exportar para Excel</button>
+            </div>
             <div id="table-inovacao-container" class="table-container">
                 <div id="table-inovacao-content"></div>
                 <p style="margin-top:0.5rem;font-size:0.85rem;color:#666;">* Valores normalizados por total de pesquisadores ativos em cada campus (considerando todas as fontes)</p>
@@ -195,8 +201,10 @@
             </div>
         </div>
         <div class="table-section">
-            <button class="table-toggle-btn" onclick="toggleTable('table-grupos-container', this)">📊 Exibir Tabela Detalhada por Campus/Ano</button>
-            <button class="export-btn" onclick="exportTableToExcel('table-grupos-container', 'Grupos_DGP_IFBA')">⬇️ Exportar para Excel</button>
+            <div class="table-actions">
+            <button class="table-toggle-btn" onclick="toggleTable('table-grupos-container', this)">Exibir Tabela Detalhada por Campus/Ano</button>
+            <button class="export-btn" onclick="exportTableToExcel('table-grupos-container', 'Grupos_DGP_IFBA')">Exportar para Excel</button>
+            </div>
             <div id="table-grupos-container" class="table-container">
                 <div id="table-grupos-content"></div>
             </div>
@@ -233,8 +241,10 @@
             </div>
         </div>
         <div class="table-section">
-            <button class="table-toggle-btn" onclick="toggleTable('table-pesquisadores-container', this)">📊 Exibir Tabela Detalhada por Campus/Ano</button>
-            <button class="export-btn" onclick="exportTableToExcel('table-pesquisadores-container', 'Pesquisadores_IFBA')">⬇️ Exportar para Excel</button>
+            <div class="table-actions">
+            <button class="table-toggle-btn" onclick="toggleTable('table-pesquisadores-container', this)">Exibir Tabela Detalhada por Campus/Ano</button>
+            <button class="export-btn" onclick="exportTableToExcel('table-pesquisadores-container', 'Pesquisadores_IFBA')">Exportar para Excel</button>
+            </div>
             <div id="table-pesquisadores-container" class="table-container">
                 <div id="table-pesquisadores-content"></div>
                 <p style="margin-top:0.5rem;font-size:0.85rem;color:#666;">* Cada pesquisador conta uma vez por ano, independentemente da quantidade de produções ou categorias no período selecionado</p>
@@ -268,8 +278,10 @@
             </div>
         </div>
         <div class="table-section">
-            <button class="table-toggle-btn" onclick="toggleTable('table-orientacoes-container', this)">📊 Exibir Tabela Detalhada por Campus/Ano</button>
-            <button class="export-btn" onclick="exportTableToExcel('table-orientacoes-container', 'Orientacoes_IFBA')">⬇️ Exportar para Excel</button>
+            <div class="table-actions">
+            <button class="table-toggle-btn" onclick="toggleTable('table-orientacoes-container', this)">Exibir Tabela Detalhada por Campus/Ano</button>
+            <button class="export-btn" onclick="exportTableToExcel('table-orientacoes-container', 'Orientacoes_IFBA')">Exportar para Excel</button>
+            </div>
             <div id="table-orientacoes-container" class="table-container">
                 <div id="table-orientacoes-content"></div>
             </div>
@@ -280,14 +292,14 @@
     <section id="tab-posgraduacao" class="tab-content">
         <div class="chart-card" style="margin-bottom: 1.5rem;">
             <div class="chart-title">Filtros de Gestão da Pós-Graduação</div>
-            <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: center;">
-                <select id="posgrad-categoria-filter" style="min-width: 220px;" title="Filtra por modalidade do programa (Mestrado, Doutorado, Especialização).">
+            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center;">
+                <select id="posgrad-categoria-filter" style="min-width: 160px; font-size: 0.85rem; padding: 0.35rem 0.6rem;" title="Filtra por modalidade do programa (Mestrado, Doutorado, Especialização).">
                     <option value="all">Todas Categorias</option>
                     <option value="Mestrado">Mestrado</option>
                     <option value="Doutorado">Doutorado</option>
                     <option value="Especialização">Especialização</option>
                 </select>
-                <select id="posgrad-status-filter" style="min-width: 220px;" title="Filtra por situação acadêmica atual registrada no SUAP.">
+                <select id="posgrad-status-filter" style="min-width: 160px; font-size: 0.85rem; padding: 0.35rem 0.6rem;" title="Filtra por situação acadêmica atual registrada no SUAP.">
                     <option value="all">Todos os Status</option>
                     <option value="Matriculado">Matriculado</option>
                     <option value="Concluído">Concluído</option>
@@ -295,15 +307,15 @@
                     <option value="Desligado">Desligado</option>
                     <option value="Evasão">Evasão</option>
                 </select>
-                <select id="posgrad-campus-filter" style="min-width: 220px;" title="Filtra por campus do programa.">
+                <select id="posgrad-campus-filter" style="min-width: 160px; font-size: 0.85rem; padding: 0.35rem 0.6rem;" title="Filtra por campus do programa.">
                     <option value="all">Todos os Campi</option>
                 </select>
-                <select id="posgrad-curso-filter" style="min-width: 300px;" title="Filtra por programa/curso específico.">
+                <select id="posgrad-curso-filter" style="min-width: 180px; font-size: 0.85rem; padding: 0.35rem 0.6rem;" title="Filtra por programa/curso específico.">
                     <option value="all">Todos os Programas</option>
                 </select>
-                <label style="display:flex;align-items:center;gap:0.4rem;color:#444;font-weight:600;" title="Mantém apenas coortes maduras. Regra: Mestrado >= 2 anos, Doutorado >= 4 anos, Especialização >= 2 anos.">
-                    <input type="checkbox" id="posgrad-matured-only-toggle" checked style="width: 16px; height: 16px;">
-                    Somente Coortes Maduras
+                <label style="display:flex;align-items:center;gap:0.4rem;color:#444;font-weight:600;font-size:0.85rem;" title="Mantém apenas coortes maduras. Regra: Mestrado >= 2 anos, Doutorado >= 4 anos, Especialização >= 2 anos.">
+                    <input type="checkbox" id="posgrad-matured-only-toggle" checked style="width: 14px; height: 14px;">
+                    Coortes Maduras
                     <span class="tip-dot" title="Coorte madura = turma de ingresso cujo prazo esperado já foi atingido.">?</span>
                 </label>
             </div>
@@ -404,7 +416,7 @@
     <div class="modal-overlay" id="methodology-modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>📋 Sobre os Dados e Metodologia</h2>
+                <h2>Sobre os Dados e Metodologia</h2>
                 <button class="modal-close" id="modal-close">×</button>
             </div>
             <div class="modal-body">
@@ -422,7 +434,7 @@
                 <div class="modal-section">
                     <h3>Fontes de Dados</h3>
                     <div class="data-source-card">
-                        <strong>📚 Plataforma Lattes (CNPq)</strong><br>
+                        <strong>Plataforma Lattes (CNPq)</strong><br>
                         <em>Produção Científica, Produção Técnica, Inovação e Orientações</em><br>
                         Os dados são extraídos dos currículos Lattes dos servidores do IFBA, contendo publicações bibliográficas, produções técnicas, registros de propriedade intelectual e orientações acadêmicas.
                     </div>
@@ -432,7 +444,7 @@
                         Informações sobre os grupos de pesquisa certificados no CNPq, incluindo área de atuação, número de pesquisadores, estudantes e vinculação institucional.
                     </div>
                     <div class="data-source-card">
-                        <strong>🎓 Sistema Acadêmico (SUAP/PRPGI)</strong><br>
+                        <strong>Sistema Acadêmico (SUAP/PRPGI)</strong><br>
                         <em>Pós-Graduação</em><br>
                         Dados dos programas de pós-graduação do IFBA, incluindo matrículas, status de alunos e informações sobre cursos de mestrado, doutorado e especialização.
                     </div>
@@ -547,17 +559,18 @@
     </div>
 
     <footer>
-        <div style="margin-bottom: 1rem;">
-            <div style="font-size: 0.85rem; color: #666; margin-bottom: 0.5rem;">
-                Última atualização dos dados: <strong id="last-update-display">...</strong>
-                <span id="source-updates-display" style="display:block; font-size: 0.75rem; margin-top: 0.2rem;"></span>
+        <div style="margin-bottom: 1.5rem;">
+            <div style="font-size: 0.85rem; color: #777; margin-bottom: 0.8rem;">
+                Processamento Global: <strong id="last-update-display">...</strong>
+                <span id="source-updates-display" style="display:block; font-size: 0.75rem; color: #888; margin-top: 0.4rem;"></span>
             </div>
-            <button id="methodology-btn" style="background: #f0f0f0; border: 1px solid #ccc; color: #555; padding: 0.4rem 0.8rem; border-radius: 4px; cursor: pointer; font-weight: 600; font-size: 0.8rem; transition: all 0.2s;">
-                ℹ️ Sobre os Dados e Metodologia
+            <button id="methodology-btn" style="background: #f8f9fa; border: 1px solid #ddd; color: #666; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 0.85rem; transition: all 0.2s;">
+                Metodologia e Fontes
             </button>
         </div>
-        <div style="margin-bottom: 0.5rem; font-weight: 600;">Fonte de Dados: Lattes e Espelho dos Grupos de Pesquisa (CNPq)</div>
-        <div>© IFBA – PRPGI – <span id="year"></span></div>
+        <div style="font-size: 0.85rem; color: #999;">
+            © <span id="year"></span> Dashboard PRPGI – Pró-Reitoria de Pesquisa, Pós-Graduação e Inovação – IFBA
+        </div>
     </footer>
 
     <script src="src/pesquisadores.js"></script>
