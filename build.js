@@ -203,22 +203,29 @@ function main() {
           return raw.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]/gi, "").substring(0, 150);
         };
 
-        const tagged = rows.map(r => {
-          let srvId = null;
+        const tagged = rows.flatMap(r => {
+          // Extract all Servidor IDs from the VinculoQueryset string (multi-author support)
+          const srvIds = [];
           if (r["Servidor"]) {
-             const match = r["Servidor"].match(/(\d{7,})/);
-             if (match) srvId = match[1];
-             else srvId = r["Servidor"];
+            const allMatches = [...r["Servidor"].matchAll(/\((\d{7,})\)/g)];
+            if (allMatches.length > 0) {
+              allMatches.forEach(m => srvIds.push(m[1]));
+            } else {
+              // Fallback: store the raw value if no numeric ID found
+              srvIds.push(r["Servidor"]);
+            }
+          } else {
+            srvIds.push(null);
           }
-          const obj = {
+          const base = {
              Ano: r["Ano"],
              Tipo: r["Tipo"],
-             Servidor: srvId,
              campus: campusCode,
              dedupKey: normalizeKey(r)
           };
-          if (r["Estrato"]) obj.Estrato = r["Estrato"];
-          return obj;
+          if (r["Estrato"]) base.Estrato = r["Estrato"];
+          // One result row per unique Servidor ID so all co-authors are counted
+          return srvIds.map(srvId => ({ ...base, Servidor: srvId }));
         });
         result[key].push(...tagged);
       }
@@ -353,16 +360,42 @@ function main() {
         });
         result.posgraduacao.push(...mapped);
       } else {
-        // Process research groups data (existing logic)
-        const mapped = rows.map(r => ({
-           Situação: r["Situação"],
-           "Ano Formação": r["Ano Formação"],
-           Pesquisadores: r["Pesquisadores"],
-           Estudantes: r["Estudantes"],
-           Área: r["Área"],
-           "Último Envio": r["Último Envio"],
-           Unidade: r["Unidade"]
-        }));
+        // Process research groups data — only IFBA groups
+        // ⚠️ Guard against IFBaiano contamination: skip rows not from IFBA.
+        // IFBA = "Instituto Federal da Bahia - IFBA" or "Instituto Federal de Educação...da Bahia"
+        // IFBaiano = "Instituto Federal Baiano" — a completely different institution.
+        let skipped = 0;
+        const mapped = rows.reduce((acc, r) => {
+          const instituicao = (r["Instituição"] || "").toUpperCase();
+          if (!instituicao.includes("IFBA") && !instituicao.includes("INSTITUTO FEDERAL DA BAHIA")) {
+            skipped++;
+            console.warn(`   ⚠️  Skipping non-IFBA group (Instituição: "${r["Instituição"]}")`);
+            return acc;
+          }
+
+          // Normalize Unidade: map generic institution strings and empty values to "Salvador"
+          // so map pins are placed correctly at IFBA headquarters.
+          let unidade = (r["Unidade"] || "").trim();
+          if (!unidade ||
+              unidade.toLowerCase().startsWith("instituto federal da bahia") ||
+              unidade.toLowerCase().startsWith("instituto federal de educação")) {
+            unidade = "Salvador";
+          }
+
+          acc.push({
+            Situação: r["Situação"],
+            "Ano Formação": r["Ano Formação"],
+            Pesquisadores: r["Pesquisadores"],
+            Estudantes: r["Estudantes"],
+            Área: r["Área"],
+            "Último Envio": r["Último Envio"],
+            Unidade: unidade
+          });
+          return acc;
+        }, []);
+        if (skipped > 0) {
+          console.warn(`   ⚠️  ${skipped} non-IFBA group(s) skipped in ${fileName}.`);
+        }
         result.grupos.push(...mapped);
       }
     } catch (e) {

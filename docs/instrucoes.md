@@ -60,7 +60,7 @@
     - **Descrição:** Quantos tipos diferentes de produção técnica foram registrados no período selecionado.
     - **Lógica:** `CONTAGEM DISTINTA` de valores na coluna `Tipo` para as linhas onde `Ano` está no intervalo do filtro.
 
-### Seção 3: Inovação (Base: `Registros e Patentes` do arquivo `SF_1947_2027.xls`)
+### Seção 3: Inovação (Base: `Registros e Patentes` unificada de todos os campi)
 
 - **KPI 3.1 - Total de Registros de Propriedade Intelectual:**
     - **Descrição:** Número total de patentes, softwares e desenhos industriais registrados.

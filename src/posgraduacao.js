@@ -204,8 +204,19 @@ function ensureCanvasElements(ids) {
   const missing = ids.filter(id => !$(id));
   if (missing.length > 0) {
     console.warn('Missing post-graduation canvas elements:', missing.join(', '));
+    // Show inline error in the active subtab content so users get visible feedback
+    const activeContent = document.querySelector('.subtab-content.active');
+    if (activeContent && !activeContent.querySelector('.canvas-error')) {
+      const msg = document.createElement('p');
+      msg.className = 'canvas-error';
+      msg.style.cssText = 'color:#c62828;background:#ffebee;padding:0.75rem 1rem;border-radius:6px;margin:1rem 0;font-weight:600;';
+      msg.textContent = `Gráfico não disponível — elemento HTML não encontrado: ${missing.join(', ')}`;
+      activeContent.prepend(msg);
+    }
     return false;
   }
+  // Remove any previously shown error if all canvases are present
+  document.querySelectorAll('.canvas-error').forEach(el => el.remove());
   return true;
 }
 
