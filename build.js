@@ -415,4 +415,8 @@ function main() {
   console.log(`   Campuses: ${result.meta.campuses.join(', ')}`);
 }
 
-main();
+if (require.main === module) {
+  main();
+}
+
+module.exports = { findFiles, parseCSV, getSourceKey, registerSourceFile, SHEET_MAP, SOURCE_LABELS };
