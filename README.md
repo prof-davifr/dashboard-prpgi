@@ -1,7 +1,6 @@
 # 📊 Dashboard PRPGI – IFBA
 
 Este é o dashboard institucional da Pró-Reitoria de Pesquisa, Pós-Graduação e Inovação (PRPGI) do IFBA. Um sistema *standalone* de alta performance, projetado para visualização de indicadores acadêmicos e científicos, pronto para integração via `<iframe>`.
-
 ---
 
 ## 🚀 Demonstração Online
