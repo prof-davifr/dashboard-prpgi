@@ -85,7 +85,7 @@ function parseCSV(filePath) {
     // Map to headers
     headers.forEach((h, i) => {
       if (i < fields.length) {
-        obj[h] = fields[i].replace(/^"|"$/g, '').trim();
+        obj[h] = fields[i].trim();
       } else {
         obj[h] = '';
       }

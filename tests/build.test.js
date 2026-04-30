@@ -110,12 +110,8 @@ describe('parseCSV', () => {
   });
 
   test('handles escaped double-quotes inside quoted fields', () => {
-    // The parser correctly strips surrounding quotes but then applies a
-    // post-processing replace that removes a trailing " from the value.
-    // Input:  "Say ""Hi"""  → parser builds: Say "Hi"  → post-strip: Say "Hi
-    // This is a known edge case of the current implementation.
     const rows = writeCsvAndParse('Nome,Descricao\nAlice,"Say ""Hi"""');
-    expect(rows[0]).toEqual({ Nome: 'Alice', Descricao: 'Say "Hi' });
+    expect(rows[0]).toEqual({ Nome: 'Alice', Descricao: 'Say "Hi"' });
   });
 
   test('fills missing fields with empty string', () => {
