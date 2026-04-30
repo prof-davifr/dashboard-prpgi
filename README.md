@@ -1,12 +1,6 @@
 # 📊 Dashboard PRPGI – IFBA
 
 Este é o dashboard institucional da Pró-Reitoria de Pesquisa, Pós-Graduação e Inovação (PRPGI) do IFBA. Um sistema *standalone* de alta performance, projetado para visualização de indicadores acadêmicos e científicos, pronto para integração via `<iframe>`.
-
-> ⚠️ **Atenção — IFBA ≠ IFBaiano**
-> Este dashboard cobre exclusivamente o **IFBA** (Instituto Federal de Educação, Ciência e Tecnologia **da Bahia**), com sede em Salvador e campi em todo o estado.
-> Não confunda com o **IFBaiano** (Instituto Federal **Baiano**), que é uma instituição completamente diferente com seus próprios campi (Guanambi, Catu, Itapetinga, etc.).
-> Toda integração de dados deve verificar se a fonte pertence ao IFBA antes de processar.
-
 ---
 
 ## 🚀 Demonstração Online
