@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// build.js  Pre-processes all XLS + CSV data files into a single data.json
+// build.js  Pre-processes all XLSX + CSV data files into a single data.json
 // Run: node build.js   (or: npm run build)
 
 const XLSX = require('xlsx');
@@ -19,7 +19,13 @@ const SHEET_MAP = {
   'produções técnicas': 'tecnica',
   'registros e patentes': 'inovacao',
   'orientações concluídas': 'concluidas',
-  'orientações em andamento': 'andamento'
+  'orientações em andamento': 'andamento',
+  // Title-case variants (new scraper format)
+  'Produções Bibliográficas': 'bibliografica',
+  'Produções Técnicas': 'tecnica',
+  'Registros e Patentes': 'inovacao',
+  'Orientações Concluídas': 'concluidas',
+  'Orientações em Andamento': 'andamento'
 };
 
 function findFiles(dir, extension) {
@@ -42,7 +48,8 @@ function findFiles(dir, extension) {
 function parseCSV(filePath) {
   const text = fs.readFileSync(filePath, 'utf-8');
   const rows = text.split('\n').map(r => r.trim()).filter(r => r);
-  const headers = rows[0].split(',').map(h => h.replace(/^"|"$/g, '').trim());
+  const headers = rows[0].split(',').map(h => h.replace(/^"|"$/g, '').trim())
+                       .map(h => h.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, ''));
   
   return rows.slice(1).map(line => {
     // Parse CSV line handling quoted fields with commas
@@ -142,12 +149,12 @@ function registerSourceFile(meta, filePath, fileName) {
 }
 
 function main() {
-  console.log(' Scanning dados/ for .xls and .csv files recursively...');
+  console.log(' Scanning dados/ for .xlsx and .csv files recursively...');
 
-  const xlsFiles = findFiles(DADOS_DIR, '.xls');
+  const xlsFiles = findFiles(DADOS_DIR, '.xlsx');
   const csvFiles = findFiles(DADOS_DIR, '.csv');
 
-  console.log(`   Found ${xlsFiles.length} XLS files and ${csvFiles.length} CSV files.`);
+  console.log(`   Found ${xlsFiles.length} XLSX files and ${csvFiles.length} CSV files.`);
 
   const result = {
     meta: {
@@ -171,16 +178,8 @@ function main() {
   // Process XLS files
   for (const { fileName, filePath } of xlsFiles) {
     registerSourceFile(result.meta, filePath, fileName);
-    const campusCode = fileName.includes('-') ? fileName.split('-')[0] : fileName.split('_')[0];
-
-    // Extract years from filename
-    const dateMatch = fileName.match(/(\d{4})[_-](\d{4})/);
-    if (dateMatch) {
-      const y1 = parseInt(dateMatch[1]);
-      const y2 = parseInt(dateMatch[2]);
-      if (y1 < result.meta.minYear) result.meta.minYear = y1;
-      if (y2 > result.meta.maxYear) result.meta.maxYear = y2;
-    }
+    // Campus code is the filename without extension (e.g. SSA.xlsx → SSA)
+    const campusCode = path.basename(fileName, path.extname(fileName));
 
     if (!result.meta.campuses.includes(campusCode)) {
       result.meta.campuses.push(campusCode);
@@ -192,10 +191,19 @@ function main() {
       const workbook = XLSX.readFile(filePath);
 
       for (const sheetName of workbook.SheetNames) {
-        const key = SHEET_MAP[sheetName.trim().toLowerCase()];
+        const key = SHEET_MAP[sheetName.trim().toLowerCase()] || SHEET_MAP[sheetName.trim()];
         if (!key) continue;
 
         const rows = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName], { raw: false, defval: null });
+
+        // Track year range from row data
+        for (const r of rows) {
+          const y = parseInt(r["Ano"]);
+          if (!isNaN(y)) {
+            if (y < result.meta.minYear) result.meta.minYear = y;
+            if (y > result.meta.maxYear) result.meta.maxYear = y;
+          }
+        }
         
         const normalizeKey = r => {
           const raw = r["Ttulo"] || r["Nome"] || (r["Publicao"] || "").substring(0, 150);
@@ -244,135 +252,127 @@ function main() {
       // Check if this is the post-graduation CSV
       if (fileName.includes('alunos_pos')) {
         // Process post-graduation data
-        const mapped = rows.map(r => {
-          // Extract year and semester from ano/periodo_letivo
-          let ano = null;
-          let semestre = null;
-          const anoPeriodo = r["ano/periodo_letivo"];
-          if (anoPeriodo && anoPeriodo.match(/^\d{4}\.\d$/)) {
-            const parts = anoPeriodo.split('.');
-            ano = parseInt(parts[0]);
-            semestre = parseInt(parts[1]);
-            
-            // Update meta year range
-            if (ano < result.meta.minYear) result.meta.minYear = ano;
-            if (ano > result.meta.maxYear) result.meta.maxYear = ano;
-          }
-          
-          // Determine categoria from modalidade and curso
-          let categoria = r["modalidade"] || "";
-          const curso = r["curso"] || "";
-          
-          // Clean up categoria - remove year/period if present
-          if (categoria && categoria.match(/^\d{4}\.\d$/)) {
-            categoria = ''; // This is actually a year/period, not a category
-          }
-          
-          // If categoria is empty or invalid, infer from curso name
-          if (!categoria || !['Mestrado', 'Doutorado', 'Especializao'].includes(categoria)) {
-            const cursoLower = curso.toLowerCase();
-            if (cursoLower.includes('doutorado')) categoria = 'Doutorado';
-            else if (cursoLower.includes('mestrado')) categoria = 'Mestrado';
-            else if (cursoLower.includes('especializao') || cursoLower.includes('lato sensu') || cursoLower.includes('ps-graduao')) categoria = 'Especializao';
-            else categoria = 'Outro'; // Fallback
-          }
-          
-          // Simplify curso name
-          let curso_simplificado = curso;
-          if (curso_simplificado) {
-            // Remove leading numbers and dash
-            curso_simplificado = curso_simplificado.replace(/^\d+\s*-\s*/, '');
-            // Remove campus in parentheses at the end
-            curso_simplificado = curso_simplificado.replace(/\s*\([^)]*\)$/, '');
-            // Trim extra spaces
-            curso_simplificado = curso_simplificado.trim();
-          }
-          
-          // Normalize campus code
-          let campus = r["campus"] || "";
-          // Clean up campus field - remove quotes and trim
-          campus = campus.replace(/^"|"$/g, '').trim();
-          
-          // Handle special cases
-          if (campus === ' Lato Sensu') {
-            // This appears to be Ubaitaba based on the original data
-            campus = 'UBA';
-          } else if (campus.includes('(')) {
-            // Extract campus code from parentheses
-            const match = campus.match(/\(([^)]+)\)/);
-            if (match) {
-              campus = match[1].trim();
-            }
-          }
-          
-          // Map common campus names to codes
-          const campusMap = {
-            'Salvador': 'SSA',
-            'Brumado': 'BRU',
-            'Camaari': 'CAM', 
-            'Jequi': 'JEQ',
-            'Porto Seguro': 'PS',
-            'Ubaitaba': 'UBA',
-            'Valena': 'VAL',
-            'Vitria da Conquista': 'VC',
-            'Bom Jesus da Lapa': 'BJL',
-            'Itabuna': 'ITB',
-            'Juazeiro': 'JUA',
-            'Lauro de Freitas': 'LF',
-            'Macaubas': 'MCB',
-            'Paulo Afonso': 'PA'
-          };
-          
-          if (campusMap[campus]) {
-            campus = campusMap[campus];
-          }
-          
-          // Only add standard campus codes (2-3 letters)
-          if (campus && /^[A-Z]{2,3}$/.test(campus) && !result.meta.campuses.includes(campus)) {
-            result.meta.campuses.push(campus);
-          }
-          
-          // Clean up status field
-          let situacao = r["situao"] || "";
-          situacao = situacao.replace(/^"|"$/g, '').trim();
-          // Remove malformed suffixes
-          if (situacao.includes('(')) {
-            situacao = situacao.split('(')[0].trim();
-          }
-          
-          return {
-            nome: r["nome"],
-            matricula: r["matrcula"],
-            curso: curso_simplificado,
-            curso_original: curso,
-            campus: campus,
-            polo: r["polo"],
-            situacao: situacao,
-            email_academico: r["e-mail_acadmico"],
-            email_pessoal: r["e-mail_pessoal"],
-            ano: ano,
-            semestre: semestre,
-            ano_periodo: anoPeriodo,
-            modalidade: r["modalidade"],
-            categoria: categoria,
-            dedupKey: r["matrcula"] // Use matricula as dedup key
-          };
-        });
-        result.posgraduacao.push(...mapped);
-      } else {
-        // Process research groups data  only IFBA groups
-        //  Guard against IFBaiano contamination: skip rows not from IFBA.
-        // IFBA = "Instituto Federal da Bahia - IFBA" or "Instituto Federal de Educao...da Bahia"
-        // IFBaiano = "Instituto Federal Baiano"  a completely different institution.
-        let skipped = 0;
-        const mapped = rows.reduce((acc, r) => {
-          const instituicao = (r["Instituio"] || "").toUpperCase();
-          if (!instituicao.includes("IFBA") && !instituicao.includes("INSTITUTO FEDERAL DA BAHIA")) {
-            skipped++;
-            console.warn(`     Skipping non-IFBA group (Instituio: "${r["Instituio"]}")`);
-            return acc;
-          }
+         const mapped = rows.map(r => {
+           // Extract year and semester from ano/periodo_letivo
+           let ano = null;
+           let semestre = null;
+           const anoPeriodo = r["ano/periodo_letivo"];
+           if (anoPeriodo && anoPeriodo.match(/^\d{4}\.\d$/)) {
+             const parts = anoPeriodo.split('.');
+             ano = parseInt(parts[0]);
+             semestre = parseInt(parts[1]);
+             
+             // Update meta year range
+             if (ano < result.meta.minYear) result.meta.minYear = ano;
+             if (ano > result.meta.maxYear) result.meta.maxYear = ano;
+           }
+           
+           // Determine categoria from modalidade and curso
+           let categoria = r["modalidade"] || "";
+           const curso = r["curso"] || "";
+           
+           // Clean up categoria - remove year/period if present
+           if (categoria && categoria.match(/^\d{4}\.\d$/)) {
+             categoria = ''; // This is actually a year/period, not a category
+           }
+           
+           // If categoria is empty or invalid, infer from curso name
+           if (!categoria || !['Mestrado', 'Doutorado', 'Especializao'].includes(categoria)) {
+             const cursoLower = curso.toLowerCase();
+             if (cursoLower.includes('doutorado')) categoria = 'Doutorado';
+             else if (cursoLower.includes('mestrado')) categoria = 'Mestrado';
+             else if (cursoLower.includes('especializao') || cursoLower.includes('lato sensu') || cursoLower.includes('ps-graduao')) categoria = 'Especializao';
+             else categoria = 'Outro'; // Fallback
+           }
+           
+           // Simplify curso name
+           let curso_simplificado = curso;
+           if (curso_simplificado) {
+             // Remove leading numbers and dash
+             curso_simplificado = curso_simplificado.replace(/^\d+\s*-\s*/, '');
+             // Remove campus in parentheses at the end
+             curso_simplificado = curso_simplificado.replace(/\s*\([^)]*\)$/, '');
+             // Trim extra spaces
+             curso_simplificado = curso_simplificado.trim();
+           }
+           
+           // Normalize campus code
+           let campus = r["campus"] || "";
+           // Clean up campus field - remove quotes and trim
+           campus = campus.replace(/^"|"$/g, '').trim();
+           
+           // Handle special cases
+           if (campus === ' Lato Sensu') {
+             // This appears to be Ubaitaba based on the original data
+             campus = 'UBA';
+           } else if (campus.includes('(')) {
+             // Extract campus code from parentheses
+             const match = campus.match(/\(([^)]+)\)/);
+             if (match) {
+               campus = match[1].trim();
+             }
+           }
+           
+           // Map common campus names to codes
+           const campusMap = {
+             'Salvador': 'SSA',
+             'Brumado': 'BRU',
+             'Camaari': 'CAM', 
+             'Jequi': 'JEQ',
+             'Porto Seguro': 'PS',
+             'Ubaitaba': 'UBA',
+             'Valena': 'VAL',
+             'Vitria da Conquista': 'VC',
+             'Bom Jesus da Lapa': 'BJL',
+             'Itabuna': 'ITB',
+             'Juazeiro': 'JUA',
+             'Lauro de Freitas': 'LF',
+             'Macaubas': 'MCB',
+             'Paulo Afonso': 'PA'
+           };
+           
+           if (campusMap[campus]) {
+             campus = campusMap[campus];
+           }
+           
+           // Only add standard campus codes (2-3 letters)
+           if (campus && /^[A-Z]{2,3}$/.test(campus) && !result.meta.campuses.includes(campus)) {
+             result.meta.campuses.push(campus);
+           }
+           
+           // Clean up status field
+           let situacao = r["situacao"] || "";
+           situacao = situacao.replace(/^"|"$/g, '').trim();
+           // Remove malformed suffixes
+           if (situacao.includes('(')) {
+             situacao = situacao.split('(')[0].trim();
+           }
+           
+           // Skip records with no matricula or invalid ano
+           if (!r["matricula"] || !ano) return null;
 
+           return {
+             nome: r["nome"],
+             matricula: r["matricula"],
+             curso: curso_simplificado,
+             curso_original: curso,
+             campus: campus,
+             polo: r["polo"],
+             situacao: situacao,
+             email_academico: r["e-mail_academico"],
+             email_pessoal: r["e-mail_pessoal"],
+             ano: ano,
+             semestre: semestre,
+             ano_periodo: anoPeriodo,
+             modalidade: r["modalidade"],
+             categoria: categoria,
+             dedupKey: r["matricula"] // Use matricula as dedup key
+           };
+         }).filter(r => r !== null);
+         result.posgraduacao.push(...mapped);
+      } else {
+        // Process research groups data
+        const mapped = rows.map(r => {
           // Normalize Unidade: map generic institution strings and empty values to "Salvador"
           // so map pins are placed correctly at IFBA headquarters.
           let unidade = (r["Unidade"] || "").trim();
@@ -382,20 +382,16 @@ function main() {
             unidade = "Salvador";
           }
 
-          acc.push({
-            Situao: r["Situao"],
-            "Ano Formao": r["Ano Formao"],
+          return {
+            Situacao: r["Situacao"],
+            AnoFormacao: r["AnoFormacao"],
             Pesquisadores: r["Pesquisadores"],
             Estudantes: r["Estudantes"],
-            rea: r["rea"],
-            "ltimo Envio": r["ltimo Envio"],
+            Area: r["Area"],
+            UltimoEnvio: r["UltimoEnvio"],
             Unidade: unidade
-          });
-          return acc;
-        }, []);
-        if (skipped > 0) {
-          console.warn(`     ${skipped} non-IFBA group(s) skipped in ${fileName}.`);
-        }
+          };
+        });
         result.grupos.push(...mapped);
       }
     } catch (e) {

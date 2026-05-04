@@ -735,7 +735,7 @@ function renderChartsGrupos() {
   // Evo 1: Grupos Criados por Ano
   const yearsMap = {};
   data.forEach(r => {
-    const y = parseInt(r["Ano Formação"], 10);
+    const y = parseInt(r["AnoFormacao"], 10);
     if(y) yearsMap[y] = (yearsMap[y]||0) + 1;
   });
   const sortedYears = Object.keys(yearsMap).sort();
@@ -750,12 +750,12 @@ function renderChartsGrupos() {
   let earliestYear = 2100;
   let latestYear = new Date().getFullYear();
   data.forEach(r => {
-    const formedYear = parseInt(r["Ano Formação"], 10);
+    const formedYear = parseInt(r["AnoFormacao"], 10);
     if (formedYear && formedYear < earliestYear) earliestYear = formedYear;
     if (formedYear) yearsEvoFormed[formedYear] = (yearsEvoFormed[formedYear] || 0) + 1;
-    const status = (r["Situação"]||"").toLowerCase();
+    const status = (r["Situacao"]||"").toLowerCase();
     if (status.includes("excluí") || status.includes("exclui")) {
-        const lastEnvio = r["Último Envio"] || "";
+        const lastEnvio = r["UltimoEnvio"] || "";
         const matchYear = lastEnvio.match(/(\d{4})/);
         if(matchYear) yearsEvoDeleted[matchYear[1]] = (yearsEvoDeleted[matchYear[1]] || 0) + 1;
     }
@@ -778,7 +778,7 @@ function renderChartsGrupos() {
   // Pie: Áreas
   const areaMap = {};
   data.forEach(r => {
-    let a = (r["Área"] || "Não informada").split(";")[0];
+    let a = (r["Area"] || "Não informada").split(";")[0];
     areaMap[a] = (areaMap[a]||0)+1;
   });
   createChart("chart-grupos-pie", "doughnut", {
@@ -793,7 +793,7 @@ function renderChartsGrupos() {
 function renderKPIsGrupos() {
   const data = STATE.filtered.grupos;
   const total = data.length;
-  const certificados = data.filter(r => (r["Situação"]||"").includes("Certificado")).length;
+  const certificados = data.filter(r => (r["Situacao"]||"").includes("Certificado")).length;
   let totalPesq = 0, totalEst = 0;
   data.forEach(r => {
     totalPesq += parseInt(r["Pesquisadores"]||0);
@@ -1195,12 +1195,12 @@ function renderTableGrupos() {
   const campuses = new Set();
 
   data.forEach(r => {
-    const year = parseInt(r["Ano Formação"], 10);
+    const year = parseInt(r["AnoFormacao"], 10);
     const unidade = r["Unidade"] || "";
     // Map unidade to campus code
     let campus = "";
     Object.entries(CAMPUS_TO_CITY).forEach(([code, city]) => {
-      if (unidade.includes(city)) campus = code;
+      if (unidade.toUpperCase().includes(city)) campus = code;
     });
     
     if (!year || !campus) return;
