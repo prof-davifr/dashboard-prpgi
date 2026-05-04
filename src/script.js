@@ -732,25 +732,31 @@ function renderChartsInovacao() {
 function renderChartsGrupos() {
   const data = STATE.filtered.grupos;
 
-  // Combined chart: Created, Deleted, and Active (Cumulative)
-  const yearsEvoFormed = {};
-  const yearsEvoDeleted = {};
+  // Combined chart with Dual Y-axis: Created/Deleted (left) + Cumulative Total (right)
+  const yearsCreated = {};
+  const yearsDeleted = {};
+  const yearsCumulative = {};
   let earliestYear = 2100;
   let latestYear = new Date().getFullYear();
 
+  // Calculate created groups by year
   data.forEach(r => {
     const formedYear = parseInt(r["AnoFormacao"], 10);
     if (formedYear && formedYear < earliestYear) earliestYear = formedYear;
-    if (formedYear) yearsEvoFormed[formedYear] = (yearsEvoFormed[formedYear] || 0) + 1;
+    if (formedYear) yearsCreated[formedYear] = (yearsCreated[formedYear] || 0) + 1;
+  });
+
+  // Calculate deleted groups by year (using UltimoEnvio as approximation)
+  data.forEach(r => {
     const status = (r["Situacao"]||"").toLowerCase();
     if (status.includes("excluí") || status.includes("exclui")) {
         const lastEnvio = r["UltimoEnvio"] || "";
         const matchYear = lastEnvio.match(/(\d{4})/);
-        if(matchYear) yearsEvoDeleted[matchYear[1]] = (yearsEvoDeleted[matchYear[1]] || 0) + 1;
+        if(matchYear) yearsDeleted[matchYear[1]] = (yearsDeleted[matchYear[1]] || 0) + 1;
     }
   });
 
-  // Build sorted years array and datasets
+  // Build sorted years and cumulative data
   const sortedYears = [];
   const createdData = [];
   const deletedData = [];
@@ -760,8 +766,8 @@ function renderChartsGrupos() {
   if (earliestYear !== 2100) {
     for (let y = earliestYear; y <= latestYear; y++) {
       sortedYears.push(y.toString());
-      const created = yearsEvoFormed[y] || 0;
-      const deleted = yearsEvoDeleted[y] || 0;
+      const created = yearsCreated[y] || 0;
+      const deleted = yearsDeleted[y] || 0;
       createdData.push(created);
       deletedData.push(deleted);
       currentTotal += created - deleted;
@@ -769,6 +775,7 @@ function renderChartsGrupos() {
     }
   }
 
+  // Create dual Y-axis chart
   createChart("chart-grupos-evo-combined", "bar", {
     labels: sortedYears,
     datasets: [
@@ -776,12 +783,14 @@ function renderChartsGrupos() {
         label: "Novos Grupos",
         data: createdData,
         backgroundColor: "#4CAF50",
+        yAxisID: 'y',
         order: 2
       },
       {
         label: "Excluídos",
         data: deletedData,
         backgroundColor: "#F44336",
+        yAxisID: 'y',
         order: 3
       },
       {
@@ -792,13 +801,42 @@ function renderChartsGrupos() {
         backgroundColor: "rgba(33, 150, 243, 0.1)",
         tension: 0.3,
         fill: false,
+        yAxisID: 'y1',
         order: 1
       }
     ]
   }, {
     scales: {
-      x: { ticks: { color: '#555' } },
-      y: { ticks: { color: '#555' }, beginAtZero: true }
+      x: {
+        ticks: { color: '#555' }
+      },
+      y: {
+        type: 'linear',
+        display: true,
+        position: 'left',
+        title: {
+          display: true,
+          text: 'Grupos Criados/Excluídos',
+          color: '#555'
+        },
+        ticks: { color: '#555', beginAtZero: true },
+        beginAtZero: true
+      },
+      y1: {
+        type: 'linear',
+        display: true,
+        position: 'right',
+        title: {
+          display: true,
+          text: 'Total Ativos Acumulado',
+          color: '#555'
+        },
+        ticks: { color: '#555', beginAtZero: true },
+        beginAtZero: true,
+        grid: {
+          drawOnChartArea: false
+        }
+      }
     }
   });
 
@@ -822,6 +860,9 @@ function renderKPIsGrupos() {
   const total = data.length;
   const certificados = data.filter(r => (r["Situacao"]||"").includes("Certificado")).length;
   const excluidos = data.filter(r => (r["Situacao"]||"") === "Excluído").length;
+  const emPreenchimento = data.filter(r => (r["Situacao"]||"") === "Em preenchimento").length;
+  const naoAtualizado = data.filter(r => (r["Situacao"]||"").includes("Não-atualizado")).length;
+  const aguardandoCert = data.filter(r => (r["Situacao"]||"") === "Aguardando certificação").length;
   let totalPesq = 0, totalEst = 0;
   data.forEach(r => {
     totalPesq += parseInt(r["Pesquisadores"]||0);
@@ -831,9 +872,11 @@ function renderKPIsGrupos() {
   const avgEst = total ? (totalEst/total).toFixed(1) : 0;
 
   $('kpi-grupos').innerHTML = `
-    <div class="kpi-card"><div class="kpi-label">Total de Grupos</div><div class="kpi-value">${total}</div></div>
     <div class="kpi-card"><div class="kpi-label">Certificados</div><div class="kpi-value">${certificados}</div></div>
     <div class="kpi-card"><div class="kpi-label">Excluídos</div><div class="kpi-value">${excluidos}</div></div>
+    <div class="kpi-card"><div class="kpi-label">Em Preenchimento</div><div class="kpi-value">${emPreenchimento}</div></div>
+    <div class="kpi-card"><div class="kpi-label">Não Atualizados (>12m)</div><div class="kpi-value">${naoAtualizado}</div></div>
+    <div class="kpi-card"><div class="kpi-label">Aguardando Certificação</div><div class="kpi-value">${aguardandoCert}</div></div>
     <div class="kpi-card"><div class="kpi-label">Média Pesquisadores/Grupo</div><div class="kpi-value">${avgPesq}</div></div>
     <div class="kpi-card"><div class="kpi-label">Média Estudantes/Grupo</div><div class="kpi-value">${avgEst}</div></div>
   `;
