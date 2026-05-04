@@ -774,6 +774,17 @@ function renderChartsGrupos() {
     labels: sortedYearsGrupos,
     datasets: [{ label: "Total Ativos", data: cumulativeData, borderColor: "#2196F3", tension: 0.3, fill: false }]
   });
+
+  // Evo 3: Grupos Excluídos por Ano (using UltimoEnvio as approximation)
+  const deletedYearsSorted = Object.keys(yearsEvoDeleted).sort();
+  createChart("chart-grupos-evo-3", "bar", {
+    labels: deletedYearsSorted,
+    datasets: [{
+      label: "Excluídos",
+      data: deletedYearsSorted.map(y => yearsEvoDeleted[y] || 0),
+      backgroundColor: "#F44336"
+    }]
+  });
   
   // Pie: Áreas
   const areaMap = {};
@@ -794,6 +805,7 @@ function renderKPIsGrupos() {
   const data = STATE.filtered.grupos;
   const total = data.length;
   const certificados = data.filter(r => (r["Situacao"]||"").includes("Certificado")).length;
+  const excluidos = data.filter(r => (r["Situacao"]||"") === "Excluído").length;
   let totalPesq = 0, totalEst = 0;
   data.forEach(r => {
     totalPesq += parseInt(r["Pesquisadores"]||0);
@@ -805,6 +817,7 @@ function renderKPIsGrupos() {
   $('kpi-grupos').innerHTML = `
     <div class="kpi-card"><div class="kpi-label">Total de Grupos</div><div class="kpi-value">${total}</div></div>
     <div class="kpi-card"><div class="kpi-label">Certificados</div><div class="kpi-value">${certificados}</div></div>
+    <div class="kpi-card"><div class="kpi-label">Excluídos</div><div class="kpi-value">${excluidos}</div></div>
     <div class="kpi-card"><div class="kpi-label">Média Pesquisadores/Grupo</div><div class="kpi-value">${avgPesq}</div></div>
     <div class="kpi-card"><div class="kpi-label">Média Estudantes/Grupo</div><div class="kpi-value">${avgEst}</div></div>
   `;
