@@ -731,24 +731,13 @@ function renderChartsInovacao() {
 
 function renderChartsGrupos() {
   const data = STATE.filtered.grupos;
-  
-  // Evo 1: Grupos Criados por Ano
-  const yearsMap = {};
-  data.forEach(r => {
-    const y = parseInt(r["AnoFormacao"], 10);
-    if(y) yearsMap[y] = (yearsMap[y]||0) + 1;
-  });
-  const sortedYears = Object.keys(yearsMap).sort();
-  createChart("chart-grupos-evo-1", "bar", {
-    labels: sortedYears,
-    datasets: [{ label: "Novos Grupos", data: sortedYears.map(y => yearsMap[y]), backgroundColor: "#4CAF50" }]
-  });
-  
-  // Evo 2: Grupos Ativos (Acumulado)
+
+  // Combined chart: Created, Deleted, and Active (Cumulative)
   const yearsEvoFormed = {};
   const yearsEvoDeleted = {};
   let earliestYear = 2100;
   let latestYear = new Date().getFullYear();
+
   data.forEach(r => {
     const formedYear = parseInt(r["AnoFormacao"], 10);
     if (formedYear && formedYear < earliestYear) earliestYear = formedYear;
@@ -760,32 +749,59 @@ function renderChartsGrupos() {
         if(matchYear) yearsEvoDeleted[matchYear[1]] = (yearsEvoDeleted[matchYear[1]] || 0) + 1;
     }
   });
-  const sortedYearsGrupos = [];
+
+  // Build sorted years array and datasets
+  const sortedYears = [];
+  const createdData = [];
+  const deletedData = [];
   const cumulativeData = [];
   let currentTotal = 0;
+
   if (earliestYear !== 2100) {
     for (let y = earliestYear; y <= latestYear; y++) {
-      sortedYearsGrupos.push(y.toString());
-      currentTotal += (yearsEvoFormed[y] || 0) - (yearsEvoDeleted[y] || 0);
+      sortedYears.push(y.toString());
+      const created = yearsEvoFormed[y] || 0;
+      const deleted = yearsEvoDeleted[y] || 0;
+      createdData.push(created);
+      deletedData.push(deleted);
+      currentTotal += created - deleted;
       cumulativeData.push(currentTotal);
     }
   }
-  createChart("chart-grupos-evo-2", "line", {
-    labels: sortedYearsGrupos,
-    datasets: [{ label: "Total Ativos", data: cumulativeData, borderColor: "#2196F3", tension: 0.3, fill: false }]
+
+  createChart("chart-grupos-evo-combined", "bar", {
+    labels: sortedYears,
+    datasets: [
+      {
+        label: "Novos Grupos",
+        data: createdData,
+        backgroundColor: "#4CAF50",
+        order: 2
+      },
+      {
+        label: "Excluídos",
+        data: deletedData,
+        backgroundColor: "#F44336",
+        order: 3
+      },
+      {
+        label: "Total Ativos (Acumulado)",
+        data: cumulativeData,
+        type: "line",
+        borderColor: "#2196F3",
+        backgroundColor: "rgba(33, 150, 243, 0.1)",
+        tension: 0.3,
+        fill: false,
+        order: 1
+      }
+    ]
+  }, {
+    scales: {
+      x: { ticks: { color: '#555' } },
+      y: { ticks: { color: '#555' }, beginAtZero: true }
+    }
   });
 
-  // Evo 3: Grupos Excluídos por Ano (using UltimoEnvio as approximation)
-  const deletedYearsSorted = Object.keys(yearsEvoDeleted).sort();
-  createChart("chart-grupos-evo-3", "bar", {
-    labels: deletedYearsSorted,
-    datasets: [{
-      label: "Excluídos",
-      data: deletedYearsSorted.map(y => yearsEvoDeleted[y] || 0),
-      backgroundColor: "#F44336"
-    }]
-  });
-  
   // Pie: Áreas
   const areaMap = {};
   data.forEach(r => {
