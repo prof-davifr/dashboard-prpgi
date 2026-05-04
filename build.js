@@ -206,7 +206,7 @@ function main() {
         }
         
         const normalizeKey = r => {
-          const raw = r["Ttulo"] || r["Nome"] || (r["Publicao"] || "").substring(0, 150);
+          const raw = r["Título"] || r["Nome"] || (r["Publicação"] || "").substring(0, 150);
           if (!raw) return "";
           return raw.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]/gi, "").substring(0, 150);
         };
