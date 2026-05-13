@@ -40,32 +40,34 @@ Any new data source integration **must** verify `Instituição` contains `"IFBA"
 
 ## Commands
 
-- `node build.js` – Process Excel/CSV files from `dados/` into `data.json`
-- `npm start` – Start dev server on port 8080
-- `python archive/server.py` – Start Python HTTP server on port 8000 (legacy)
+- `node build.js` — Process `.xlsx` and `.csv` files from `dados/` into `data.json` (no npm script; direct Node invocation)
+- `npm start` — Start dev server on port 8080 (live-server)
+- `npm test` — Run Jest unit tests
 
-## Data Structure
+## Data & Build
 
-- `dados/` contains source files organized by scraper:
-  - `scraper-SUAPCNPQ/` – Campus Excel files (`[CAMPUS]-2000-2026.xls`)
-  - `scraper-DGP/` – Research groups CSV (`coletor_dgp_ifba.csv`)
-  - `scraper-SUAPPos/` – Postgraduate students CSV (`alunos_pos_*.csv`)
-- `build.js` recursively scans `dados/` for `.xls` and `.csv` files
-- Output `data.json` is ~26MB, contains all processed data for dashboard
-- `archive/` contains legacy scripts (e.g., `server.py`)
-- `docs/` contains technical documentation and specifications
+- `dados/` contains raw source files organized by scraper subdirectory:
+  - `scraper-SUAPCNPQ/` — Per-campus Excel files named `[CAMPUS_CODE]-2000-2026.xlsx`
+  - `scraper-DGP/` — Research groups CSV (`coletor_dgp_ifba.csv`)
+  - `scraper-SUAPPos/` — Postgraduate students CSV (`alunos_pos_*.csv`)
+- `build.js` recursively scans `dados/` for `.xlsx` and `.csv` files, extracts campus code from filename prefix, and produces a single `data.json` (~30 MB).
+- `data.json` **is tracked in git** (required for GitHub Pages). Never commit raw `dados/` contents — it is gitignored.
+- After placing new files in `dados/`, always regenerate with `node build.js` and verify the output size and campus list.
 
-## Development
+## Frontend & Development
 
-- Static dashboard: `index.html`, `src/script.js`, `src/style.css`
-- No build step required for frontend changes
-- Data updates: place files in correct `dados/` subdirectory, run `node build.js`
-- Dashboard hosted at https://prof-davifr.github.io/dashboard-prpgi/
+- Static dashboard: `index.html`, `src/script.js`, `src/style.css`, `src/posgraduacao.js`, `src/pesquisadores.js`. No build step for frontend changes.
+- `archive/server.py` is legacy; use `npm start` for development.
+- Deploy: push to main branch triggers GitHub Pages update at https://prof-davifr.github.io/dashboard-prpgi/
 
-## Notes
+## Consistency Requirements
 
-- Excel processing uses `xlsx` library via Node.js
-- `server.py` is legacy (now in `archive/`); use `npm start` for development
-- `data.json` is tracked in the repo (required for GitHub Pages); regenerate with `node build.js`
-- Campus codes extracted from filename prefixes (e.g., `SSA-2000-2026.xls` → `SSA`)
-- The `CAMPUS_TO_CITY` map and `IFBA_COORDS` object in `src/script.js` must be kept in sync with the campus code table above
+- **CAMPUS_TO_CITY** and **IFBA_COORDS** in `src/script.js` must exactly match the campus code table above. If you add or rename a campus, update both the table and these objects simultaneously.
+- **Test helpers** (`tests/helpers/browserEnv.js`) contain their own copies of `CAMPUS_TO_CITY` and `IFBA_COORDS` used by Jest VM tests. These must also be kept in sync with `src/script.js`. Note: current `browserEnv.js` maps `UBA` to `UBATÃ` while `src/script.js` uses `UBAITABA` — reconcile this discrepancy if touching either file.
+- `build.js` uses `xlsx` (SheetJS) to read Excel; ensure all campus files are `.xlsx` (not `.xls`).
+
+## Testing
+
+- Jest unit tests cover `build.js` pure functions (`findFiles`, `parseCSV`, `getSourceKey`, `registerSourceFile`, `SHEET_MAP`, `SOURCE_LABELS`) and `src/script.js` utilities.
+- Tests use a custom VM-based browser context (`tests/helpers/browserEnv.js`) that stubs DOM and Leaflet/Chart.js — no real browser or jsdom required.
+- Run focused tests with `npm test -- <pattern>` (e.g., `npm test -- parseCSV`).
