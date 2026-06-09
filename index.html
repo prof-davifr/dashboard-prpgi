@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard PRPGI</title>
+    <link rel="stylesheet" href="src/style.css">
+    <!-- SheetJS, ChartJS, Leaflet -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+</head>
+<body>
+
+    <div id="loading">
+        <div class="spinner"></div>
+        <p style="margin-top:20px; font-weight:600; font-size:1.2rem; color:var(--accent);" id="loading-text">Carregando dados dos campi...</p>
+    </div>
+
+    
+    <div class="controls">
+        <select id="period-filter">
+            <option value="all">Carregando períodos...</option>
+        </select>
+
+        <select id="campus-filter">
+            <option value="all">Todos os Campi</option>
+            <option value="BAR">Barreiras</option>
+            <option value="BRU">Brumado</option>
+            <option value="CAM">Camaçari</option>
+            <option value="CFO">Campo Formoso</option>
+            <option value="EC">Euclides da Cunha</option>
+            <option value="EUN">Eunápolis</option>
+            <option value="FS">Feira de Santana</option>
+            <option value="ILH">Ilhéus</option>
+            <option value="IRE">Irecê</option>
+            <option value="JAC">Jacobina</option>
+            <option value="JAG">Jaguaquara</option>
+            <option value="JEQ">Jequié</option>
+            <option value="JUA">Juazeiro</option>
+            <option value="LF">Lauro de Freitas</option>
+            <option value="PA">Paulo Afonso</option>
+            <option value="PIS">Polo de Inovação Salvador</option>
+            <option value="PS">Porto Seguro</option>
+            <option value="SSA">Salvador</option>
+            <option value="SAM">Santo Amaro</option>
+            <option value="SAJ">Santo Antônio de Jesus</option>
+            <option value="SEA">Seabra</option>
+            <option value="SF">Simões Filho</option>
+            <option value="UBA">Ubaitaba</option>
+            <option value="VAL">Valença</option>
+            <option value="VC">Vitória da Conquista</option>
+        </select>
+        
+        <label style="display: flex; align-items: center; gap: 0.4rem; color: #444; font-weight: 600; font-size: 0.85rem; cursor: pointer;" title="Evita que o mesmo trabalho seja contado múltiplas vezes quando há coautoria entre servidores.">
+            <input type="checkbox" id="unique-toggle" checked style="width: 16px; height: 16px;">
+            Desduplicar
+            <span style="font-size: 0.8rem; background: #32a041; color: white; border-radius: 50%; width: 16px; height: 16px; display: inline-flex; justify-content: center; align-items: center; font-weight: bold; cursor: help;" title="Evita que o mesmo trabalho seja contado múltiplas vezes quando há coautoria entre servidores.">?</span>
+        </label>
+
+        <label style="display: flex; align-items: center; gap: 0.4rem; color: #444; font-weight: 600; font-size: 0.85rem; cursor: pointer;" title="Divide os valores pelo número de servidores ativos em cada campus para comparação justa.">
+            <input type="checkbox" id="relative-metrics-toggle" style="width: 16px; height: 16px;">
+            p/ Servidor
+            <span style="font-size: 0.8rem; background: #32a041; color: white; border-radius: 50%; width: 16px; height: 16px; display: inline-flex; justify-content: center; align-items: center; font-weight: bold; cursor: help;" title="Divide os valores pelo número de servidores ativos em cada campus para comparação justa.">?</span>
+        </label>
+    </div>
+
+    <!-- Tabs Navigation -->
+    <div class="tabs">
+        <button class="tab-btn active" data-target="tab-cientifica">Produção Científica</button>
+        <button class="tab-btn" data-target="tab-tecnica">Produção Técnica</button>
+        <button class="tab-btn" data-target="tab-inovacao">Inovação</button>
+        <button class="tab-btn" data-target="tab-grupos">Grupos de Pesquisa</button>
+        <button class="tab-btn" data-target="tab-pesquisadores">Pesquisadores</button>
+        <button class="tab-btn" data-target="tab-orientacoes">Orientações</button>
+        <button class="tab-btn" data-target="tab-posgraduacao">Pós-Graduação</button>
+    </div>
+
+    <!-- Tab 1: Produção Científica -->
+    <section id="tab-cientifica" class="tab-content active">
+        <div class="kpi-grid" id="kpi-cientifica"></div>
+        <div class="charts-container">
+            <div class="chart-row-full chart-card">
+                <div class="chart-title">Evolução Temporal da Produção Científica</div>
+                <div class="chart-wrapper large"><canvas id="chart-cientifica-evolucao"></canvas></div>
+            </div>
+            <div class="chart-row-split">
+                <div class="chart-card">
+                    <div class="chart-title">Distribuição Qualis</div>
+                    <div class="chart-wrapper"><canvas id="chart-cientifica-pie"></canvas></div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-title">Distribuição Geográfica</div>
+                    <div class="map-container"><div id="map-cientifica" style="height: 100%; width: 100%;"></div></div>
+                </div>
+            </div>
+        </div>
+        <div class="table-section">
+            <div class="table-actions">
+            <button class="table-toggle-btn" onclick="toggleTable('table-cientifica-container', this)">Exibir Tabela Detalhada por Campus/Ano</button>
+            <button class="export-btn" onclick="exportTableToExcel('table-cientifica-container', 'Producao_Cientifica_IFBA')">Exportar para Excel</button>
+            </div>
+            <div id="table-cientifica-container" class="table-container">
+                <div id="table-cientifica-content"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Tab 2: Produção Técnica -->
+    <section id="tab-tecnica" class="tab-content">
+        <div class="kpi-grid" id="kpi-tecnica"></div>
+        <div class="charts-container">
+            <div class="chart-row-full chart-card">
+                <div class="chart-title">Evolução Temporal da Produção Técnica</div>
+                <div class="chart-wrapper large"><canvas id="chart-tecnica-evolucao"></canvas></div>
+            </div>
+            <div class="chart-row-split">
+                <div class="chart-card">
+                    <div class="chart-title">Tipos de Produção Técnica</div>
+                    <div class="chart-wrapper"><canvas id="chart-tecnica-pie"></canvas></div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-title">Distribuição Geográfica</div>
+                    <div class="map-container"><div id="map-tecnica" style="height: 100%; width: 100%;"></div></div>
+                </div>
+            </div>
+        </div>
+        <div class="table-section">
+            <div class="table-actions">
+            <button class="table-toggle-btn" onclick="toggleTable('table-tecnica-container', this)">Exibir Tabela Detalhada por Campus/Ano</button>
+            <button class="export-btn" onclick="exportTableToExcel('table-tecnica-container', 'Producao_Tecnica_IFBA')">Exportar para Excel</button>
+            </div>
+            <div id="table-tecnica-container" class="table-container">
+                <div id="table-tecnica-content"></div>
+                <p style="margin-top:0.5rem;font-size:0.85rem;color:#666;">* Valores normalizados por total de pesquisadores ativos em cada campus (considerando todas as fontes)</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Tab 3: Inovação -->
+    <section id="tab-inovacao" class="tab-content">
+        <div class="kpi-grid" id="kpi-inovacao"></div>
+        <div class="charts-container">
+            <div class="chart-row-split">
+                <div class="chart-card">
+                    <div class="chart-title">Patentes e Softwares</div>
+                    <div class="chart-wrapper"><canvas id="chart-inovacao-evo-1"></canvas></div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-title">Marcas e Outros</div>
+                    <div class="chart-wrapper"><canvas id="chart-inovacao-evo-2"></canvas></div>
+                </div>
+            </div>
+            <div class="chart-row-split">
+                <div class="chart-card">
+                    <div class="chart-title">Registros por Tipo</div>
+                    <div class="chart-wrapper"><canvas id="chart-inovacao-pie"></canvas></div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-title">Distribuição Geográfica</div>
+                    <div class="map-container"><div id="map-inovacao" style="height: 100%; width: 100%;"></div></div>
+                </div>
+            </div>
+        </div>
+        <div class="table-section">
+            <div class="table-actions">
+            <button class="table-toggle-btn" onclick="toggleTable('table-inovacao-container', this)">Exibir Tabela Detalhada por Campus/Ano</button>
+            <button class="export-btn" onclick="exportTableToExcel('table-inovacao-container', 'Inovacao_IFBA')">Exportar para Excel</button>
+            </div>
+            <div id="table-inovacao-container" class="table-container">
+                <div id="table-inovacao-content"></div>
+                <p style="margin-top:0.5rem;font-size:0.85rem;color:#666;">* Valores normalizados por total de pesquisadores ativos em cada campus (considerando todas as fontes)</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Tab 4: Grupos de Pesquisa -->
+    <section id="tab-grupos" class="tab-content">
+        <div class="kpi-grid" id="kpi-grupos"></div>
+        <div class="charts-container">
+            <div class="chart-card">
+                <div class="chart-title">Evolução dos Grupos de Pesquisa</div>
+                <div class="chart-wrapper large"><canvas id="chart-grupos-evo-combined"></canvas></div>
+            </div>
+            <div class="chart-row-split">
+                <div class="chart-card">
+                    <div class="chart-title">Grupos por Área</div>
+                    <div class="chart-wrapper"><canvas id="chart-grupos-pie"></canvas></div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-title">Distribuição Geográfica</div>
+                    <div class="map-container"><div id="map-grupos" style="height: 100%; width: 100%;"></div></div>
+                </div>
+            </div>
+        </div>
+        <div class="table-section">
+            <div class="table-actions">
+            <button class="table-toggle-btn" onclick="toggleTable('table-grupos-container', this)">Exibir Tabela Detalhada por Campus/Ano</button>
+            <button class="export-btn" onclick="exportTableToExcel('table-grupos-container', 'Grupos_DGP_IFBA')">Exportar para Excel</button>
+            </div>
+            <div id="table-grupos-container" class="table-container">
+                <div id="table-grupos-content"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Tab 5: Pesquisadores -->
+    <section id="tab-pesquisadores" class="tab-content">
+        <div class="kpi-grid" id="kpi-pesquisadores"></div>
+        <div class="charts-container">
+            <div class="chart-row-full chart-card">
+                <div class="chart-title">Evolução Temporal de Pesquisadores Ativos</div>
+                <div class="chart-wrapper large"><canvas id="chart-pesquisadores-evolucao"></canvas></div>
+            </div>
+            <div class="chart-row-split">
+                <div class="chart-card">
+                    <div class="chart-title">Distribuição por Campus</div>
+                    <div class="chart-wrapper"><canvas id="chart-pesquisadores-campus"></canvas></div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-title">Distribuição Geográfica</div>
+                    <div class="map-container"><div id="map-pesquisadores" style="height: 100%; width: 100%;"></div></div>
+                </div>
+            </div>
+            <div class="chart-row-split">
+                <div class="chart-card">
+                    <div class="chart-title">Produção por Tipo</div>
+                    <div class="chart-wrapper"><canvas id="chart-pesquisadores-producao"></canvas></div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-title">Pesquisadores por Área (Grupos DGP)</div>
+                    <div class="chart-wrapper"><canvas id="chart-pesquisadores-area"></canvas></div>
+                </div>
+            </div>
+        </div>
+        <div class="table-section">
+            <div class="table-actions">
+            <button class="table-toggle-btn" onclick="toggleTable('table-pesquisadores-container', this)">Exibir Tabela Detalhada por Campus/Ano</button>
+            <button class="export-btn" onclick="exportTableToExcel('table-pesquisadores-container', 'Pesquisadores_IFBA')">Exportar para Excel</button>
+            </div>
+            <div id="table-pesquisadores-container" class="table-container">
+                <div id="table-pesquisadores-content"></div>
+                <p style="margin-top:0.5rem;font-size:0.85rem;color:#666;">* Cada pesquisador conta uma vez por ano, independentemente da quantidade de produções ou categorias no período selecionado</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Tab 6: Orientações -->
+    <section id="tab-orientacoes" class="tab-content">
+        <div class="kpi-grid" id="kpi-orientacoes"></div>
+        <div class="charts-container">
+            <div class="chart-row-split">
+                <div class="chart-card">
+                    <div class="chart-title">Orientações Concluídas</div>
+                    <div class="chart-wrapper"><canvas id="chart-orientacoes-evo-1"></canvas></div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-title">Orientações em Andamento</div>
+                    <div class="chart-wrapper"><canvas id="chart-orientacoes-evo-2"></canvas></div>
+                </div>
+            </div>
+            <div class="chart-row-split">
+                <div class="chart-card">
+                    <div class="chart-title">Nível de Orientação</div>
+                    <div class="chart-wrapper"><canvas id="chart-orientacoes-pie"></canvas></div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-title">Distribuição Geográfica</div>
+                    <div class="map-container"><div id="map-orientacoes" style="height: 100%; width: 100%;"></div></div>
+                </div>
+            </div>
+        </div>
+        <div class="table-section">
+            <div class="table-actions">
+            <button class="table-toggle-btn" onclick="toggleTable('table-orientacoes-container', this)">Exibir Tabela Detalhada por Campus/Ano</button>
+            <button class="export-btn" onclick="exportTableToExcel('table-orientacoes-container', 'Orientacoes_IFBA')">Exportar para Excel</button>
+            </div>
+            <div id="table-orientacoes-container" class="table-container">
+                <div id="table-orientacoes-content"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Tab 6: Pós-Graduação -->
+    <section id="tab-posgraduacao" class="tab-content">
+        <div class="chart-card" style="margin-bottom: 1.5rem;">
+            <div class="chart-title">Filtros de Gestão da Pós-Graduação</div>
+            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center;">
+                <select id="posgrad-categoria-filter" style="min-width: 160px; font-size: 0.85rem; padding: 0.35rem 0.6rem;" title="Filtra por modalidade do programa (Mestrado, Doutorado, Especialização).">
+                    <option value="all">Todas Categorias</option>
+                    <option value="Mestrado">Mestrado</option>
+                    <option value="Doutorado">Doutorado</option>
+                    <option value="Especialização">Especialização</option>
+                </select>
+                <select id="posgrad-status-filter" style="min-width: 160px; font-size: 0.85rem; padding: 0.35rem 0.6rem;" title="Filtra por situação acadêmica atual registrada no SUAP.">
+                    <option value="all">Todos os Status</option>
+                    <option value="Matriculado">Matriculado</option>
+                    <option value="Concluído">Concluído</option>
+                    <option value="Cancelado">Cancelado</option>
+                    <option value="Desligado">Desligado</option>
+                    <option value="Evasão">Evasão</option>
+                </select>
+                <select id="posgrad-campus-filter" style="min-width: 160px; font-size: 0.85rem; padding: 0.35rem 0.6rem;" title="Filtra por campus do programa.">
+                    <option value="all">Todos os Campi</option>
+                </select>
+                <select id="posgrad-curso-filter" style="min-width: 180px; font-size: 0.85rem; padding: 0.35rem 0.6rem;" title="Filtra por programa/curso específico.">
+                    <option value="all">Todos os Programas</option>
+                </select>
+                <label style="display:flex;align-items:center;gap:0.4rem;color:#444;font-weight:600;font-size:0.85rem;" title="Mantém apenas coortes maduras. Regra: Mestrado >= 2 anos, Doutorado >= 4 anos, Especialização >= 2 anos.">
+                    <input type="checkbox" id="posgrad-matured-only-toggle" checked style="width: 14px; height: 14px;">
+                    Coortes Maduras
+                    <span class="tip-dot" title="Coorte madura = turma de ingresso cujo prazo esperado já foi atingido.">?</span>
+                </label>
+            </div>
+            <div class="inline-help">
+                <strong>O que é Coorte Madura:</strong> turma de ingresso (ano de entrada) com tempo esperado já transcorrido.
+                Regra usada: Mestrado ≥ 2 anos, Doutorado ≥ 4 anos, Especialização ≥ 2 anos.
+                Esse recorte evita comparar turmas muito recentes com turmas que já deveriam ter desfecho.
+            </div>
+        </div>
+        <!-- Subtabs Navigation -->
+        <div class="sub-tabs">
+            <button class="sub-tab-btn active" data-subtarget="subtab-overview">Resumo Executivo</button>
+            <button class="sub-tab-btn" data-subtarget="subtab-cursos">Desempenho por Coorte</button>
+            <button class="sub-tab-btn" data-subtarget="subtab-campus">Risco por Programa/Campus</button>
+        </div>
+        
+        <!-- Subtabs Content -->
+        <div class="subtab-content active" id="subtab-overview">
+            <div class="kpi-grid" id="kpi-posgraduacao-overview"></div>
+            <div class="charts-container">
+                <div class="chart-row-full chart-card">
+                    <div class="chart-title" title="Volume de ingressos por ano de entrada e modalidade do programa.">Entradas por Coorte e Categoria</div>
+                    <div class="chart-wrapper large"><canvas id="chart-posgraduacao-evolucao"></canvas></div>
+                </div>
+                <div class="chart-row-split">
+                    <div class="chart-card">
+                        <div class="chart-title" title="Distribuição de desfechos (Concluído, Ativo, Evasão/Desligamento, Outros) para coortes maduras.">Desfecho das Coortes</div>
+                        <div class="chart-wrapper"><canvas id="chart-posgraduacao-status"></canvas></div>
+                    </div>
+                    <div class="chart-card">
+                        <div class="chart-title" title="Compara conclusão, evasão e pendência ativa por modalidade, apenas em coortes maduras.">Risco por Categoria (Coortes Maduras)</div>
+                        <div class="chart-wrapper"><canvas id="chart-posgraduacao-categoria"></canvas></div>
+                    </div>
+                </div>
+                <div class="chart-row-split">
+                    <div class="chart-card">
+                        <div class="chart-title" title="Programas com maior volume de alunos ativos, separados em fluxo regular e pendência ativa.">Programas com Maior Volume Ativo</div>
+                        <div class="chart-wrapper"><canvas id="chart-posgraduacao-topcursos"></canvas></div>
+                    </div>
+                    <div class="chart-card">
+                        <div class="chart-title" title="Compara fluxo regular, pendência ativa e evasão/desligamento por campus.">Situação Ativa por Campus</div>
+                        <div class="chart-wrapper"><canvas id="chart-posgraduacao-campusrisk"></canvas></div>
+                    </div>
+                </div>
+                <div class="chart-row-full chart-card">
+                    <div class="chart-title" title="Evolução anual das taxas de conclusão, evasão/desligamento e pendência ativa para coortes maduras.">Taxas por Ano de Coorte (Maduras)</div>
+                    <div class="chart-wrapper large"><canvas id="chart-posgraduacao-completion"></canvas></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="subtab-content" id="subtab-cursos">
+            <div class="kpi-grid" id="kpi-posgraduacao-curso"></div>
+            <div class="charts-container">
+                <div class="chart-row-full chart-card">
+                    <div class="chart-title">Coortes por Situação (Programa)</div>
+                    <div class="chart-wrapper large"><canvas id="chart-posgraduacao-curso-evolucao"></canvas></div>
+                </div>
+                <div class="chart-row-split">
+                    <div class="chart-card">
+                        <div class="chart-title">Desfecho por Coorte</div>
+                        <div class="chart-wrapper"><canvas id="chart-posgraduacao-curso-status"></canvas></div>
+                    </div>
+                    <div class="chart-card">
+                        <div class="chart-title">Taxas (Conclusão, Evasão, Pendência)</div>
+                        <div class="chart-wrapper"><canvas id="chart-posgraduacao-curso-campus"></canvas></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="subtab-content" id="subtab-campus">
+            <div class="kpi-grid" id="kpi-posgraduacao-campus"></div>
+            <div class="charts-container">
+                <div class="chart-row-full chart-card">
+                    <div class="chart-title">Ranking de Programas por Risco</div>
+                    <div class="chart-wrapper large"><canvas id="chart-posgraduacao-campus-evolucao"></canvas></div>
+                </div>
+                <div class="chart-row-split">
+                    <div class="chart-card">
+                        <div class="chart-title">Comparativo de Campi</div>
+                        <div class="chart-wrapper"><canvas id="chart-posgraduacao-campus-cursos"></canvas></div>
+                    </div>
+                    <div class="chart-card">
+                        <div class="chart-title">Composição por Categoria</div>
+                        <div class="chart-wrapper"><canvas id="chart-posgraduacao-campus-categorias"></canvas></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="chart-card" style="margin-top: 1.5rem;">
+            <div class="chart-title">Rastreabilidade dos Indicadores</div>
+            <div id="posgrad-traceability" class="inline-help">Carregando rastreabilidade...</div>
+        </div>
+    </section>
+
+    <!-- Methodology Modal -->
+    <div class="modal-overlay" id="methodology-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Sobre os Dados e Metodologia</h2>
+                <button class="modal-close" id="modal-close">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-section">
+                    <h3>Escopo e Objetivo do Dashboard</h3>
+                    <p>Este dashboard consolida indicadores institucionais de pesquisa, inovação e pós-graduação do IFBA para apoio à gestão acadêmica. O foco é comparabilidade entre campi, programas e períodos, com leitura executiva e possibilidade de detalhamento.</p>
+                    <p>O painel é orientado por três perguntas principais:</p>
+                    <ul>
+                        <li><strong>Volume:</strong> Qual é o porte da produção e da formação em cada eixo?</li>
+                        <li><strong>Desempenho:</strong> Quais unidades/programas estão entregando melhores resultados?</li>
+                        <li><strong>Risco:</strong> Onde há sinais de evasão, atraso ou baixa conclusão que exigem intervenção?</li>
+                    </ul>
+                </div>
+
+                <div class="modal-section">
+                    <h3>Fontes de Dados</h3>
+                    <div class="data-source-card">
+                        <strong>Plataforma Lattes (CNPq)</strong><br>
+                        <em>Produção Científica, Produção Técnica, Inovação e Orientações</em><br>
+                        Os dados são extraídos dos currículos Lattes dos servidores do IFBA, contendo publicações bibliográficas, produções técnicas, registros de propriedade intelectual e orientações acadêmicas.
+                    </div>
+                    <div class="data-source-card">
+                        <strong>🔬 Diretório de Grupos de Pesquisa (DGP/CNPq)</strong><br>
+                        <em>Grupos de Pesquisa e Pesquisadores</em><br>
+                        Informações sobre os grupos de pesquisa certificados no CNPq, incluindo área de atuação, número de pesquisadores, estudantes e vinculação institucional.
+                    </div>
+                    <div class="data-source-card">
+                        <strong>Sistema Acadêmico (SUAP/PRPGI)</strong><br>
+                        <em>Pós-Graduação</em><br>
+                        Dados dos programas de pós-graduação do IFBA, incluindo matrículas, status de alunos e informações sobre cursos de mestrado, doutorado e especialização.
+                    </div>
+                </div>
+
+                <div class="modal-section">
+                    <h3>Metodologia de Coleta e Processamento</h3>
+                    <p><strong>Coleta de Dados:</strong></p>
+                    <ul>
+                        <li>Os dados do Lattes são obtidos através de exportações diretas da plataforma, organizadas por campus do IFBA.</li>
+                        <li>Os dados dos Grupos de Pesquisa são coletados diretamente do Diretório DGP do CNPq.</li>
+                        <li>Os dados da Pós-Graduação são extraídos do sistema acadêmico institucional (SUAP).</li>
+                    </ul>
+                    <p><strong>Processamento e Tratamento:</strong></p>
+                    <ul>
+                        <li><strong>Unificação:</strong> Dados de múltiplos campi são consolidados em uma base única para visão institucional completa.</li>
+                        <li><strong>Identificação de Servidores:</strong> Cada servidor é identificado por um código único extraído da plataforma Lattes, permitindo contagens precisas mesmo quando há múltiplos autores em uma produção.</li>
+                        <li><strong>Desduplicação de Coautorias:</strong> O sistema permite filtrar contagens para exibir apenas produções únicas, evitando que o mesmo trabalho seja contado múltiplas vezes quando há coautoria entre servidores do IFBA.</li>
+                        <li><strong>Classificação Qualis:</strong> Para produções bibliográficas, é considerado o estrato Qualis atribuído pela CAPES para avaliação de periódicos científicos.</li>
+                    </ul>
+                </div>
+
+                <div class="modal-section">
+                    <h3>Dicionário de Termos (Pós-Graduação)</h3>
+                    <ul>
+                        <li><strong>Coorte:</strong> conjunto de estudantes de um mesmo ano de ingresso.</li>
+                        <li><strong>Coorte Madura:</strong> coorte cujo prazo esperado de conclusão já foi atingido.</li>
+                        <li><strong>Em Fluxo Regular:</strong> estudante matriculado dentro do prazo esperado da coorte.</li>
+                        <li><strong>Pendência Ativa:</strong> estudante matriculado além do prazo esperado da coorte.</li>
+                        <li><strong>Evasão/Desligamento:</strong> consolida status como Cancelado, Desligado, Evasão, Abandono e Falecido.</li>
+                    </ul>
+                    <div class="methodology-note">
+                        <strong>Regra de prazo esperado para Coorte Madura:</strong> Mestrado ≥ 2 anos, Doutorado ≥ 4 anos, Especialização ≥ 2 anos.
+                    </div>
+                </div>
+
+                <div class="modal-section">
+                    <h3>Regras de Cálculo (Pós-Graduação)</h3>
+                    <p><strong>Base de Avaliação de Desfecho:</strong> As taxas de conclusão, evasão/desligamento e pendência ativa são calculadas prioritariamente sobre as coortes maduras, para evitar comparação indevida com turmas recentes.</p>
+                    <p><strong>Fórmulas principais:</strong></p>
+                    <ul>
+                        <li><strong>Taxa de Conclusão:</strong> Concluídos (coortes maduras) / Total de coortes maduras.</li>
+                        <li><strong>Taxa de Evasão/Desligamento:</strong> Evasão/Desligamento (coortes maduras) / Total de coortes maduras.</li>
+                        <li><strong>Taxa de Pendência Ativa:</strong> Matriculados em atraso (coortes maduras) / Total de coortes maduras.</li>
+                        <li><strong>Em Fluxo Regular:</strong> Matriculados fora da base madura (dentro do prazo esperado).</li>
+                    </ul>
+                    <p><strong>Importante:</strong> O ano da pós-graduação representa o ano de ingresso/coorte, e não necessariamente o ano do evento de conclusão ou evasão.</p>
+                </div>
+
+                <div class="modal-section">
+                    <h3>Critérios de Análise por Eixo</h3>
+                    <p><strong>Filtro Temporal:</strong> Todos os indicadores podem ser filtrados por período, permitindo análises anuais, quinquenais ou do período histórico completo disponível.</p>
+                    <p><strong>Distribuição Geográfica:</strong> Os mapas apresentam a distribuição das produções e grupos de pesquisa por campus/cidade, com tamanho proporcional ao volume de produções ou pesquisadores.</p>
+                    <p><strong>Classificação de Produções:</strong></p>
+                    <ul>
+                        <li><em>Produção Científica:</em> Artigos em periódicos, livros, capítulos de livros e trabalhos publicados em anais.</li>
+                        <li><em>Produção Técnica:</em> Apresentações em eventos, cursos ministrados, organização de eventos, produtos técnicos e tecnológicos.</li>
+                        <li><em>Inovação:</em> Patentes, registros de software, desenhos industriais e outras formas de propriedade intelectual.</li>
+                        <li><em>Orientações:</em> Inclui iniciação científica, graduação, especialização, mestrado e doutorado.</li>
+                    </ul>
+                </div>
+
+                <div class="modal-section">
+                    <h3>Definição de Pesquisador Ativo</h3>
+                    <p>Para fins deste dashboard, um <strong>Pesquisador Ativo</strong> é definido como:</p>
+                    <ul>
+                        <li><strong>Critério de Inclusão:</strong> Qualquer servidor do IFBA que possua ao menos um registro em qualquer uma das bases de dados dentro do período selecionado.</li>
+                        <li><strong>Fontes Consideradas:</strong> Produção Científica, Produção Técnica, Orientações Concluídas e Orientações em Andamento (todas extraídas da Plataforma Lattes).</li>
+                        <li><strong>Identificação Única:</strong> Cada pesquisador é identificado por um código de servidor (Servidor ID) extraído do currículo Lattes, garantindo que o mesmo indivíduo seja contado apenas uma vez, mesmo que tenha múltiplas produções.</li>
+                        <li><strong>Periodo de Avaliação:</strong> A contagem de pesquisadores ativos é filtrada pelo período selecionado no filtro temporal. Um pesquisador que produziu apenas fora do período selecionado não é contabilizado como "ativo" naquele recorte temporal.</li>
+                        <li><strong>Desduplicação:</strong> Quando há coautoria entre servidores do IFBA, cada servidor é contado individualmente como pesquisador ativo, mas a produção pode ser desduplicada (quando a opção "Exibir Apenas Produções Únicas" está ativa) para evitar contar o mesmo trabalho múltiplas vezes nas métricas de produção.</li>
+                    </ul>
+                    <div class="methodology-note" style="margin-top: 1rem;">
+                        <strong>Nota:</strong> Esta definição foca na produção acadêmica registrada. Servidores que atuam como pesquisadores mas não registraram produções no período selecionado não aparecem como "ativos" neste dashboard.
+                    </div>
+                </div>
+
+                <div class="modal-section">
+                    <h3>Como Interpretar para Tomada de Decisão</h3>
+                    <ul>
+                        <li><strong>Compare campi/programas por taxa e por volume:</strong> taxa alta com base pequena pode ser instável; taxa moderada com base grande pode ter maior impacto institucional.</li>
+                        <li><strong>Use Coorte Madura para desempenho:</strong> evita penalizar programas com turmas recentes ainda em formação.</li>
+                        <li><strong>Use Em Fluxo Regular + Pendência Ativa para gestão acadêmica:</strong> diferenciar quem está no tempo esperado de quem já demanda ação corretiva.</li>
+                        <li><strong>Leia tendências com cautela:</strong> oscilações anuais podem refletir tamanho de ingresso, mudanças de oferta e atualização das bases.</li>
+                    </ul>
+                </div>
+
+                <div class="modal-section">
+                    <h3>Limitações e Qualidade dos Dados</h3>
+                    <div class="methodology-note">
+                        <strong>⚠️ Atualização dos Dados:</strong> As informações apresentadas refletem os dados disponíveis nas fontes originais na data de processamento. Para o Lattes, dependem da atualização dos currículos pelos próprios servidores.
+                    </div>
+                    <p style="margin-top: 1rem;"><strong>Limitações:</strong></p>
+                    <ul>
+                        <li>Dados do Lattes dependem da atualização voluntária pelos servidores.</li>
+                        <li>Produções mais recentes podem não estar completamente registradas.</li>
+                        <li>A classificação Qualis é específica para cada área de avaliação da CAPES.</li>
+                        <li>Grupos de pesquisa excluídos ou em situação irregular no DGP não são considerados nas contagens de grupos ativos.</li>
+                        <li>Na pós-graduação, o ano utilizado é o de ingresso da coorte; desfechos podem ocorrer em anos posteriores.</li>
+                        <li>Status acadêmicos podem variar em granularidade entre exportações e períodos, exigindo agrupamentos para análise executiva.</li>
+                    </ul>
+                </div>
+
+                <div class="modal-section">
+                    <h3>Periodo dos Dados</h3>
+                    <p>Este dashboard apresenta dados históricos desde <strong id="min-year-display">1947</strong> até <strong id="max-year-display">2026</strong>, abrangendo toda a série histórica disponível nas bases de dados do IFBA.</p>
+                    <p>Última atualização processada: <strong id="last-update-modal">não disponível</strong>.</p>
+                    <p id="source-updates-modal">Atualização por fonte: não disponível.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div style="margin-bottom: 1.5rem;">
+            <div style="font-size: 0.85rem; color: #777; margin-bottom: 0.8rem;">
+                Processamento Global: <strong id="last-update-display">...</strong>
+                <span id="source-updates-display" style="display:block; font-size: 0.75rem; color: #888; margin-top: 0.4rem;"></span>
+            </div>
+            <button id="methodology-btn" style="background: #f8f9fa; border: 1px solid #ddd; color: #666; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 0.85rem; transition: all 0.2s;">
+                Metodologia e Fontes
+            </button>
+        </div>
+        <div style="font-size: 0.85rem; color: #999;">
+            © <span id="year"></span> Dashboard PRPGI – Pró-Reitoria de Pesquisa, Pós-Graduação e Inovação – IFBA
+        </div>
+    </footer>
+
+    <script src="src/pesquisadores.js"></script>
+    <script src="src/posgraduacao.js"></script>
+    <script src="src/script.js"></script>
+
+    <!-- Map modal -->
+    <div class="map-modal-overlay" id="map-modal">
+        <div class="map-modal-content">
+            <div class="map-modal-header">
+                <h2 id="map-modal-title">Mapa</h2>
+                <button class="map-modal-close" id="map-modal-close">&times;</button>
+            </div>
+            <div class="map-modal-body">
+                <div id="map-modal-map"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast notification container -->
+    <div id="toast-container" aria-live="polite" aria-atomic="false"></div>
+</body>
+</html>
