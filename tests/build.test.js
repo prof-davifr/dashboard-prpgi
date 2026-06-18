@@ -344,17 +344,17 @@ describe('isDgpGroupsCsv', () => {
 
 describe('selectDgpGroupsCsvFiles', () => {
   const dgpDir = path.join(__dirname, '..', 'dados', 'scraper-DGP');
-  const createdFiles = [];
+  const createdDirs = [];
 
   beforeEach(() => {
     fs.mkdirSync(dgpDir, { recursive: true });
   });
 
   afterEach(() => {
-    createdFiles.forEach(filePath => {
-      if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+    createdDirs.forEach(dir => {
+      if (fs.existsSync(dir)) fs.rmSync(dir, { recursive: true });
     });
-    createdFiles.length = 0;
+    createdDirs.length = 0;
   });
 
   function makeCsv(name, ageMs = 0) {
@@ -362,7 +362,7 @@ describe('selectDgpGroupsCsvFiles', () => {
     fs.mkdirSync(uniqueDir, { recursive: true });
     const filePath = path.join(uniqueDir, name);
     fs.writeFileSync(filePath, 'h1\nh2');
-    createdFiles.push(filePath);
+    createdDirs.push(uniqueDir);
     if (ageMs > 0) {
       const time = new Date(Date.now() - ageMs);
       fs.utimesSync(filePath, time, time);
