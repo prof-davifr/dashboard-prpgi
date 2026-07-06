@@ -10,7 +10,8 @@ const STATE = {
     concluidas: [],
     andamento: [],
     grupos: [],
-    posgraduacao: []
+    posgraduacao: [],
+    ic: []
   },
   filtered: {},
   charts: {},
@@ -94,6 +95,15 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
     if (switchingToPesquisadores) {
       renderChartsPesquisadores();
     }
+  });
+  
+  // Re-render IC charts when IC tab becomes active
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      if ($('tab-ic') && $('tab-ic').classList.contains('active')) {
+        renderChartsIC();
+      }
+    });
   });
 });
 
@@ -221,9 +231,10 @@ function processData() {
   }
 
   const filterPeriodAndCampus = arr => arr.filter(r => {
-    // Year filter (if it has "Ano")
-    if (r["Ano"]) {
-        const y = parseInt(r["Ano"], 10);
+    // Year filter — supports both "Ano" (Lattes) and "ano" (IC)
+    const yearField = r["Ano"] || r.ano;
+    if (yearField) {
+        const y = parseInt(yearField, 10);
         const inPeriod = !isNaN(y) && y >= startYear && y <= endYear;
         if (!inPeriod) return false;
     }
@@ -313,7 +324,8 @@ function processData() {
     concluidas: filterUnique(filterPeriodAndCampus(STATE.raw.concluidas)),
     andamento: filterUnique(filterPeriodAndCampus(STATE.raw.andamento)),
     grupos: filterGroupsCampus(STATE.raw.grupos),
-    posgraduacao: filterPosGraduacao(STATE.raw.posgraduacao)
+    posgraduacao: filterPosGraduacao(STATE.raw.posgraduacao),
+    ic: filterPeriodAndCampus(STATE.raw.ic)
   };
 
 // Main initialization
@@ -329,6 +341,8 @@ function processData() {
   renderChartsPesquisadores();
   renderKPIsOrientacoes();
   renderChartsOrientacoes();
+  renderKPIsIC();
+  renderChartsIC();
   
   // Render tables
   renderTables();
@@ -945,7 +959,8 @@ const MAP_TITLES = {
   'map-inovacao': 'Inovação',
   'map-grupos': 'Grupos de Pesquisa',
   'map-pesquisadores': 'Pesquisadores',
-  'map-orientacoes': 'Orientações'
+  'map-orientacoes': 'Orientações',
+  'map-ic': 'Iniciação Científica'
 };
 
 function openMapModal(sourceMapId) {
@@ -1130,6 +1145,7 @@ async function initDashboard() {
     STATE.raw.andamento = data.andamento || [];
     STATE.raw.grupos = data.grupos || [];
     STATE.raw.posgraduacao = data.posgraduacao || [];
+    STATE.raw.ic = data.ic || [];
 
     // Set period labels from metadata
     if (data.meta) {
@@ -1163,6 +1179,7 @@ async function initDashboard() {
         renderKPIsInovacao();
         renderKPIsOrientacoes();
         renderKPIsPesquisadores();
+        renderKPIsIC();
         renderTables();
       });
     }
@@ -1406,6 +1423,7 @@ function renderTables() {
   renderTableGrupos();
   renderTablePesquisadores();
   renderTableOrientacoes();
+  renderTableIC();
 }
 
 function renderTableCientifica() {
@@ -1478,6 +1496,174 @@ function renderTableGrupos() {
 function renderTableOrientacoes() {
   const allData = [...STATE.filtered.concluidas, ...STATE.filtered.andamento];
   generateCampusYearTable(allData, 'table-orientacoes-content', 'Orientações', true);
+}
+
+// =====================
+// Tab: IC (Iniciação Científica)
+// =====================
+
+function renderKPIsIC() {
+  const data = STATE.filtered.ic;
+  const total = data.length;
+  const bolsistasUnicos = new Set(data.map(r => r.bolsista).filter(Boolean)).size;
+  const orientadoresUnicos = new Set(data.map(r => r.orientador).filter(Boolean)).size;
+  const campiComIC = new Set(data.map(r => r.campus).filter(Boolean)).size;
+  const modais = {};
+  data.forEach(r => {
+    const m = r.modalidade || 'Outra';
+    modais[m] = (modais[m] || 0) + 1;
+  });
+  const modalEntries = Object.entries(modais).sort((a, b) => b[1] - a[1]);
+
+  $('kpi-ic').innerHTML = `
+    <div class="kpi-grid">
+      <div class="kpi-card"><div class="kpi-label">Total de Projetos</div><div class="kpi-value">${total}</div></div>
+      <div class="kpi-card"><div class="kpi-label">Bolsistas Únicos</div><div class="kpi-value">${bolsistasUnicos}</div></div>
+      <div class="kpi-card"><div class="kpi-label">Orientadores Únicos</div><div class="kpi-value">${orientadoresUnicos}</div></div>
+      <div class="kpi-card"><div class="kpi-label">Campi com IC</div><div class="kpi-value">${campiComIC}</div></div>
+    </div>
+    <div class="kpi-grid" style="display:flex;flex-wrap:wrap;justify-content:center;gap:1rem">
+      ${modalEntries.map(([m, c]) => `<div class="kpi-card" style="flex:0 0 auto;min-width:140px"><div class="kpi-label">${m}</div><div class="kpi-value">${c}</div></div>`).join('')}
+    </div>
+  `;
+}
+
+function renderChartsIC() {
+  const data = STATE.filtered.ic;
+
+  // Evolution: projects per year
+  const yearMap = {};
+  data.forEach(r => {
+    const y = r.ano;
+    if (!y) return;
+    yearMap[y] = (yearMap[y] || 0) + 1;
+  });
+  const sortedYears = Object.keys(yearMap).sort();
+  createChart('chart-ic-evolucao', 'bar', {
+    labels: sortedYears,
+    datasets: [{
+      label: 'Projetos de IC',
+      data: sortedYears.map(y => yearMap[y]),
+      backgroundColor: '#4D90FE'
+    }]
+  }, {
+    scales: {
+      x: { ticks: { color: '#555' } },
+      y: { ticks: { color: '#555', beginAtZero: true } }
+    },
+    plugins: {
+      legend: { display: false }
+    }
+  });
+
+  // Pie: modalidade
+  const modalMap = {};
+  data.forEach(r => {
+    const m = r.modalidade || 'Outra';
+    modalMap[m] = (modalMap[m] || 0) + 1;
+  });
+  createChart('chart-ic-modalidade', 'doughnut', {
+    labels: Object.keys(modalMap),
+    datasets: [{
+      data: Object.values(modalMap),
+      backgroundColor: ['#4D90FE', '#F44336', '#4CAF50', '#FFC107', '#9C27B0']
+    }]
+  });
+
+  // Pie: área do conhecimento
+  const areaMap = {};
+  data.forEach(r => {
+    const a = r.area_conhecimento || 'Não informada';
+    areaMap[a] = (areaMap[a] || 0) + 1;
+  });
+  // Aggregate small areas (<2%) into "Outras"
+  const grandTotal = Object.values(areaMap).reduce((s, v) => s + v, 0);
+  const threshold = 0.02 * grandTotal;
+  const smallAreas = new Set();
+  Object.entries(areaMap).forEach(([area, count]) => {
+    if (count < threshold) smallAreas.add(area);
+  });
+  const aggAreaMap = {};
+  Object.entries(areaMap).forEach(([area, count]) => {
+    const key = smallAreas.has(area) ? 'Outras' : area;
+    aggAreaMap[key] = (aggAreaMap[key] || 0) + count;
+  });
+  createChart('chart-ic-area', 'pie', {
+    labels: Object.keys(aggAreaMap),
+    datasets: [{
+      data: Object.values(aggAreaMap),
+      backgroundColor: ['#4D90FE', '#F44336', '#4CAF50', '#FFC107', '#9C27B0', '#00BCD4', '#E91E63', '#FF9800']
+    }]
+  });
+
+  // Pie: fomento
+  const fomentoMap = {};
+  data.forEach(r => {
+    const f = r.fomento || 'Não informado';
+    fomentoMap[f] = (fomentoMap[f] || 0) + 1;
+  });
+  const fomentoTotal = Object.values(fomentoMap).reduce((s, v) => s + v, 0);
+  const fomentoThreshold = 0.02 * fomentoTotal;
+  const smallFomento = new Set();
+  Object.entries(fomentoMap).forEach(([f, c]) => {
+    if (c < fomentoThreshold) smallFomento.add(f);
+  });
+  const aggFomentoMap = {};
+  Object.entries(fomentoMap).forEach(([f, c]) => {
+    const key = smallFomento.has(f) ? 'Outros' : f;
+    aggFomentoMap[key] = (aggFomentoMap[key] || 0) + c;
+  });
+  createChart('chart-ic-fomento', 'doughnut', {
+    labels: Object.keys(aggFomentoMap),
+    datasets: [{
+      data: Object.values(aggFomentoMap),
+      backgroundColor: ['#4D90FE', '#F44336', '#4CAF50', '#FFC107', '#9C27B0', '#00BCD4', '#E91E63', '#FF9800']
+    }]
+  });
+
+  // Map: geographic distribution
+  renderGenericMap(data, 'map-ic', '#FF9800', 'Projetos de IC');
+}
+
+function renderTableIC() {
+  const container = $('table-ic-content');
+  if (!container) return;
+  const data = STATE.filtered.ic;
+  const campusYearData = {};
+  const years = new Set();
+  const campuses = new Set();
+
+  data.forEach(r => {
+    const year = r.ano;
+    const campus = r.campus;
+    if (!year || !campus) return;
+    years.add(year);
+    campuses.add(campus);
+    if (!campusYearData[campus]) campusYearData[campus] = {};
+    campusYearData[campus][year] = (campusYearData[campus][year] || 0) + 1;
+  });
+
+  const sortedYears = Array.from(years).sort();
+  const sortedCampuses = Array.from(campuses).sort();
+
+  let html = '<table class="data-table"><thead><tr><th>Campus</th>';
+  sortedYears.forEach(y => { html += `<th>${y}</th>`; });
+  html += '<th>Total</th></tr></thead><tbody>';
+
+  sortedCampuses.forEach(campus => {
+    const campusName = CAMPUS_TO_CITY[campus] || campus;
+    html += `<tr><td>${campusName} (${campus})</td>`;
+    let total = 0;
+    sortedYears.forEach(year => {
+      const count = campusYearData[campus]?.[year] || 0;
+      total += count;
+      html += `<td>${count}</td>`;
+    });
+    html += `<td><strong>${total}</strong></td></tr>`;
+  });
+
+  html += '</tbody></table>';
+  container.innerHTML = html;
 }
 
 function exportTableToExcel(tableContainerId, filename) {

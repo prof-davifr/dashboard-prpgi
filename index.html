@@ -75,6 +75,7 @@
         <button class="tab-btn" data-target="tab-pesquisadores">Pesquisadores</button>
         <button class="tab-btn" data-target="tab-orientacoes">Orientações</button>
         <button class="tab-btn" data-target="tab-posgraduacao">Pós-Graduação</button>
+        <button class="tab-btn" data-target="tab-ic">Iniciação Científica</button>
     </div>
 
     <!-- Tab 1: Produção Científica -->
@@ -406,6 +407,46 @@
         </div>
     </section>
 
+    <!-- Tab 8: Iniciação Científica -->
+    <section id="tab-ic" class="tab-content">
+        <div class="kpi-grid" id="kpi-ic"></div>
+        <div class="charts-container">
+            <div class="chart-row-full chart-card">
+                <div class="chart-title">Evolução Temporal dos Projetos de IC</div>
+                <div class="chart-wrapper large"><canvas id="chart-ic-evolucao"></canvas></div>
+            </div>
+            <div class="chart-row-split">
+                <div class="chart-card">
+                    <div class="chart-title">Distribuição por Modalidade</div>
+                    <div class="chart-wrapper"><canvas id="chart-ic-modalidade"></canvas></div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-title">Distribuição por Fomento</div>
+                    <div class="chart-wrapper"><canvas id="chart-ic-fomento"></canvas></div>
+                </div>
+            </div>
+            <div class="chart-row-split">
+                <div class="chart-card">
+                    <div class="chart-title">Distribuição por Área do Conhecimento</div>
+                    <div class="chart-wrapper"><canvas id="chart-ic-area"></canvas></div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-title">Distribuição Geográfica</div>
+                    <div class="map-container"><div id="map-ic" style="height: 400px; width: 100%;"></div></div>
+                </div>
+            </div>
+        </div>
+        <div class="table-section">
+            <div class="table-actions">
+                <button class="table-toggle-btn" onclick="toggleTable('table-ic-container', this)">Exibir Tabela Detalhada por Campus/Ano</button>
+                <button class="export-btn" onclick="exportTableToExcel('table-ic-container', 'IC_IFBA')">Exportar para Excel</button>
+            </div>
+            <div id="table-ic-container" class="table-container">
+                <div id="table-ic-content"></div>
+            </div>
+        </div>
+    </section>
+
     <!-- Methodology Modal -->
     <div class="modal-overlay" id="methodology-modal">
         <div class="modal-content">
@@ -441,6 +482,11 @@
                         <strong>Sistema Acadêmico (SUAP/PRPGI)</strong><br>
                         <em>Pós-Graduação</em><br>
                         Dados dos programas de pós-graduação do IFBA, incluindo matrículas, status de alunos e informações sobre cursos de mestrado, doutorado e especialização.
+                    </div>
+                    <div class="data-source-card">
+                        <strong>Planilha Compartilhada (Coordenação de IC/PRPGI)</strong><br>
+                        <em>Iniciação Científica e Tecnológica</em><br>
+                        Dados extraídos da planilha da Plataforma Nilo Peçanha (PNP) contendo os projetos de IC submetidos, organizados por ciclo anual, incluindo orientador, bolsista, modalidade (PIBIC, PIBITI, etc.), campus e fomento.
                     </div>
                 </div>
 

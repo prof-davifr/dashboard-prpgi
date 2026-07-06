@@ -12,7 +12,8 @@ const OUTPUT_GROUPS = path.join(__dirname, 'data-groups.json');
 const SOURCE_LABELS = {
   'scraper-SUAPCNPQ': 'SUAP CNPq (Lattes)',
   'scraper-DGP': 'DGP',
-  'scraper-SUAPPos': 'SUAP Pós-Graduação'
+  'scraper-SUAPPos': 'SUAP Pós-Graduação',
+  'ic': 'IC (Iniciação Científica)'
 };
 
 const SHEET_MAP = {
@@ -199,7 +200,7 @@ function selectDgpGroupsCsvFiles(csvFiles) {
 function main() {
   console.log(' Scanning dados/ for .xlsx and .csv files recursively...');
 
-  const xlsFiles = findFiles(DADOS_DIR, '.xlsx');
+  const xlsFiles = findFiles(DADOS_DIR, '.xlsx').filter(f => getSourceKey(f.filePath) !== 'ic');
   const csvFiles = findFiles(DADOS_DIR, '.csv');
   const dgpCsvSelection = selectDgpGroupsCsvFiles(csvFiles);
 
@@ -232,7 +233,8 @@ function main() {
     concluidas: [],
     andamento: [],
     grupos: [],
-    posgraduacao: []
+    posgraduacao: [],
+    ic: []
   };
 
   // Process XLS files
@@ -455,6 +457,81 @@ function main() {
     }
   }
 
+  // ─── Process IC Excel file ──────────────────────────────────────────────────
+  const icDir = path.join(DADOS_DIR, 'ic');
+  if (fs.existsSync(icDir)) {
+    const icFiles = findFiles(icDir, '.xlsx');
+    const campusMap = {
+      'salvador': 'SSA', 'brumado': 'BRU', 'camaçari': 'CAM', 'camacari': 'CAM',
+      'campo formoso': 'CFO', 'euclides da cunha': 'EC', 'eunápolis': 'EUN', 'eunapolis': 'EUN',
+      'feira de santana': 'FS', 'ilhéus': 'ILH', 'ilheus': 'ILH', 'irecê': 'IRE', 'irece': 'IRE',
+      'jacobina': 'JAC', 'jaguaquara': 'JAG', 'jequié': 'JEQ', 'jequie': 'JEQ',
+      'juazeiro': 'JUA', 'lauro de freitas': 'LF', 'paulo afonso': 'PA',
+      'porto seguro': 'PS', 'santo antônio de jesus': 'SAJ', 'santo antonio de jesus': 'SAJ',
+      'santo amaro': 'SAM', 'seabra': 'SEA', 'simões filho': 'SF', 'simoes filho': 'SF',
+      'ubaitaba': 'UBA', 'valença': 'VAL', 'valenca': 'VAL',
+      'vitória da conquista': 'VC', 'vitoria da conquista': 'VC',
+      'barreiras': 'BAR', 'polo de inovação salvador': 'PIS', 'polo de inovacao salvador': 'PIS',
+      'rei': 'SSA', 'paf': 'PA'
+    };
+    for (const { fileName, filePath } of icFiles) {
+      registerSourceFile(result.meta, filePath, fileName);
+      try {
+        const workbook = XLSX.readFile(filePath);
+        for (const sheetName of workbook.SheetNames) {
+          if (!sheetName.startsWith('Ciclo')) continue;
+          const yearMatch = sheetName.match(/(\d{4})/);
+          const ano = yearMatch ? parseInt(yearMatch[1]) : null;
+          if (!ano) continue;
+          const rows = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName], {
+            raw: false, defval: null, header: 1
+          });
+          // SheetJS header:1 → 0-indexed rows
+          // Row 2: header ("Nº","Orientador","Bolsista","Curso do bolsista","Campus",...)
+          // Row 3+: data
+          // Columns: 0=Nº, 1=Orientador, 2=Bolsista, 3=Curso, 4=Campus,
+          //          5=Título, 6=Área, 7=Modalidade, 8=Titulação, 9=Progresso, 10=Fomento
+          for (let i = 3; i < rows.length; i++) {
+            const row = rows[i];
+            if (!row || !row[1]) continue; // Skip rows without orientador
+            const campusRaw = (row[4] || '').toString().trim();
+            if (!campusRaw) continue;
+            // Normalize campus: check if it's already a code (2-3 letters) or a city name
+            let campusCode = campusRaw.toUpperCase();
+            // Override non-standard codes like REI (Reitoria) and PAF (Paulo Afonso typo)
+            const codeOverride = { 'REI': 'SSA', 'PAF': 'PA' };
+            if (codeOverride[campusCode]) campusCode = codeOverride[campusCode];
+            if (!/^[A-Z]{2,3}$/.test(campusCode)) {
+              const cityKey = campusRaw.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+              campusCode = campusMap[cityKey];
+              if (!campusCode) continue;
+            }
+            if (!result.meta.campuses.includes(campusCode)) {
+              result.meta.campuses.push(campusCode);
+            }
+            if (ano < result.meta.minYear) result.meta.minYear = ano;
+            if (ano > result.meta.maxYear) result.meta.maxYear = ano;
+            result.ic.push({
+              ano,
+              campus: campusCode,
+              orientador: (row[1] || '').toString().trim(),
+              bolsista: (row[2] || '').toString().trim(),
+              curso_bolsista: (row[3] || '').toString().trim(),
+              titulo: (row[5] || '').toString().trim(),
+              area_conhecimento: (row[6] || '').toString().trim(),
+              modalidade: (row[7] || '').toString().trim(),
+              titulacao_orientador: (row[8] || '').toString().trim(),
+              progresso: (row[9] || '').toString().trim(),
+              fomento: (row[10] || '').toString().trim()
+            });
+          }
+        }
+      } catch (e) {
+        console.warn(`     Failed to parse IC file ${fileName}: ${e.message}`);
+      }
+    }
+  }
+
   result.meta.campuses.sort();
 
   // Write data.json (lightweight — for dashboard)
@@ -466,6 +543,7 @@ function main() {
   console.log(`   ${result.bibliografica.length} bibliogrfica, ${result.tecnica.length} tcnica, ${result.inovacao.length} inovao`);
   console.log(`   ${result.concluidas.length} concludas, ${result.andamento.length} andamento, ${result.grupos.length} grupos`);
   console.log(`   ${result.posgraduacao.length} ps-graduao`);
+  console.log(`   ${result.ic.length} IC (Iniciao Cientfica)`);
   console.log(`   Period: ${result.meta.minYear}-${result.meta.maxYear}`);
   console.log(`   Updated at (UTC): ${result.meta.generatedAt}`);
   console.log(`   Campuses: ${result.meta.campuses.join(', ')}`);

@@ -307,6 +307,7 @@ describe('SOURCE_LABELS', () => {
     expect(SOURCE_LABELS['scraper-SUAPCNPQ']).toBeTruthy();
     expect(SOURCE_LABELS['scraper-DGP']).toBeTruthy();
     expect(SOURCE_LABELS['scraper-SUAPPos']).toBeTruthy();
+    expect(SOURCE_LABELS['ic']).toBeTruthy();
   });
 });
 
