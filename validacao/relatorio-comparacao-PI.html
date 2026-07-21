@@ -1,0 +1,5815 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title></title>
+  <style>
+  .markdown-body {
+  --base-size-16: 1rem;
+  --base-size-24: 1.5rem;
+  --base-size-4: 0.25rem;
+  --base-size-40: 2.5rem;
+  --base-size-8: 0.5rem;
+  --base-text-weight-medium: 500;
+  --base-text-weight-normal: 400;
+  --base-text-weight-semibold: 600;
+  --fontStack-monospace: ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas, Liberation Mono, monospace;
+  --fontStack-sansSerif: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+  --fgColor-accent: Highlight;
+}
+@media (prefers-color-scheme: dark) {
+  .markdown-body, [data-theme="dark"] {
+    /*dark */
+    --csstools-color-scheme--light:  ;
+    color-scheme: dark;
+    --fgColor-accent: #4493f8;
+    --bgColor-attention-muted: rgba(187,128,9,0.14902);
+    --bgColor-default: #0d1117;
+    --bgColor-muted: #151b23;
+    --bgColor-neutral-muted: rgba(101,108,118,0.2);
+    --borderColor-accent-emphasis: #1f6feb;
+    --borderColor-attention-emphasis: #9e6a03;
+    --borderColor-danger-emphasis: #da3633;
+    --borderColor-default: #3d444d;
+    --borderColor-done-emphasis: #8957e5;
+    --borderColor-success-emphasis: #238636;
+    --color-prettylights-syntax-brackethighlighter-angle: #9198a1;
+    --color-prettylights-syntax-brackethighlighter-unmatched: #f85149;
+    --color-prettylights-syntax-carriage-return-bg: #b62324;
+    --color-prettylights-syntax-carriage-return-text: #f0f6fc;
+    --color-prettylights-syntax-comment: #9198a1;
+    --color-prettylights-syntax-constant: #79c0ff;
+    --color-prettylights-syntax-constant-other-reference-link: #a5d6ff;
+    --color-prettylights-syntax-entity: #d2a8ff;
+    --color-prettylights-syntax-entity-tag: #7ee787;
+    --color-prettylights-syntax-keyword: #ff7b72;
+    --color-prettylights-syntax-markup-bold: #f0f6fc;
+    --color-prettylights-syntax-markup-changed-bg: #5a1e02;
+    --color-prettylights-syntax-markup-changed-text: #ffdfb6;
+    --color-prettylights-syntax-markup-deleted-bg: #67060c;
+    --color-prettylights-syntax-markup-deleted-text: #ffdcd7;
+    --color-prettylights-syntax-markup-heading: #1f6feb;
+    --color-prettylights-syntax-markup-ignored-bg: #1158c7;
+    --color-prettylights-syntax-markup-ignored-text: #f0f6fc;
+    --color-prettylights-syntax-markup-inserted-bg: #033a16;
+    --color-prettylights-syntax-markup-inserted-text: #aff5b4;
+    --color-prettylights-syntax-markup-italic: #f0f6fc;
+    --color-prettylights-syntax-markup-list: #f2cc60;
+    --color-prettylights-syntax-meta-diff-range: #d2a8ff;
+    --color-prettylights-syntax-storage-modifier-import: #f0f6fc;
+    --color-prettylights-syntax-string: #a5d6ff;
+    --color-prettylights-syntax-string-regexp: #7ee787;
+    --color-prettylights-syntax-sublimelinter-gutter-mark: #3d444d;
+    --color-prettylights-syntax-variable: #ffa657;
+    --fgColor-attention: #d29922;
+    --fgColor-danger: #f85149;
+    --fgColor-default: #f0f6fc;
+    --fgColor-done: #ab7df8;
+    --fgColor-muted: #9198a1;
+    --fgColor-success: #3fb950;
+    --borderColor-muted: rgba(61,68,77,0.70196);
+    --color-prettylights-syntax-invalid-illegal-bg: var(--bgColor-danger-muted);
+    --color-prettylights-syntax-invalid-illegal-text: var(--fgColor-danger);
+    --focus-outlineColor: var(--borderColor-accent-emphasis);
+    --borderColor-neutral-muted: var(--borderColor-muted);
+  }
+}
+@media (prefers-color-scheme: light) {
+  .markdown-body, [data-theme="light"] {
+    /*light */
+    --csstools-color-scheme--light: initial;
+    color-scheme: light;
+    --fgColor-danger: #d1242f;
+    --bgColor-attention-muted: #fff8c5;
+    --bgColor-muted: #f6f8fa;
+    --bgColor-neutral-muted: rgba(129,139,152,0.12157);
+    --borderColor-accent-emphasis: #0969da;
+    --borderColor-attention-emphasis: #9a6700;
+    --borderColor-danger-emphasis: #cf222e;
+    --borderColor-default: #d1d9e0;
+    --borderColor-done-emphasis: #8250df;
+    --borderColor-success-emphasis: #1a7f37;
+    --color-prettylights-syntax-brackethighlighter-angle: #59636e;
+    --color-prettylights-syntax-brackethighlighter-unmatched: #82071e;
+    --color-prettylights-syntax-carriage-return-bg: #cf222e;
+    --color-prettylights-syntax-carriage-return-text: #f6f8fa;
+    --color-prettylights-syntax-comment: #59636e;
+    --color-prettylights-syntax-constant: #0550ae;
+    --color-prettylights-syntax-constant-other-reference-link: #0a3069;
+    --color-prettylights-syntax-entity: #6639ba;
+    --color-prettylights-syntax-entity-tag: #0550ae;
+    --color-prettylights-syntax-invalid-illegal-text: var(--fgColor-danger);
+    --color-prettylights-syntax-keyword: #cf222e;
+    --color-prettylights-syntax-markup-changed-bg: #ffd8b5;
+    --color-prettylights-syntax-markup-changed-text: #953800;
+    --color-prettylights-syntax-markup-deleted-bg: #ffebe9;
+    --color-prettylights-syntax-markup-deleted-text: #82071e;
+    --color-prettylights-syntax-markup-heading: #0550ae;
+    --color-prettylights-syntax-markup-ignored-bg: #0550ae;
+    --color-prettylights-syntax-markup-ignored-text: #d1d9e0;
+    --color-prettylights-syntax-markup-inserted-bg: #dafbe1;
+    --color-prettylights-syntax-markup-inserted-text: #116329;
+    --color-prettylights-syntax-markup-list: #3b2300;
+    --color-prettylights-syntax-meta-diff-range: #8250df;
+    --color-prettylights-syntax-string: #0a3069;
+    --color-prettylights-syntax-string-regexp: #116329;
+    --color-prettylights-syntax-sublimelinter-gutter-mark: #818b98;
+    --color-prettylights-syntax-variable: #953800;
+    --fgColor-accent: #0969da;
+    --fgColor-attention: #9a6700;
+    --fgColor-done: #8250df;
+    --fgColor-muted: #59636e;
+    --fgColor-success: #1a7f37;
+    --bgColor-default: #ffffff;
+    --borderColor-muted: rgba(209,217,224,0.70196);
+    --color-prettylights-syntax-invalid-illegal-bg: var(--bgColor-danger-muted);
+    --color-prettylights-syntax-markup-bold: #1f2328;
+    --color-prettylights-syntax-markup-italic: #1f2328;
+    --color-prettylights-syntax-storage-modifier-import: #1f2328;
+    --fgColor-default: #1f2328;
+    --focus-outlineColor: var(--borderColor-accent-emphasis);
+    --borderColor-neutral-muted: var(--borderColor-muted);
+  }
+}
+
+.markdown-body {
+  /** CSS default easing. Use for hover state changes and micro-interactions. */
+  /** Accelerating motion. Use for elements exiting the viewport (moving off-screen). */
+  /** Smooth acceleration and deceleration. Use for elements moving or morphing within the viewport. */
+  /** Decelerating motion. Use for elements entering the viewport or appearing on screen. */
+  /** Constant motion with no acceleration. Use for continuous animations like progress bars or loaders. */
+  -ms-text-size-adjust: 100%;
+  -webkit-text-size-adjust: 100%;
+  margin: 0;
+  font-weight: 400;
+  font-weight: var(--base-text-weight-normal, 400);
+  color: var(--fgColor-default);
+  background-color: var(--bgColor-default);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+  font-family: var(--fontStack-sansSerif, -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji");
+  font-size: 16px;
+  line-height: 1.5;
+  word-wrap: break-word;
+}
+
+.markdown-body a {
+  -webkit-text-decoration: underline;
+  text-decoration: underline;
+  text-underline-offset: .2rem;
+}
+
+.markdown-body .octicon {
+  display: inline-block;
+  fill: currentColor;
+  vertical-align: text-bottom;
+}
+
+.markdown-body h1:hover .anchor .octicon-link:before,
+.markdown-body h2:hover .anchor .octicon-link:before,
+.markdown-body h3:hover .anchor .octicon-link:before,
+.markdown-body h4:hover .anchor .octicon-link:before,
+.markdown-body h5:hover .anchor .octicon-link:before,
+.markdown-body h6:hover .anchor .octicon-link:before {
+  width: 16px;
+  height: 16px;
+  content: ' ';
+  display: inline-block;
+  background-color: currentColor;
+  -webkit-mask-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' version='1.1' aria-hidden='true'><path fill-rule='evenodd' d='M7.775 3.275a.75.75 0 001.06 1.06l1.25-1.25a2 2 0 112.83 2.83l-2.5 2.5a2 2 0 01-2.83 0 .75.75 0 00-1.06 1.06 3.5 3.5 0 004.95 0l2.5-2.5a3.5 3.5 0 00-4.95-4.95l-1.25 1.25zm-4.69 9.64a2 2 0 010-2.83l2.5-2.5a2 2 0 012.83 0 .75.75 0 001.06-1.06 3.5 3.5 0 00-4.95 0l-2.5 2.5a3.5 3.5 0 004.95 4.95l1.25-1.25a.75.75 0 00-1.06-1.06l-1.25 1.25a2 2 0 01-2.83 0z'></path></svg>");
+  mask-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' version='1.1' aria-hidden='true'><path fill-rule='evenodd' d='M7.775 3.275a.75.75 0 001.06 1.06l1.25-1.25a2 2 0 112.83 2.83l-2.5 2.5a2 2 0 01-2.83 0 .75.75 0 00-1.06 1.06 3.5 3.5 0 004.95 0l2.5-2.5a3.5 3.5 0 00-4.95-4.95l-1.25 1.25zm-4.69 9.64a2 2 0 010-2.83l2.5-2.5a2 2 0 012.83 0 .75.75 0 001.06-1.06 3.5 3.5 0 00-4.95 0l-2.5 2.5a3.5 3.5 0 004.95 4.95l1.25-1.25a.75.75 0 00-1.06-1.06l-1.25 1.25a2 2 0 01-2.83 0z'></path></svg>");
+}
+
+.markdown-body details,
+.markdown-body figcaption,
+.markdown-body figure {
+  display: block;
+}
+
+.markdown-body summary {
+  display: list-item;
+}
+
+.markdown-body [hidden] {
+  display: none !important;
+}
+
+.markdown-body a {
+  background-color: rgba(0,0,0,0);
+  color: var(--fgColor-accent);
+  -webkit-text-decoration: none;
+  text-decoration: none;
+}
+
+.markdown-body abbr[title] {
+  border-bottom: none;
+  -webkit-text-decoration: underline dotted;
+  text-decoration: underline;
+  text-decoration: underline dotted;
+}
+
+.markdown-body b,
+.markdown-body strong {
+  font-weight: 600;
+  font-weight: var(--base-text-weight-semibold, 600);
+}
+
+.markdown-body dfn {
+  font-style: italic;
+}
+
+.markdown-body h1 {
+  margin: .67em 0;
+  font-weight: 600;
+  font-weight: var(--base-text-weight-semibold, 600);
+  padding-bottom: .3em;
+  font-size: 2em;
+  border-bottom: 1px solid var(--borderColor-muted);
+}
+
+.markdown-body mark {
+  background-color: var(--bgColor-attention-muted);
+  color: var(--fgColor-default);
+}
+
+.markdown-body small {
+  font-size: 90%;
+}
+
+.markdown-body sub,
+.markdown-body sup {
+  font-size: 75%;
+  line-height: 0;
+  position: relative;
+  vertical-align: baseline;
+}
+
+.markdown-body sub {
+  bottom: -0.25em;
+}
+
+.markdown-body sup {
+  top: -0.5em;
+}
+
+.markdown-body img {
+  border-style: none;
+  max-width: 100%;
+  box-sizing: content-box;
+}
+
+.markdown-body code,
+.markdown-body kbd,
+.markdown-body pre,
+.markdown-body samp {
+  font-family: monospace;
+  font-size: 1em;
+}
+
+.markdown-body figure {
+  margin: 1em var(--base-size-40);
+}
+
+.markdown-body hr {
+  box-sizing: content-box;
+  overflow: hidden;
+  background: rgba(0,0,0,0);
+  border-bottom: 1px solid var(--borderColor-muted);
+  height: .25em;
+  padding: 0;
+  margin: var(--base-size-24) 0;
+  background-color: var(--borderColor-default);
+  border: 0;
+}
+
+.markdown-body input {
+  font: inherit;
+  margin: 0;
+  overflow: visible;
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+}
+
+.markdown-body [type=button],
+.markdown-body [type=reset],
+.markdown-body [type=submit] {
+  -webkit-appearance: button;
+  -moz-appearance: button;
+       appearance: button;
+}
+
+.markdown-body [type=checkbox],
+.markdown-body [type=radio] {
+  box-sizing: border-box;
+  padding: 0;
+}
+
+.markdown-body [type=number]::-webkit-inner-spin-button,
+.markdown-body [type=number]::-webkit-outer-spin-button {
+  height: auto;
+}
+
+.markdown-body [type=search]::-webkit-search-cancel-button,
+.markdown-body [type=search]::-webkit-search-decoration {
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.markdown-body ::-webkit-input-placeholder {
+  color: inherit;
+  opacity: .54;
+}
+
+.markdown-body ::-webkit-file-upload-button {
+  -webkit-appearance: button;
+  appearance: button;
+  font: inherit;
+}
+
+.markdown-body a:hover {
+  -webkit-text-decoration: underline;
+  text-decoration: underline;
+}
+
+.markdown-body ::-moz-placeholder {
+  color: var(--fgColor-muted);
+  opacity: 1;
+}
+
+.markdown-body ::placeholder {
+  color: var(--fgColor-muted);
+  opacity: 1;
+}
+
+.markdown-body hr::before {
+  display: table;
+  content: "";
+}
+
+.markdown-body hr::after {
+  display: table;
+  clear: both;
+  content: "";
+}
+
+.markdown-body table {
+  border-spacing: 0;
+  border-collapse: collapse;
+  display: block;
+  width: -moz-max-content;
+  width: max-content;
+  max-width: 100%;
+  overflow: auto;
+  font-feature-settings: "tnum";
+  font-variant: tabular-nums;
+}
+
+.markdown-body td,
+.markdown-body th {
+  padding: 0;
+}
+
+.markdown-body details summary {
+  cursor: pointer;
+}
+
+.markdown-body a:focus,
+.markdown-body [role=button]:focus,
+.markdown-body input[type=radio]:focus,
+.markdown-body input[type=checkbox]:focus {
+  outline: 2px solid var(--focus-outlineColor);
+  outline-offset: -2px;
+  box-shadow: none;
+}
+
+.markdown-body a:focus:not(:focus-visible),
+.markdown-body [role=button]:focus:not(:focus-visible),
+.markdown-body input[type=radio]:focus:not(:focus-visible),
+.markdown-body input[type=checkbox]:focus:not(:focus-visible) {
+  outline: solid 1px rgba(0,0,0,0);
+}
+
+.markdown-body a:focus-visible,
+.markdown-body [role=button]:focus-visible,
+.markdown-body input[type=radio]:focus-visible,
+.markdown-body input[type=checkbox]:focus-visible {
+  outline: 2px solid var(--focus-outlineColor);
+  outline-offset: -2px;
+  box-shadow: none;
+}
+
+.markdown-body a:not([class]):focus,
+.markdown-body a:not([class]):focus-visible,
+.markdown-body input[type=radio]:focus,
+.markdown-body input[type=radio]:focus-visible,
+.markdown-body input[type=checkbox]:focus,
+.markdown-body input[type=checkbox]:focus-visible {
+  outline-offset: 0;
+}
+
+.markdown-body kbd {
+  display: inline-block;
+  padding: var(--base-size-4);
+  font: 11px ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas, Liberation Mono, monospace;
+  font: 11px var(--fontStack-monospace, ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas, Liberation Mono, monospace);
+  line-height: 10px;
+  color: var(--fgColor-default);
+  vertical-align: middle;
+  background-color: var(--bgColor-muted);
+  border: solid 1px var(--borderColor-neutral-muted);
+  border-bottom-color: var(--borderColor-neutral-muted);
+  border-radius: 6px;
+  box-shadow: inset 0 -1px 0 var(--borderColor-neutral-muted);
+}
+
+.markdown-body h1,
+.markdown-body h2,
+.markdown-body h3,
+.markdown-body h4,
+.markdown-body h5,
+.markdown-body h6 {
+  margin-top: var(--base-size-24);
+  margin-bottom: var(--base-size-16);
+  font-weight: 600;
+  font-weight: var(--base-text-weight-semibold, 600);
+  line-height: 1.25;
+}
+
+.markdown-body h2 {
+  font-weight: 600;
+  font-weight: var(--base-text-weight-semibold, 600);
+  padding-bottom: .3em;
+  font-size: 1.5em;
+  border-bottom: 1px solid var(--borderColor-muted);
+}
+
+.markdown-body h3 {
+  font-weight: 600;
+  font-weight: var(--base-text-weight-semibold, 600);
+  font-size: 1.25em;
+}
+
+.markdown-body h4 {
+  font-weight: 600;
+  font-weight: var(--base-text-weight-semibold, 600);
+  font-size: 1em;
+}
+
+.markdown-body h5 {
+  font-weight: 600;
+  font-weight: var(--base-text-weight-semibold, 600);
+  font-size: .875em;
+}
+
+.markdown-body h6 {
+  font-weight: 600;
+  font-weight: var(--base-text-weight-semibold, 600);
+  font-size: .85em;
+  color: var(--fgColor-muted);
+}
+
+.markdown-body p {
+  margin-top: 0;
+  margin-bottom: 10px;
+}
+
+.markdown-body blockquote {
+  margin: 0;
+  padding: 0 1em;
+  color: var(--fgColor-muted);
+  border-left: .25em solid var(--borderColor-default);
+}
+
+.markdown-body ul,
+.markdown-body ol {
+  margin-top: 0;
+  margin-bottom: 0;
+  padding-left: 2em;
+}
+
+.markdown-body ol ol,
+.markdown-body ul ol {
+  list-style-type: lower-roman;
+}
+
+.markdown-body ul ul ol,
+.markdown-body ul ol ol,
+.markdown-body ol ul ol,
+.markdown-body ol ol ol {
+  list-style-type: lower-alpha;
+}
+
+.markdown-body dd {
+  margin-left: 0;
+}
+
+.markdown-body tt,
+.markdown-body code,
+.markdown-body samp {
+  font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas, Liberation Mono, monospace;
+  font-family: var(--fontStack-monospace, ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas, Liberation Mono, monospace);
+  font-size: 12px;
+}
+
+.markdown-body pre {
+  margin-top: 0;
+  margin-bottom: 0;
+  font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas, Liberation Mono, monospace;
+  font-family: var(--fontStack-monospace, ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas, Liberation Mono, monospace);
+  font-size: 12px;
+  word-wrap: normal;
+}
+
+.markdown-body .octicon {
+  display: inline-block;
+  overflow: visible !important;
+  vertical-align: text-bottom;
+  fill: currentColor;
+}
+
+.markdown-body input::-webkit-outer-spin-button,
+.markdown-body input::-webkit-inner-spin-button {
+  margin: 0;
+  -webkit-appearance: none;
+          appearance: none;
+}
+
+.markdown-body .mr-2 {
+  margin-right: 8px !important;
+  margin-right: var(--base-size-8, 8px) !important;
+}
+
+.markdown-body::before {
+  display: table;
+  content: "";
+}
+
+.markdown-body::after {
+  display: table;
+  clear: both;
+  content: "";
+}
+
+.markdown-body>*:first-child {
+  margin-top: 0 !important;
+}
+
+.markdown-body>*:last-child {
+  margin-bottom: 0 !important;
+}
+
+.markdown-body a:not([href]) {
+  color: inherit;
+  -webkit-text-decoration: none;
+  text-decoration: none;
+}
+
+.markdown-body .absent {
+  color: var(--fgColor-danger);
+}
+
+.markdown-body .anchor {
+  float: left;
+  padding-right: var(--base-size-4);
+  margin-left: -20px;
+  line-height: 1;
+}
+
+.markdown-body .anchor:focus {
+  outline: none;
+}
+
+.markdown-body p,
+.markdown-body blockquote,
+.markdown-body ul,
+.markdown-body ol,
+.markdown-body dl,
+.markdown-body table,
+.markdown-body pre,
+.markdown-body details {
+  margin-top: 0;
+  margin-bottom: var(--base-size-16);
+}
+
+.markdown-body blockquote>:first-child {
+  margin-top: 0;
+}
+
+.markdown-body blockquote>:last-child {
+  margin-bottom: 0;
+}
+
+.markdown-body h1 .octicon-link,
+.markdown-body h2 .octicon-link,
+.markdown-body h3 .octicon-link,
+.markdown-body h4 .octicon-link,
+.markdown-body h5 .octicon-link,
+.markdown-body h6 .octicon-link {
+  color: var(--fgColor-default);
+  vertical-align: middle;
+  visibility: hidden;
+}
+
+.markdown-body h1:hover .anchor,
+.markdown-body h2:hover .anchor,
+.markdown-body h3:hover .anchor,
+.markdown-body h4:hover .anchor,
+.markdown-body h5:hover .anchor,
+.markdown-body h6:hover .anchor {
+  -webkit-text-decoration: none;
+  text-decoration: none;
+}
+
+.markdown-body h1:hover .anchor .octicon-link,
+.markdown-body h2:hover .anchor .octicon-link,
+.markdown-body h3:hover .anchor .octicon-link,
+.markdown-body h4:hover .anchor .octicon-link,
+.markdown-body h5:hover .anchor .octicon-link,
+.markdown-body h6:hover .anchor .octicon-link {
+  visibility: visible;
+}
+
+.markdown-body h1 tt,
+.markdown-body h1 code,
+.markdown-body h2 tt,
+.markdown-body h2 code,
+.markdown-body h3 tt,
+.markdown-body h3 code,
+.markdown-body h4 tt,
+.markdown-body h4 code,
+.markdown-body h5 tt,
+.markdown-body h5 code,
+.markdown-body h6 tt,
+.markdown-body h6 code {
+  padding: 0 .2em;
+  font-size: inherit;
+}
+
+.markdown-body summary h1,
+.markdown-body summary h2,
+.markdown-body summary h3,
+.markdown-body summary h4,
+.markdown-body summary h5,
+.markdown-body summary h6 {
+  display: inline-block;
+}
+
+.markdown-body summary h1 .anchor,
+.markdown-body summary h2 .anchor,
+.markdown-body summary h3 .anchor,
+.markdown-body summary h4 .anchor,
+.markdown-body summary h5 .anchor,
+.markdown-body summary h6 .anchor {
+  margin-left: -40px;
+}
+
+.markdown-body summary h1,
+.markdown-body summary h2 {
+  padding-bottom: 0;
+  border-bottom: 0;
+}
+
+.markdown-body ul.no-list,
+.markdown-body ol.no-list {
+  padding: 0;
+  list-style-type: none;
+}
+
+.markdown-body ol[type="a s"] {
+  list-style-type: lower-alpha;
+}
+
+.markdown-body ol[type="A s"] {
+  list-style-type: upper-alpha;
+}
+
+.markdown-body ol[type="i s"] {
+  list-style-type: lower-roman;
+}
+
+.markdown-body ol[type="I s"] {
+  list-style-type: upper-roman;
+}
+
+.markdown-body ol[type="1"] {
+  list-style-type: decimal;
+}
+
+.markdown-body div>ol:not([type]) {
+  list-style-type: decimal;
+}
+
+.markdown-body ul ul,
+.markdown-body ul ol,
+.markdown-body ol ol,
+.markdown-body ol ul {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.markdown-body li>p {
+  margin-top: var(--base-size-16);
+}
+
+.markdown-body li+li {
+  margin-top: .25em;
+}
+
+.markdown-body dl {
+  padding: 0;
+}
+
+.markdown-body dl dt {
+  padding: 0;
+  margin-top: var(--base-size-16);
+  font-size: 1em;
+  font-style: italic;
+  font-weight: 600;
+  font-weight: var(--base-text-weight-semibold, 600);
+}
+
+.markdown-body dl dd {
+  padding: 0 var(--base-size-16);
+  margin-bottom: var(--base-size-16);
+}
+
+.markdown-body table th {
+  font-weight: 600;
+  font-weight: var(--base-text-weight-semibold, 600);
+}
+
+.markdown-body table th,
+.markdown-body table td {
+  padding: 6px 13px;
+  border: 1px solid var(--borderColor-default);
+}
+
+.markdown-body table td>:last-child {
+  margin-bottom: 0;
+}
+
+.markdown-body table tr {
+  background-color: var(--bgColor-default);
+  border-top: 1px solid var(--borderColor-muted);
+}
+
+.markdown-body table tr:nth-child(2n) {
+  background-color: var(--bgColor-muted);
+}
+
+.markdown-body table img {
+  background-color: rgba(0,0,0,0);
+}
+
+.markdown-body img[align=right] {
+  padding-left: 20px;
+}
+
+.markdown-body img[align=left] {
+  padding-right: 20px;
+}
+
+.markdown-body .emoji {
+  max-width: none;
+  vertical-align: text-top;
+  background-color: rgba(0,0,0,0);
+}
+
+.markdown-body span.frame {
+  display: block;
+  overflow: hidden;
+}
+
+.markdown-body span.frame>span {
+  display: block;
+  float: left;
+  width: auto;
+  padding: 7px;
+  margin: 13px 0 0;
+  overflow: hidden;
+  border: 1px solid var(--borderColor-default);
+}
+
+.markdown-body span.frame span img {
+  display: block;
+  float: left;
+}
+
+.markdown-body span.frame span span {
+  display: block;
+  padding: 5px 0 0;
+  clear: both;
+  color: var(--fgColor-default);
+}
+
+.markdown-body span.align-center {
+  display: block;
+  overflow: hidden;
+  clear: both;
+}
+
+.markdown-body span.align-center>span {
+  display: block;
+  margin: 13px auto 0;
+  overflow: hidden;
+  text-align: center;
+}
+
+.markdown-body span.align-center span img {
+  margin: 0 auto;
+  text-align: center;
+}
+
+.markdown-body span.align-right {
+  display: block;
+  overflow: hidden;
+  clear: both;
+}
+
+.markdown-body span.align-right>span {
+  display: block;
+  margin: 13px 0 0;
+  overflow: hidden;
+  text-align: right;
+}
+
+.markdown-body span.align-right span img {
+  margin: 0;
+  text-align: right;
+}
+
+.markdown-body span.float-left {
+  display: block;
+  float: left;
+  margin-right: 13px;
+  overflow: hidden;
+}
+
+.markdown-body span.float-left span {
+  margin: 13px 0 0;
+}
+
+.markdown-body span.float-right {
+  display: block;
+  float: right;
+  margin-left: 13px;
+  overflow: hidden;
+}
+
+.markdown-body span.float-right>span {
+  display: block;
+  margin: 13px auto 0;
+  overflow: hidden;
+  text-align: right;
+}
+
+.markdown-body code,
+.markdown-body tt {
+  padding: .2em .4em;
+  margin: 0;
+  font-size: 85%;
+  white-space: break-spaces;
+  background-color: var(--bgColor-neutral-muted);
+  border-radius: 6px;
+}
+
+.markdown-body code br,
+.markdown-body tt br {
+  display: none;
+}
+
+.markdown-body del code {
+  text-decoration: inherit;
+}
+
+.markdown-body samp {
+  font-size: 85%;
+}
+
+.markdown-body pre code {
+  font-size: 100%;
+}
+
+.markdown-body pre>code {
+  padding: 0;
+  margin: 0;
+  word-break: normal;
+  white-space: pre;
+  background: rgba(0,0,0,0);
+  border: 0;
+}
+
+.markdown-body .highlight {
+  margin-bottom: var(--base-size-16);
+}
+
+.markdown-body .highlight pre {
+  margin-bottom: 0;
+  word-break: normal;
+}
+
+.markdown-body .highlight pre,
+.markdown-body pre {
+  padding: var(--base-size-16);
+  overflow: auto;
+  font-size: 85%;
+  line-height: 1.45;
+  color: var(--fgColor-default);
+  background-color: var(--bgColor-muted);
+  border-radius: 6px;
+}
+
+.markdown-body pre code,
+.markdown-body pre tt {
+  display: inline;
+  padding: 0;
+  margin: 0;
+  overflow: visible;
+  line-height: inherit;
+  word-wrap: normal;
+  background-color: rgba(0,0,0,0);
+  border: 0;
+}
+
+.markdown-body .csv-data td,
+.markdown-body .csv-data th {
+  padding: 5px;
+  overflow: hidden;
+  font-size: 12px;
+  line-height: 1;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.markdown-body .csv-data .blob-num {
+  padding: 10px var(--base-size-8) 9px;
+  text-align: right;
+  background: var(--bgColor-default);
+  border: 0;
+}
+
+.markdown-body .csv-data tr {
+  border-top: 0;
+}
+
+.markdown-body .csv-data th {
+  font-weight: 600;
+  font-weight: var(--base-text-weight-semibold, 600);
+  background: var(--bgColor-muted);
+  border-top: 0;
+}
+
+.markdown-body [data-footnote-ref]::before {
+  content: "[";
+}
+
+.markdown-body [data-footnote-ref]::after {
+  content: "]";
+}
+
+.markdown-body .footnotes {
+  font-size: 12px;
+  color: var(--fgColor-muted);
+  border-top: 1px solid var(--borderColor-default);
+}
+
+.markdown-body .footnotes ol {
+  padding-left: var(--base-size-16);
+}
+
+.markdown-body .footnotes ol ul {
+  display: inline-block;
+  padding-left: var(--base-size-16);
+  margin-top: var(--base-size-16);
+}
+
+.markdown-body .footnotes li {
+  position: relative;
+}
+
+.markdown-body .footnotes li:target::before {
+  position: absolute;
+  top: calc(var(--base-size-8)*-1);
+  right: calc(var(--base-size-8)*-1);
+  bottom: calc(var(--base-size-8)*-1);
+  left: calc(var(--base-size-24)*-1);
+  pointer-events: none;
+  content: "";
+  border: 2px solid var(--borderColor-accent-emphasis);
+  border-radius: 6px;
+}
+
+.markdown-body .footnotes li:target {
+  color: var(--fgColor-default);
+}
+
+.markdown-body .footnotes .data-footnote-backref g-emoji {
+  font-family: monospace;
+}
+
+.markdown-body .pl-c {
+  color: var(--color-prettylights-syntax-comment);
+}
+
+.markdown-body .pl-c1,
+.markdown-body .pl-s .pl-v {
+  color: var(--color-prettylights-syntax-constant);
+}
+
+.markdown-body .pl-e,
+.markdown-body .pl-en {
+  color: var(--color-prettylights-syntax-entity);
+}
+
+.markdown-body .pl-smi,
+.markdown-body .pl-s .pl-s1 {
+  color: var(--color-prettylights-syntax-storage-modifier-import);
+}
+
+.markdown-body .pl-ent {
+  color: var(--color-prettylights-syntax-entity-tag);
+}
+
+.markdown-body .pl-k {
+  color: var(--color-prettylights-syntax-keyword);
+}
+
+.markdown-body .pl-s,
+.markdown-body .pl-pds,
+.markdown-body .pl-s .pl-pse .pl-s1,
+.markdown-body .pl-sr,
+.markdown-body .pl-sr .pl-cce,
+.markdown-body .pl-sr .pl-sre,
+.markdown-body .pl-sr .pl-sra {
+  color: var(--color-prettylights-syntax-string);
+}
+
+.markdown-body .pl-v,
+.markdown-body .pl-smw {
+  color: var(--color-prettylights-syntax-variable);
+}
+
+.markdown-body .pl-bu {
+  color: var(--color-prettylights-syntax-brackethighlighter-unmatched);
+}
+
+.markdown-body .pl-ii {
+  color: var(--color-prettylights-syntax-invalid-illegal-text);
+  background-color: var(--color-prettylights-syntax-invalid-illegal-bg);
+}
+
+.markdown-body .pl-c2 {
+  color: var(--color-prettylights-syntax-carriage-return-text);
+  background-color: var(--color-prettylights-syntax-carriage-return-bg);
+}
+
+.markdown-body .pl-sr .pl-cce {
+  font-weight: bold;
+  color: var(--color-prettylights-syntax-string-regexp);
+}
+
+.markdown-body .pl-ml {
+  color: var(--color-prettylights-syntax-markup-list);
+}
+
+.markdown-body .pl-mh,
+.markdown-body .pl-mh .pl-en,
+.markdown-body .pl-ms {
+  font-weight: bold;
+  color: var(--color-prettylights-syntax-markup-heading);
+}
+
+.markdown-body .pl-mi {
+  font-style: italic;
+  color: var(--color-prettylights-syntax-markup-italic);
+}
+
+.markdown-body .pl-mb {
+  font-weight: bold;
+  color: var(--color-prettylights-syntax-markup-bold);
+}
+
+.markdown-body .pl-md {
+  color: var(--color-prettylights-syntax-markup-deleted-text);
+  background-color: var(--color-prettylights-syntax-markup-deleted-bg);
+}
+
+.markdown-body .pl-mi1 {
+  color: var(--color-prettylights-syntax-markup-inserted-text);
+  background-color: var(--color-prettylights-syntax-markup-inserted-bg);
+}
+
+.markdown-body .pl-mc {
+  color: var(--color-prettylights-syntax-markup-changed-text);
+  background-color: var(--color-prettylights-syntax-markup-changed-bg);
+}
+
+.markdown-body .pl-mi2 {
+  color: var(--color-prettylights-syntax-markup-ignored-text);
+  background-color: var(--color-prettylights-syntax-markup-ignored-bg);
+}
+
+.markdown-body .pl-mdr {
+  font-weight: bold;
+  color: var(--color-prettylights-syntax-meta-diff-range);
+}
+
+.markdown-body .pl-ba {
+  color: var(--color-prettylights-syntax-brackethighlighter-angle);
+}
+
+.markdown-body .pl-sg {
+  color: var(--color-prettylights-syntax-sublimelinter-gutter-mark);
+}
+
+.markdown-body .pl-corl {
+  -webkit-text-decoration: underline;
+  text-decoration: underline;
+  color: var(--color-prettylights-syntax-constant-other-reference-link);
+}
+
+.markdown-body [role=button]:focus:not(:focus-visible),
+.markdown-body [role=tabpanel][tabindex="0"]:focus:not(:focus-visible),
+.markdown-body button:focus:not(:focus-visible),
+.markdown-body summary:focus:not(:focus-visible),
+.markdown-body a:focus:not(:focus-visible) {
+  outline: none;
+  box-shadow: none;
+}
+
+.markdown-body [tabindex="0"]:focus:not(:focus-visible),
+.markdown-body details-dialog:focus:not(:focus-visible) {
+  outline: none;
+}
+
+.markdown-body g-emoji {
+  display: inline-block;
+  min-width: 1ch;
+  font-family: "Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol";
+  font-size: 1em;
+  font-style: normal !important;
+  font-weight: 400;
+  font-weight: var(--base-text-weight-normal, 400);
+  line-height: 1;
+  vertical-align: -0.075em;
+}
+
+.markdown-body g-emoji img {
+  width: 1em;
+  height: 1em;
+}
+
+.markdown-body a:has(>p,>div,>pre,>blockquote) {
+  display: block;
+}
+
+.markdown-body a:has(>p,>div,>pre,>blockquote):not(:has(.snippet-clipboard-content,>pre)) {
+  width: -moz-fit-content;
+  width: fit-content;
+}
+
+.markdown-body a:has(>p,>div,>pre,>blockquote):has(.snippet-clipboard-content,>pre):focus-visible {
+  outline: 2px solid var(--focus-outlineColor);
+  outline-offset: 2px;
+}
+
+.markdown-body .task-list-item {
+  list-style-type: none;
+}
+
+.markdown-body .task-list-item label {
+  font-weight: 400;
+  font-weight: var(--base-text-weight-normal, 400);
+}
+
+.markdown-body .task-list-item.enabled label {
+  cursor: pointer;
+}
+
+.markdown-body .task-list-item+.task-list-item {
+  margin-top: var(--base-size-4);
+}
+
+.markdown-body .task-list-item .handle {
+  display: none;
+}
+
+.markdown-body .task-list-item-checkbox {
+  margin: 0 .2em .25em -1.4em;
+  vertical-align: middle;
+}
+
+[dir="rtl"] .markdown-body ul .task-list-item-checkbox {
+  margin: 0 -1.6em .25em .2em;
+}
+
+[dir="rtl"] .markdown-body ol .task-list-item-checkbox {
+  margin: 0 -1.6em .25em .2em;
+}
+
+.markdown-body .contains-task-list:hover .task-list-item-convert-container,
+.markdown-body .contains-task-list:focus-within .task-list-item-convert-container {
+  display: block;
+  width: auto;
+  height: 24px;
+  overflow: visible;
+  clip-path: none;
+}
+
+.markdown-body ::-webkit-calendar-picker-indicator {
+  filter: invert(50%);
+}
+
+.markdown-body .markdown-alert {
+  padding: var(--base-size-8) var(--base-size-16);
+  margin-bottom: var(--base-size-16);
+  color: inherit;
+  border-left: .25em solid var(--borderColor-default);
+}
+
+.markdown-body .markdown-alert>:first-child {
+  margin-top: 0;
+}
+
+.markdown-body .markdown-alert>:last-child {
+  margin-bottom: 0;
+}
+
+.markdown-body .markdown-alert .markdown-alert-title {
+  display: flex;
+  font-weight: 500;
+  font-weight: var(--base-text-weight-medium, 500);
+  align-items: center;
+  line-height: 1;
+}
+
+.markdown-body .markdown-alert.markdown-alert-note {
+  border-left-color: var(--borderColor-accent-emphasis);
+}
+
+.markdown-body .markdown-alert.markdown-alert-note .markdown-alert-title {
+  color: var(--fgColor-accent);
+}
+
+.markdown-body .markdown-alert.markdown-alert-important {
+  border-left-color: var(--borderColor-done-emphasis);
+}
+
+.markdown-body .markdown-alert.markdown-alert-important .markdown-alert-title {
+  color: var(--fgColor-done);
+}
+
+.markdown-body .markdown-alert.markdown-alert-warning {
+  border-left-color: var(--borderColor-attention-emphasis);
+}
+
+.markdown-body .markdown-alert.markdown-alert-warning .markdown-alert-title {
+  color: var(--fgColor-attention);
+}
+
+.markdown-body .markdown-alert.markdown-alert-tip {
+  border-left-color: var(--borderColor-success-emphasis);
+}
+
+.markdown-body .markdown-alert.markdown-alert-tip .markdown-alert-title {
+  color: var(--fgColor-success);
+}
+
+.markdown-body .markdown-alert.markdown-alert-caution {
+  border-left-color: var(--borderColor-danger-emphasis);
+}
+
+.markdown-body .markdown-alert.markdown-alert-caution .markdown-alert-title {
+  color: var(--fgColor-danger);
+}
+
+.markdown-body>*:first-child>.heading-element:first-child {
+  margin-top: 0 !important;
+}
+
+.markdown-body .highlight pre:has(+.zeroclipboard-container) {
+  min-height: 52px;
+}
+
+
+  </style>
+  <style>
+  /**
+ * prism.js default theme for JavaScript, CSS and HTML
+ * Based on dabblet (http://dabblet.com)
+ * @author Lea Verou
+ */
+
+code[class*="language-"],
+pre[class*="language-"] {
+	color: black;
+	background: none;
+	text-shadow: 0 1px white;
+	font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+	font-size: 1em;
+	text-align: left;
+	white-space: pre;
+	word-spacing: normal;
+	word-break: normal;
+	word-wrap: normal;
+	line-height: 1.5;
+
+	-moz-tab-size: 4;
+	-o-tab-size: 4;
+	tab-size: 4;
+	hyphens: none;
+}
+
+pre[class*="language-"]::-moz-selection, pre[class*="language-"] ::-moz-selection,
+code[class*="language-"]::-moz-selection, code[class*="language-"] ::-moz-selection {
+	text-shadow: none;
+	background: #b3d4fc;
+}
+
+pre[class*="language-"]::-moz-selection, pre[class*="language-"] ::-moz-selection, code[class*="language-"]::-moz-selection, code[class*="language-"] ::-moz-selection {
+	text-shadow: none;
+	background: #b3d4fc;
+}
+
+pre[class*="language-"]::selection, pre[class*="language-"] ::selection,
+code[class*="language-"]::selection, code[class*="language-"] ::selection {
+	text-shadow: none;
+	background: #b3d4fc;
+}
+
+@media print {
+	code[class*="language-"],
+	pre[class*="language-"] {
+		text-shadow: none;
+	}
+}
+
+/* Code blocks */
+pre[class*="language-"] {
+	padding: 1em;
+	margin: .5em 0;
+	overflow: auto;
+}
+
+:not(pre) > code[class*="language-"],
+pre[class*="language-"] {
+	background: #f5f2f0;
+}
+
+/* Inline code */
+:not(pre) > code[class*="language-"] {
+	padding: .1em;
+	border-radius: .3em;
+	white-space: normal;
+}
+
+.token.comment,
+.token.prolog,
+.token.doctype,
+.token.cdata {
+	color: slategray;
+}
+
+.token.punctuation {
+	color: #999;
+}
+
+.token.namespace {
+	opacity: .7;
+}
+
+.token.property,
+.token.tag,
+.token.boolean,
+.token.number,
+.token.constant,
+.token.symbol,
+.token.deleted {
+	color: #905;
+}
+
+.token.selector,
+.token.attr-name,
+.token.string,
+.token.char,
+.token.builtin,
+.token.inserted {
+	color: #690;
+}
+
+.token.operator,
+.token.entity,
+.token.url,
+.language-css .token.string,
+.style .token.string {
+	color: #9a6e3a;
+	/* This background color was intended by the author of this theme. */
+	background: hsla(0, 0%, 100%, .5);
+}
+
+.token.atrule,
+.token.attr-value,
+.token.keyword {
+	color: #07a;
+}
+
+.token.function,
+.token.class-name {
+	color: #DD4A68;
+}
+
+.token.regex,
+.token.important,
+.token.variable {
+	color: #e90;
+}
+
+.token.important,
+.token.bold {
+	font-weight: bold;
+}
+.token.italic {
+	font-style: italic;
+}
+
+.token.entity {
+	cursor: help;
+}
+
+  </style>
+  <style>
+  
+  </style>
+  <style>
+    .markdown-body {
+      font-family: -apple-system,Segoe UI,Helvetica,Arial,sans-serif,Apple Color Emoji,Segoe UI Emoji;
+      box-sizing: border-box;
+      min-width: 200px;
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 45px;
+    }
+
+    @media not print {
+      .markdown-body {
+        padding: 45px;
+      }
+
+      @media (max-width: 767px) {
+        .markdown-body {
+          padding: 15px;
+        }
+      }
+    }
+
+    .hf-container {
+      color: #24292e;
+      line-height: 1.3;
+    }
+
+    .markdown-body .highlight pre,
+    .markdown-body pre {
+      white-space: pre-wrap;
+    }
+    .markdown-body table {
+      display: table;
+    }
+    .markdown-body img[data-align="center"] {
+      display: block;
+      margin: 0 auto;
+    }
+    .markdown-body img[data-align="right"] {
+      display: block;
+      margin: 0 0 0 auto;
+    }
+    .markdown-body li.task-list-item {
+      list-style-type: none;
+    }
+    .markdown-body li > [type=checkbox] {
+      margin: 0 0 0 -1.3em;
+    }
+    .markdown-body input[type="checkbox"] ~ p {
+      margin-top: 0;
+      display: inline-block;
+    }
+    .markdown-body ol ol,
+    .markdown-body ul ol {
+      list-style-type: decimal;
+    }
+    .markdown-body ol ol ol,
+    .markdown-body ol ul ol,
+    .markdown-body ul ol ol,
+    .markdown-body ul ul ol {
+      list-style-type: decimal;
+    }
+  </style>
+  <style>.markdown-body a.footnote-ref {
+  -webkit-text-decoration: none;
+  text-decoration: none;
+}
+
+.footnotes {
+  font-size: .85em;
+  opacity: .8;
+}
+
+.footnotes li[role="doc-endnote"] {
+  position: relative;
+}
+
+.footnotes .footnote-back {
+  position: absolute;
+  font-family: serif;
+  font-family: initial;
+  top: .2em;
+  right: 1em;
+  -webkit-text-decoration: none;
+  text-decoration: none;
+}
+
+.inline-math.invalid,
+.multiple-math.invalid {
+  color: rgb(255, 105, 105);
+}
+
+.toc-container {
+  width: 100%;
+}
+
+.toc-container .toc-title {
+  font-weight: 700;
+  font-size: 1.2em;
+  margin-bottom: 0;
+}
+
+.toc-container li,
+.toc-container ul,
+.toc-container ul li {
+  list-style: none !important;
+}
+
+.toc-container > ul {
+  padding-left: 0;
+}
+
+.toc-container ul li span {
+  display : flex;
+}
+
+.toc-container ul li span a {
+  color: inherit;
+  -webkit-text-decoration: none;
+  text-decoration: none;
+}
+.toc-container ul li span a:hover {
+  color: inherit;
+  -webkit-text-decoration: none;
+  text-decoration: none;
+}
+
+.toc-container ul li span span.dots {
+  flex: 1;
+  height: 0.65em;
+  margin: 0 10px;
+  border-bottom: 2px dotted black;
+}
+</style>
+  <style>.markdown-body{}body {counter-reset: h2}
+h2 {counter-reset: h3}
+h3 {counter-reset: h4}
+h4 {counter-reset: h5}
+h5 {counter-reset: h6}
+h2:before {counter-increment: h2; content: counter(h2) ". "}
+h3:before {counter-increment: h3; content: counter(h2) "." counter(h3) ". "}
+h4:before {counter-increment: h4; content: counter(h2) "." counter(h3) "." counter(h4) ". "}
+h5:before {counter-increment: h5; content: counter(h2) "." counter(h3) "." counter(h4) "." counter(h5) ". "}
+h6:before {counter-increment: h6; content: counter(h2) "." counter(h3) "." counter(h4) "." counter(h5) "." counter(h6) ". "}
+h2.nocount:before, h3.nocount:before, h4.nocount:before, h5.nocount:before, h6.nocount:before { content: ""; counter-increment: none }pre.front-matter{display:none!important;}</style>
+</head>
+<body>
+  <article class="markdown-body"><h1 id="relatorio-de-comparacao-dinov-vs-dashboard-prpgi" class="atx">Relatório de Comparação: DINOV vs Dashboard PRPGI</h1>
+<blockquote>
+<p>Gerado em: 2026-07-07
+<strong>Assessoria de Ciência de Dados — PRPGI/IFBA</strong>
+Prof. Dr. Davi Franco Rêgo</p>
+</blockquote>
+<h2 id="1-sumario-executivo" class="atx">1. Sumário Executivo</h2>
+<table>
+<thead>
+<tr>
+<th>Métrica</th>
+<th>Valor</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Registros DINOV (CSV)</td>
+<td>147</td>
+</tr>
+<tr>
+<td>Registros Dashboard (inovacao[])</td>
+<td>853</td>
+</tr>
+<tr>
+<td>Chaves normalizadas (DINOV)</td>
+<td>147</td>
+</tr>
+<tr>
+<td>Chaves normalizadas (Dashboard)</td>
+<td>440</td>
+</tr>
+<tr>
+<td>Casados (match por chave normalizada)</td>
+<td>112</td>
+</tr>
+<tr>
+<td>Só DINOV</td>
+<td>35 chaves / 35 registros</td>
+</tr>
+<tr>
+<td>Só Dashboard</td>
+<td>328 chaves / 369 registros</td>
+</tr>
+</tbody></table>
+<p><strong>O que são "chaves normalizadas"?</strong></p>
+<p>Para comparar os registros das duas fontes, extraímos o número de registro do INPI de cada lado e o normalizamos: removemos espaços, hífens, barras e prefixos como <code>PI</code>, <code>BR</code>, <code>MU</code>, ficando apenas com os dígitos e letras. Por exemplo, <code>PI0802052-3</code> e <code>BR 102012007763-9</code> tornam-se <code>08020523</code> e <code>1020120077639</code>. Essa chave comum permite identificar se um mesmo registro aparece nas duas bases, independentemente do formato em que foi digitado.</p>
+<table>
+<thead>
+<tr>
+<th>Categoria</th>
+<th>Significado</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Casados</strong></td>
+<td>Registro encontrado tanto no CSV da DINOV quanto no Dashboard — o número do INPI coincide após a normalização</td>
+</tr>
+<tr>
+<td><strong>Só DINOV</strong></td>
+<td>Registro que está no CSV da DINOV mas não foi encontrado no Dashboard (pode ser que o pesquisador não o tenha cadastrado no Lattes)</td>
+</tr>
+<tr>
+<td><strong>Só Dashboard</strong></td>
+<td>Registro que está no Dashboard mas não consta no CSV da DINOV (pode ser um pedido ainda não concedido, ou um registro que a DINOV ainda não incorporou à sua planilha)</td>
+</tr>
+</tbody></table>
+<h2 id="2-registros-so-dinov" class="atx">2. Registros Só DINOV</h2>
+<p>Total: <strong>35</strong> registros presentes no CSV DINOV mas <strong>não encontrados</strong> no Dashboard.</p>
+<blockquote>
+<p>💡 <strong>Por que isso importa?</strong> São concessões já formalizadas no INPI que os inventores podem não ter cadastrado em seus Currículos Lattes. A coluna <code>CONTATO</code> traz os meios de contato informados pela própria DINOV.</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>Nº INPI</th>
+<th>OBJETO</th>
+<th>CAMPUS</th>
+<th>ANO CONCESSÃO</th>
+<th>INVENTORES</th>
+<th>CONTATO</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>PI0802052-3</td>
+<td>PI</td>
+<td>Salvador</td>
+<td>-</td>
+<td>Vanessa Mendes Santos Cavalcanti    / Frederico Guaré Cruz /...</td>
+<td><a href="mailto:vanessa@ifba.edu.br">vanessa@ifba.edu.br</a></td>
+</tr>
+<tr>
+<td>PI0805723-0</td>
+<td>PI</td>
+<td>Salvador</td>
+<td>2019</td>
+<td>Josemir da Cruz Alexandrino    / Handerson Jorge Dourado Lei...</td>
+<td><a href="mailto:jca@ifba.edu.br">jca@ifba.edu.br</a>; <a href="mailto:handerson@ifba.edu.br">handerson@ifba.edu.br</a>; kalid@ufba...</td>
+</tr>
+<tr>
+<td>MU8903003-6/ PI 0925423-4</td>
+<td>PI</td>
+<td>Salvador</td>
+<td>2019</td>
+<td>Eduardo Jorge Vidal Dultra /  Wilson Acchar</td>
+<td><a href="mailto:e.dultra@ifba.edu.br">e.dultra@ifba.edu.br</a></td>
+</tr>
+<tr>
+<td>BR 102015033175-4</td>
+<td>PI</td>
+<td>Simões Filho</td>
+<td>2020</td>
+<td>MARILENA MEIRA</td>
+<td><a href="mailto:marilenameira@ifba.edu.br">marilenameira@ifba.edu.br</a></td>
+</tr>
+<tr>
+<td>BR 102016012472-7</td>
+<td>PI</td>
+<td>Salvador</td>
+<td>2020</td>
+<td>WILSON OTTO GOMES BATISTA</td>
+<td><a href="mailto:wilson.otto@ifba.edu.br">wilson.otto@ifba.edu.br</a></td>
+</tr>
+<tr>
+<td>13345-6</td>
+<td>SO</td>
+<td>Salvador</td>
+<td>2018</td>
+<td>HENRIQUE JOSÉ CARIBÉ RIBEIRO</td>
+<td><a href="mailto:hcaribe@ifba.edu.br">hcaribe@ifba.edu.br</a></td>
+</tr>
+<tr>
+<td>BR 512013001203-1</td>
+<td>SO</td>
+<td>Salvador</td>
+<td>2014</td>
+<td>MARCUS VINÍCIUS TEIXEIRA NAVARRO / MARIO DE JESUS FERREIRA</td>
+<td><a href="mailto:navarro@ifba.edu.br">navarro@ifba.edu.br</a></td>
+</tr>
+<tr>
+<td>BR 512013001206-6</td>
+<td>SO</td>
+<td>Salvador</td>
+<td>2014</td>
+<td>JOSE GARCIA VIVAS MIRANDA / MARCUS VINÍCIUS TEIXEIRA NAVARRO...</td>
+<td><a href="mailto:navarro@ifba.edu.br">navarro@ifba.edu.br</a></td>
+</tr>
+<tr>
+<td>BR 512016000963-2</td>
+<td>SO</td>
+<td>Salvador</td>
+<td>2017</td>
+<td>ELEN BEATRIZ CARNEIRO PINTO / HANDERSON JORGE DOURADO LEITE ...</td>
+<td><a href="mailto:handerson@ifba.edu.br">handerson@ifba.edu.br</a>;</td>
+</tr>
+<tr>
+<td>BR 512017000138-3</td>
+<td>SO</td>
+<td>Irecê</td>
+<td>2017</td>
+<td>CÁSSIO ALMEIDA LIMA / MARCOS VILARINHO TORRES</td>
+<td><a href="mailto:cassiolima@ifba.edu.br">cassiolima@ifba.edu.br</a>; <a href="mailto:marcosvilarinho@ifba.edu.b">marcosvilarinho@ifba.edu.b</a>...</td>
+</tr>
+<tr>
+<td>BR 512017000769-1</td>
+<td>SO</td>
+<td>Salvador</td>
+<td>2017</td>
+<td>EDITE LUZIA DE ALMEIDA VASCONCELOS / HESROM FERNANDES SERRA ...</td>
+<td><a href="mailto:editeluziaela@gmail.com">editeluziaela@gmail.com</a>; <a href="mailto:biomoura@gmail.com">biomoura@gmail.com</a>;</td>
+</tr>
+<tr>
+<td>904452123</td>
+<td>MARCA</td>
+<td>Salvador</td>
+<td>2015</td>
+<td>Djane Santiago</td>
+<td><a href="mailto:djane@ifba.edu.br">djane@ifba.edu.br</a></td>
+</tr>
+<tr>
+<td>908799063</td>
+<td>MARCA</td>
+<td>Salvador</td>
+<td>2018</td>
+<td>Marcus Vinícius Teixeira Navarro</td>
+<td><a href="mailto:navarro@ifba.edu.br">navarro@ifba.edu.br</a></td>
+</tr>
+<tr>
+<td>911435182</td>
+<td>MARCA</td>
+<td>Salvador</td>
+<td>2018</td>
+<td>Ronaldo  Bruno Ramalho</td>
+<td><a href="mailto:ronaldobruno@ifba.edu.br">ronaldobruno@ifba.edu.br</a></td>
+</tr>
+<tr>
+<td>912154225</td>
+<td>MARCA</td>
+<td>Vitória da Conquista</td>
+<td>2018</td>
+<td>Maria das Graças Bittencourt Ferreita</td>
+<td><a href="mailto:maria.bittencourt@ifba.edu.br">maria.bittencourt@ifba.edu.br</a></td>
+</tr>
+<tr>
+<td>912186364</td>
+<td>MARCA</td>
+<td>Salvador</td>
+<td>2019</td>
+<td>Henrique José Caribé Ribeiro</td>
+<td><a href="mailto:hcaribe@ifba.edu.br">hcaribe@ifba.edu.br</a></td>
+</tr>
+<tr>
+<td>MU8802959-0</td>
+<td>MU</td>
+<td>Salvador</td>
+<td>2017</td>
+<td>CRISTIANE FREIRE SILVÃO</td>
+<td>21029516,87889370, <a href="mailto:csilvao@cefetba.br">csilvao@cefetba.br</a></td>
+</tr>
+<tr>
+<td>MU 9002752-3</td>
+<td>MU</td>
+<td>Salvador</td>
+<td>2018</td>
+<td>RAIMUNDO FERREIRA DA SILVA / ÂNGELO RONCALLI OLIVEIRA GUERRA...</td>
+<td>33625094,<a href="mailto:raimundoferreirasilva@bol.com.br">raimundoferreirasilva@bol.com.br</a>;99430440...</td>
+</tr>
+<tr>
+<td>BR 202019014112-9</td>
+<td>MU</td>
+<td>Salvador</td>
+<td>-</td>
+<td>Josemir Alexandrino, Handerson Leite e Vinícius Dias (ALGETE...</td>
+<td><a href="mailto:jca@ifba.edu.br">jca@ifba.edu.br</a>; <a href="mailto:handerson@ifba.edu.br">handerson@ifba.edu.br</a>; hugos@ifba...</td>
+</tr>
+<tr>
+<td>BR 512019001607-6</td>
+<td>SO</td>
+<td>Salvador</td>
+<td>2019</td>
+<td>CESAR AUGUSTO SILVEIRA ALVES DA CUNHA FILHO / CIRO OLIVEIRA ...</td>
+<td><a href="mailto:jca@ifba.edu.br">jca@ifba.edu.br</a>;</td>
+</tr>
+<tr>
+<td>BR 10 2020 015506-7</td>
+<td>PI</td>
+<td>Salvador</td>
+<td>2021</td>
+<td>Luanda Kívia; Leonardo Santiago; Pedro Rocha; Marília Botolo...</td>
+<td><a href="mailto:luandakivia@ifba.edu.br">luandakivia@ifba.edu.br</a>; leonardo.santiago96.ls@gm...</td>
+</tr>
+<tr>
+<td>BR 512020002068-2</td>
+<td>SO</td>
+<td>Santo Amaro</td>
+<td>2020</td>
+<td>EMANUEL PEREIRA CERQUEIRA; FRANCISCO JOSÉ DA SILVA BORGES DE...</td>
+<td></td>
+</tr>
+<tr>
+<td>BR 10 2022 013320 4</td>
+<td>PI</td>
+<td>Paulo Afonso</td>
+<td>2026</td>
+<td>LEONARDO SILVA MENEZES</td>
+<td><a href="mailto:leonardo.menezes@ifba.edu.br">leonardo.menezes@ifba.edu.br</a>; (75)</td>
+</tr>
+<tr>
+<td>98806-5338/(71)...</td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>BR 512023000792-7</td>
+<td>SO</td>
+<td>Salvador</td>
+<td>2023</td>
+<td>JOWÂNER DE OLIVEIRA ARAÚJO; GABRIEL SIMÕES ROCHA REIS</td>
+<td><a href="mailto:jowaneraraujo@gmail.com">jowaneraraujo@gmail.com</a>; <a href="mailto:gabrielsreis@gmail.com">gabrielsreis@gmail.com</a></td>
+</tr>
+<tr>
+<td>BR512024004583-0</td>
+<td>SO</td>
+<td>Ilhéus</td>
+<td>2024</td>
+<td>ANDREIA BARBOSA SOARES / MARIA CATARINA MENDONÇA DA MOTA / R...</td>
+<td><a href="mailto:hebert.santana@ifbal.edu.br">hebert.santana@ifbal.edu.br</a></td>
+</tr>
+<tr>
+<td>BR 512024004735-2</td>
+<td>SO</td>
+<td>Salvador</td>
+<td>2024</td>
+<td>MARIO JORGE PEREIRA / PABLO VIEIRA FLORENTINO / RENATO LIMA ...</td>
+<td><a href="mailto:renato@ifba.edu.br">renato@ifba.edu.br</a></td>
+</tr>
+<tr>
+<td>BR 512024004810-3</td>
+<td>SO</td>
+<td>Salvador</td>
+<td>2024</td>
+<td>LAURO PINHO DAMASCENO / MARCUS VINICIUS TEIXEIRA NAVARRO / R...</td>
+<td><a href="mailto:renato@ifba.edu.br">renato@ifba.edu.br</a></td>
+</tr>
+<tr>
+<td>BR 51 2024 005138 4</td>
+<td>SO</td>
+<td>Salvador</td>
+<td>2024</td>
+<td>CARLOS OTÁVIO DAMAS MARTINS / FRANCIRLEY PAZ DA SILVA / IVAN...</td>
+<td><a href="mailto:ivan.silva@ifba.edu.br">ivan.silva@ifba.edu.br</a></td>
+</tr>
+<tr>
+<td>BR512025004520-4</td>
+<td>SO</td>
+<td>Ilhéus</td>
+<td>2025</td>
+<td>REGILAN MEIRA SILVA; CARLOS ALBERTO LIMA AMORIM; RAFAEL SENA...</td>
+<td></td>
+</tr>
+<tr>
+<td>BR512025007003-9</td>
+<td>SO</td>
+<td>Valença</td>
+<td>2025</td>
+<td>ALBA ROGÉRIA DOS SANTOS SILVA / CATARINA FERREIRA SILVEIRA /...</td>
+<td><a href="mailto:catarina.silveira@ifba.edu.br">catarina.silveira@ifba.edu.br</a></td>
+</tr>
+<tr>
+<td>BR512025006649-0</td>
+<td>SO</td>
+<td>Valença</td>
+<td>2025</td>
+<td>ALBA ROGÉRIA DOS SANTOS SILVA / CATARINA FERREIRA SILVEIRA /...</td>
+<td><a href="mailto:catarina.silveira@ifba.edu.br">catarina.silveira@ifba.edu.br</a></td>
+</tr>
+<tr>
+<td>BR 51 2025 004932</td>
+<td>SO</td>
+<td></td>
+<td></td>
+<td>CORETTA JANERETTE / DANIEL DE SANTANA NETO / DÉBORA AYANE NA...</td>
+<td></td>
+</tr>
+<tr>
+<td>BR512025007001-2</td>
+<td>SO</td>
+<td>Valença</td>
+<td>2025</td>
+<td>ALBA ROGÉRIA DOS SANTOS SILVA / CATARINA FERREIRA SILVEIRA /...</td>
+<td><a href="mailto:catarina.silveira@ifba.edu.br">catarina.silveira@ifba.edu.br</a></td>
+</tr>
+<tr>
+<td>512026003509-0</td>
+<td>SO</td>
+<td>Lauro de Freitas, Camaçari e Feira de Santana</td>
+<td>2026</td>
+<td>MARCIO LUIS VALENÇA ARAÚJO, EDUARDO OLIVEIRA TELES, TONI ALE...</td>
+<td><a href="mailto:MARCIOARAUJO@IFBA.EDU.BR">MARCIOARAUJO@IFBA.EDU.BR</a></td>
+</tr>
+<tr>
+<td>512026003525-2</td>
+<td>SO</td>
+<td>SALVADOR</td>
+<td>2026</td>
+<td>ANTÔNIO CARLOS DOS SANTOS SOUZA, ENEIDA SANTANA DE ÀVILA GOU...</td>
+<td><a href="mailto:antoniocarlos@ifba.edu.br">antoniocarlos@ifba.edu.br</a></td>
+</tr>
+</tbody></table>
+<h2 id="3-registros-so-dashboard" class="atx">3. Registros Só Dashboard</h2>
+<p>Total: <strong>369</strong> registros no Dashboard mas <strong>não encontrados</strong> no CSV DINOV.</p>
+<p><strong>Possíveis causas (sugestões para investigação):</strong></p>
+<ol>
+<li><strong>Registro em andamento ou não concedido</strong> — pode ser um pedido de PI que o pesquisador registrou no Lattes mas que ainda não foi concedido, foi indeferido, ou não chegou a ser depositado formalmente junto ao INPI. Sugere-se verificar no Lattes do pesquisador o status informado.</li>
+<li><strong>Concedido mas ainda não inserido na planilha DINOV</strong> — talvez o título tenha sido concedido recentemente e ainda não tenha sido incluído no controle da DINOV. Uma consulta na base do INPI pode confirmar.</li>
+<li><strong>Tipo não controlado pela DINOV</strong> — marcas, cultivares, ou outros tipos de registro que fogem ao escopo da planilha atual.</li>
+<li><strong>Registro estrangeiro</strong> — patentes depositadas no exterior (USPTO, EPO, WIPO) que podem não constar na base da DINOV.</li>
+</ol>
+<table>
+<thead>
+<tr>
+<th>Tipo</th>
+<th>Campus</th>
+<th>Ano</th>
+<th>Pesquisador</th>
+<th>Servidor</th>
+<th>Nº Registro (extraído)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Software</td>
+<td>BAR</td>
+<td>2024</td>
+<td>Kalyf Abdalla Buzar Lima</td>
+<td>3074425</td>
+<td>5120240039597</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>BAR</td>
+<td>2023</td>
+<td>Erick Jarles Santos de Araujo</td>
+<td>1388943</td>
+<td>10202302498</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>BAR</td>
+<td>2023</td>
+<td>Lourivaldo Barreto Pereira</td>
+<td>1398808</td>
+<td>5120230010898</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>BAR</td>
+<td>2023</td>
+<td>Vilma Barbosa da Silva Araujo</td>
+<td>1397968</td>
+<td>10202302551</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>BAR</td>
+<td>2021</td>
+<td>Lourivaldo Barreto Pereira</td>
+<td>1398808</td>
+<td>102202104425</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>BAR</td>
+<td>2020</td>
+<td>Lourivaldo Barreto Pereira</td>
+<td>1398808</td>
+<td>5120200026630</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>BAR</td>
+<td>2020</td>
+<td>Vilma Barbosa da Silva Araujo</td>
+<td>1397968</td>
+<td>10201900305</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>BAR</td>
+<td>2017</td>
+<td>Tuane Lisboa Silva Paixao</td>
+<td>3214428</td>
+<td>5120190009894</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>BAR</td>
+<td>2016</td>
+<td>Tuane Lisboa Silva Paixao</td>
+<td>3214428</td>
+<td>1020160042348</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>BAR</td>
+<td>2015</td>
+<td>Vilma Barbosa da Silva Araujo</td>
+<td>1397968</td>
+<td>10201501621</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>CAM</td>
+<td>2026</td>
+<td>Tereza Kelly Gomes Carneiro</td>
+<td>1275005</td>
+<td>5120260006988</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>CAM</td>
+<td>2026</td>
+<td>Tereza Kelly Gomes Carneiro</td>
+<td>1275005</td>
+<td>5120260006740</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>CAM</td>
+<td>2026</td>
+<td>Tereza Kelly Gomes Carneiro</td>
+<td>1275005</td>
+<td>5120260006767</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>CAM</td>
+<td>2026</td>
+<td>Tereza Kelly Gomes Carneiro</td>
+<td>1275005</td>
+<td>5120260006910</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>CAM</td>
+<td>2025</td>
+<td>Antonio Carlos dos Santos Souza</td>
+<td>2419000</td>
+<td>5120250027338</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>SSA</td>
+<td>2025</td>
+<td>Isabelle Matos Pinheiro</td>
+<td>1919552</td>
+<td>5120250027338</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>CAM</td>
+<td>2025</td>
+<td>Antonio Carlos dos Santos Souza</td>
+<td>2419000</td>
+<td>5120250002343</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>CAM</td>
+<td>2025</td>
+<td>Tereza Kelly Gomes Carneiro</td>
+<td>1275005</td>
+<td>120250060793</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>CAM</td>
+<td>2023</td>
+<td>Eneida Santana de Avila Goulart</td>
+<td>1669370</td>
+<td>5120230020486</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>CAM</td>
+<td>2022</td>
+<td>Marcio Luis Valenca Araujo</td>
+<td>2148475</td>
+<td>5120220019728</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>LF</td>
+<td>2022</td>
+<td>Marcio Luis Valenca Araujo</td>
+<td>2148475</td>
+<td>5120220019728</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>CAM</td>
+<td>2022</td>
+<td>Vagner Simoes Santos</td>
+<td>1062405</td>
+<td>5120220019248</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>CAM</td>
+<td>2022</td>
+<td>Vagner Simoes Santos</td>
+<td>1062405</td>
+<td>5120220004801</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>CAM</td>
+<td>2020</td>
+<td>Eduardo Oliveira Teles</td>
+<td>1737324</td>
+<td>1020200157825</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>CAM</td>
+<td>2019</td>
+<td>Vagner Simoes Santos</td>
+<td>1062405</td>
+<td>5120190027066</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>CAM</td>
+<td>2018</td>
+<td>Tereza Kelly Gomes Carneiro</td>
+<td>1275005</td>
+<td>5120180009174</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>CAM</td>
+<td>2018</td>
+<td>Tereza Kelly Gomes Carneiro</td>
+<td>1275005</td>
+<td>512018000905</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>CAM</td>
+<td>2018</td>
+<td>Tereza Kelly Gomes Carneiro</td>
+<td>1275005</td>
+<td>5120180009140</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>CAM</td>
+<td>2018</td>
+<td>Tereza Kelly Gomes Carneiro</td>
+<td>1275005</td>
+<td>5120180009123</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>CAM</td>
+<td>2018</td>
+<td>Tereza Kelly Gomes Carneiro</td>
+<td>1275005</td>
+<td>5120180009158</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>CAM</td>
+<td>2017</td>
+<td>Tereza Kelly Gomes Carneiro</td>
+<td>2275005</td>
+<td>5120170003114</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>CAM</td>
+<td>2017</td>
+<td>Tereza Kelly Gomes Carneiro</td>
+<td>2275005</td>
+<td>5120170003106</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>CAM</td>
+<td>2015</td>
+<td>Tereza Kelly Gomes Carneiro</td>
+<td>2275005</td>
+<td>5120150010336</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>CAM</td>
+<td>2014</td>
+<td>Tereza Kelly Gomes Carneiro</td>
+<td>2275005</td>
+<td>12010011887</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>CAM</td>
+<td>2013</td>
+<td>Tereza Kelly Gomes Carneiro</td>
+<td>2275005</td>
+<td>5120130008425</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>EC</td>
+<td>2025</td>
+<td>Filipe Araujo de Carvalho</td>
+<td>2307437</td>
+<td>1020250164256</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>EC</td>
+<td>2025</td>
+<td>Jose Leonardo dos Santos Melo</td>
+<td>3050692</td>
+<td>5120250021178</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>EC</td>
+<td>2024</td>
+<td>Filipe Araujo de Carvalho</td>
+<td>2307437</td>
+<td>10202402608</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>EC</td>
+<td>2024</td>
+<td>Maxuel Carlos de Melo</td>
+<td>1049584</td>
+<td>5120240036423</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>EC</td>
+<td>2024</td>
+<td>Maxuel Carlos de Melo</td>
+<td>1049584</td>
+<td>5120240036644</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>EC</td>
+<td>2021</td>
+<td>Lazaro de Souza Silva</td>
+<td>1046553</td>
+<td>5120230002291</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>EC</td>
+<td>2021</td>
+<td>Lazaro de Souza Silva</td>
+<td>1046553</td>
+<td>5120210016572</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>EC</td>
+<td>2019</td>
+<td>Jonatas Macedo de Souza</td>
+<td>1241991</td>
+<td>102019003002</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>EC</td>
+<td>2016</td>
+<td>Jose Leonardo dos Santos Melo</td>
+<td>3050692</td>
+<td>5120160013087</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>EC</td>
+<td>2016</td>
+<td>Jose Leonardo dos Santos Melo</td>
+<td>3050692</td>
+<td>5120160013079</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>EUN</td>
+<td>2025</td>
+<td>Marcos Gottschalg Discher</td>
+<td>3069804</td>
+<td>5120250014112</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>EUN</td>
+<td>2024</td>
+<td>Rerison Magno Borges Pimenta</td>
+<td>3518406</td>
+<td>1020240166124</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>EUN</td>
+<td>2023</td>
+<td>Rerison Magno Borges Pimenta</td>
+<td>3518406</td>
+<td>10202301916</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>EUN</td>
+<td>2023</td>
+<td>Rerison Magno Borges Pimenta</td>
+<td>3518406</td>
+<td>10202300768</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>EUN</td>
+<td>2021</td>
+<td>Danilo Alves Martins de Faria</td>
+<td>1326986</td>
+<td>5120210029941</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>FS</td>
+<td>2024</td>
+<td>Marcio Luis Valenca Araujo</td>
+<td>2148475</td>
+<td>5120240018484</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>JAG</td>
+<td>2024</td>
+<td>Marcio Luis Valenca Araujo</td>
+<td>2148475</td>
+<td>5120240018484</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>FS</td>
+<td>2024</td>
+<td>Marcio Luis Valenca Araujo</td>
+<td>2148475</td>
+<td>5120240018468</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>JAG</td>
+<td>2024</td>
+<td>Marcio Luis Valenca Araujo</td>
+<td>2148475</td>
+<td>5120240018468</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>FS</td>
+<td>2024</td>
+<td>Marcio Luis Valenca Araujo</td>
+<td>2148475</td>
+<td>5120240050043</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>FS</td>
+<td>2022</td>
+<td>Toni Alex Reis Borges</td>
+<td>2023444</td>
+<td>5120230023906</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>FS</td>
+<td>2016</td>
+<td>Ramon Luz Lemos Santos</td>
+<td>3184222</td>
+<td>andamento</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>FS</td>
+<td>2012</td>
+<td>Jose Menezes da Silva</td>
+<td>3739152</td>
+<td>2020120009833</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>ILH</td>
+<td>2025</td>
+<td>Hebert Costa Vaz Santana</td>
+<td>2222480</td>
+<td>5120260008395</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>ILH</td>
+<td>2024</td>
+<td>Hebert Costa Vaz Santana</td>
+<td>2222480</td>
+<td>5120240041680</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>ILH</td>
+<td>2021</td>
+<td>Gabriel Jesus Alves de Melo</td>
+<td>1765336</td>
+<td>1020210043849</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>ILH</td>
+<td>2021</td>
+<td>Gabriel Jesus Alves de Melo</td>
+<td>1765336</td>
+<td>10202100395</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>ILH</td>
+<td>2020</td>
+<td>Gabriel Jesus Alves de Melo</td>
+<td>1765336</td>
+<td>1020200242121</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>ILH</td>
+<td>2018</td>
+<td>Aline Silva Ramos</td>
+<td>2697413</td>
+<td>5120180003575</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>ILH</td>
+<td>2017</td>
+<td>Daiane Farias Pereira Suffredini</td>
+<td>1961870</td>
+<td>1020170013308</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>ILH</td>
+<td>2016</td>
+<td>Everton Jose da Silva</td>
+<td>1669870</td>
+<td>1020160088623</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>ILH</td>
+<td>2014</td>
+<td>Daiane Farias Pereira Suffredini</td>
+<td>1961870</td>
+<td>10201401637</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>IRE</td>
+<td>2025</td>
+<td>Ed Fabio Silva Agapito</td>
+<td>1743304</td>
+<td>10202500441</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>IRE</td>
+<td>2025</td>
+<td>Renan Felipe Brito Dantas</td>
+<td>2132480</td>
+<td>120250021496</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>IRE</td>
+<td>2023</td>
+<td>Renan Felipe Brito Dantas</td>
+<td>2132480</td>
+<td>5120230017574</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>IRE</td>
+<td>2022</td>
+<td>Jose Airton de Mattos Carneiro Junior</td>
+<td>1852028</td>
+<td>1020220207232</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>IRE</td>
+<td>2021</td>
+<td>Tamires Pereira Alves</td>
+<td>3388665</td>
+<td>2020210149243</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>IRE</td>
+<td>2021</td>
+<td>Tamires Pereira Alves</td>
+<td>3388665</td>
+<td>2020210083226</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>IRE</td>
+<td>2019</td>
+<td>Jose Carlos Albuquerque da Silva</td>
+<td>1365901</td>
+<td>2020190117341</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>IRE</td>
+<td>2017</td>
+<td>Fabricio Ferreira Batista</td>
+<td>1086250</td>
+<td>1020170184722</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>IRE</td>
+<td>2017</td>
+<td>Fabricio Ferreira Batista</td>
+<td>1086250</td>
+<td>1020170152847</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>IRE</td>
+<td>2017</td>
+<td>Fabricio Ferreira Batista</td>
+<td>1086250</td>
+<td>1020170152820</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>IRE</td>
+<td>2014</td>
+<td>Jose Airton de Mattos Carneiro Junior</td>
+<td>1852028</td>
+<td>2020140172934</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>JAC</td>
+<td>2021</td>
+<td>Jonei Marques da Costa</td>
+<td>2051495</td>
+<td>1020210055669</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>JAC</td>
+<td>2021</td>
+<td>Philip Ramon de Araujo Santos</td>
+<td>1243929</td>
+<td>5120210001834</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>JAC</td>
+<td>2020</td>
+<td>Luis Gustavo de Jesus Araujo</td>
+<td>3268049</td>
+<td>5120200021212</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>LF</td>
+<td>2020</td>
+<td>Luis Gustavo de Jesus Araujo</td>
+<td>3268049</td>
+<td>5120200021212</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>JAC</td>
+<td>2018</td>
+<td>Yuri Bastos Wanderley</td>
+<td>1427430</td>
+<td>5120180004105</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>JAC</td>
+<td>2018</td>
+<td>Yuri Bastos Wanderley</td>
+<td>1427430</td>
+<td>5120180004113</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>JAC</td>
+<td>2018</td>
+<td>Yuri Bastos Wanderley</td>
+<td>1427430</td>
+<td>5120180004121</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>JAC</td>
+<td>2018</td>
+<td>Yuri Bastos Wanderley</td>
+<td>1427430</td>
+<td>5120180004148</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>JAC</td>
+<td>2018</td>
+<td>Yuri Bastos Wanderley</td>
+<td>1427430</td>
+<td>5120180004199</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>JAC</td>
+<td>2018</td>
+<td>Yuri Bastos Wanderley</td>
+<td>1427430</td>
+<td>5120180004156</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>JAC</td>
+<td>2018</td>
+<td>Yuri Bastos Wanderley</td>
+<td>1427430</td>
+<td>5120180004164</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>JAC</td>
+<td>2018</td>
+<td>Yuri Bastos Wanderley</td>
+<td>1427430</td>
+<td>5120180004172</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>JAC</td>
+<td>2018</td>
+<td>Yuri Bastos Wanderley</td>
+<td>1427430</td>
+<td>5120180004180</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>JAC</td>
+<td>2018</td>
+<td>Yuri Bastos Wanderley</td>
+<td>1427430</td>
+<td>5120180007953</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>JAC</td>
+<td>2014</td>
+<td>Juciely Carvalho Maia</td>
+<td>3155537</td>
+<td>1020140169776</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>JAC</td>
+<td>2014</td>
+<td>Juciely Carvalho Maia</td>
+<td>3155537</td>
+<td>1020140169784</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>JAC</td>
+<td>2013</td>
+<td>Vanessa dos Santos Rios</td>
+<td>3271674</td>
+<td>5120160015870</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>JAC</td>
+<td>2011</td>
+<td>Vitor Otavio Silva Teixeira de Souza</td>
+<td>2148477</td>
+<td>129140</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>JAG</td>
+<td>2023</td>
+<td>Bartolomeu das Neves Marques</td>
+<td>3518421</td>
+<td>512024002386</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>JAG</td>
+<td>2009</td>
+<td>Luciana de Matos</td>
+<td>1050864</td>
+<td>0900200</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>JEQ</td>
+<td>2011</td>
+<td>Vitor Silva Vieira</td>
+<td>1073293</td>
+<td>532246</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>JEQ</td>
+<td>2009</td>
+<td>Nubia Moura Ribeiro</td>
+<td>1375635</td>
+<td>09039570</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>JEQ</td>
+<td>2008</td>
+<td>Nubia Moura Ribeiro</td>
+<td>1375635</td>
+<td>011090000508</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>JUA</td>
+<td>2023</td>
+<td>Selma Maria Rodrigues de Andrade Alves</td>
+<td>1105340</td>
+<td>5120230018465</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>JUA</td>
+<td>2023</td>
+<td>Selma Maria Rodrigues de Andrade Alves</td>
+<td>1105340</td>
+<td>5120230040304</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>JUA</td>
+<td>2022</td>
+<td>Marcos Antonio Bezerra Santos Filho</td>
+<td>3112736</td>
+<td>10202202258</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>LF</td>
+<td>2026</td>
+<td>Marcio Luis Valenca Araujo</td>
+<td>2148475</td>
+<td>5120260005051</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>LF</td>
+<td>2026</td>
+<td>Marcio Luis Valenca Araujo</td>
+<td>2148475</td>
+<td>5120260005043</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>LF</td>
+<td>2025</td>
+<td>Adriana Vieira dos Santos</td>
+<td>2693067</td>
+<td>10202500927</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>LF</td>
+<td>2024</td>
+<td>Marcio Luis Valenca Araujo</td>
+<td>2148475</td>
+<td>5120240022520</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>LF</td>
+<td>2023</td>
+<td>Julita Maria Freitas Coelho</td>
+<td>1991887</td>
+<td>5120230011908</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>LF</td>
+<td>2022</td>
+<td>Handerson Jorge Dourado Leite</td>
+<td>1189954</td>
+<td>5120220008556</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>LF</td>
+<td>2022</td>
+<td>Luiz Claudio Machado dos Santos</td>
+<td>1667861</td>
+<td>5120230001554</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>LF</td>
+<td>2022</td>
+<td>Manoel Messias Santos de Oliveira</td>
+<td>3306509</td>
+<td>5120220029693</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>SF</td>
+<td>2022</td>
+<td>Manoel Messias Santos de Oliveira</td>
+<td>3306509</td>
+<td>5120220029693</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>SSA</td>
+<td>2022</td>
+<td>Manoel Messias Santos de Oliveira</td>
+<td>3306509</td>
+<td>5120220029693</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>LF</td>
+<td>2022</td>
+<td>Marcio Luis Valenca Araujo</td>
+<td>2148475</td>
+<td>5120220005441</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>SAJ</td>
+<td>2020</td>
+<td>Marcio Luis Valenca Araujo</td>
+<td>2148475</td>
+<td>5120220005441</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>VAL</td>
+<td>2022</td>
+<td>Marcio Luis Valenca Araujo</td>
+<td>2148475</td>
+<td>5120220005441</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>LF</td>
+<td>2022</td>
+<td>Marcio Luis Valenca Araujo</td>
+<td>2148475</td>
+<td>5120220005425</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>SAJ</td>
+<td>2020</td>
+<td>Marcio Luis Valenca Araujo</td>
+<td>2148475</td>
+<td>5120220005425</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>VAL</td>
+<td>2022</td>
+<td>Marcio Luis Valenca Araujo</td>
+<td>2148475</td>
+<td>5120220005425</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>LF</td>
+<td>2022</td>
+<td>Marcio Luis Valenca Araujo</td>
+<td>2148475</td>
+<td>5120220005433</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>SAJ</td>
+<td>2020</td>
+<td>Marcio Luis Valenca Araujo</td>
+<td>2148475</td>
+<td>5120220005433</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>VAL</td>
+<td>2022</td>
+<td>Marcio Luis Valenca Araujo</td>
+<td>2148475</td>
+<td>5120220005433</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>LF</td>
+<td>2022</td>
+<td>Marcio Luis Valenca Araujo</td>
+<td>2148475</td>
+<td>5120220005417</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>SAJ</td>
+<td>2020</td>
+<td>Marcio Luis Valenca Araujo</td>
+<td>2148475</td>
+<td>5120220005417</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>VAL</td>
+<td>2022</td>
+<td>Marcio Luis Valenca Araujo</td>
+<td>2148475</td>
+<td>5120220005417</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>LF</td>
+<td>2022</td>
+<td>Marcio Luis Valenca Araujo</td>
+<td>2148475</td>
+<td>5120220005409</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>SAJ</td>
+<td>2020</td>
+<td>Marcio Luis Valenca Araujo</td>
+<td>2148475</td>
+<td>5120220005409</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>VAL</td>
+<td>2022</td>
+<td>Marcio Luis Valenca Araujo</td>
+<td>2148475</td>
+<td>5120220005409</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>LF</td>
+<td>2022</td>
+<td>Marcio Luis Valenca Araujo</td>
+<td>2148475</td>
+<td>5120220005450</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>SAJ</td>
+<td>2020</td>
+<td>Marcio Luis Valenca Araujo</td>
+<td>2148475</td>
+<td>5120220005450</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>VAL</td>
+<td>2022</td>
+<td>Marcio Luis Valenca Araujo</td>
+<td>2148475</td>
+<td>5120220005450</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>LF</td>
+<td>2022</td>
+<td>Marcio Luis Valenca Araujo</td>
+<td>2148475</td>
+<td>5120220002507</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>VAL</td>
+<td>2022</td>
+<td>Marcio Luis Valenca Araujo</td>
+<td>2148475</td>
+<td>5120220002507</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>LF</td>
+<td>2022</td>
+<td>Marcio Luis Valenca Araujo</td>
+<td>2148475</td>
+<td>5120220002523</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>SAJ</td>
+<td>2020</td>
+<td>Marcio Luis Valenca Araujo</td>
+<td>2148475</td>
+<td>5120220002523</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>VAL</td>
+<td>2022</td>
+<td>Marcio Luis Valenca Araujo</td>
+<td>2148475</td>
+<td>5120220002523</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>LF</td>
+<td>2022</td>
+<td>Marcio Luis Valenca Araujo</td>
+<td>2148475</td>
+<td>5120220002515</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>SAJ</td>
+<td>2020</td>
+<td>Marcio Luis Valenca Araujo</td>
+<td>2148475</td>
+<td>5120220002515</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>VAL</td>
+<td>2022</td>
+<td>Marcio Luis Valenca Araujo</td>
+<td>2148475</td>
+<td>5120220002515</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>LF</td>
+<td>2022</td>
+<td>Marcio Luis Valenca Araujo</td>
+<td>2148475</td>
+<td>5120220002493</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>VAL</td>
+<td>2022</td>
+<td>Marcio Luis Valenca Araujo</td>
+<td>2148475</td>
+<td>5120220002493</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>LF</td>
+<td>2022</td>
+<td>Marcio Luis Valenca Araujo</td>
+<td>2148475</td>
+<td>5120220001322</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>SAJ</td>
+<td>2020</td>
+<td>Marcio Luis Valenca Araujo</td>
+<td>2148475</td>
+<td>5120220001322</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>LF</td>
+<td>2022</td>
+<td>Marcio Luis Valenca Araujo</td>
+<td>2148475</td>
+<td>5120220001314</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>SAJ</td>
+<td>2022</td>
+<td>Marcio Luis Valenca Araujo</td>
+<td>2148475</td>
+<td>5120220001314</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>LF</td>
+<td>2022</td>
+<td>Marcio Luis Valenca Araujo</td>
+<td>2148475</td>
+<td>5120220001306</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>SAJ</td>
+<td>2022</td>
+<td>Marcio Luis Valenca Araujo</td>
+<td>2148475</td>
+<td>5120220001306</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>LF</td>
+<td>2022</td>
+<td>Marcio Luis Valenca Araujo</td>
+<td>2148475</td>
+<td>5120220001292</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>SAJ</td>
+<td>2020</td>
+<td>Marcio Luis Valenca Araujo</td>
+<td>2148475</td>
+<td>5120220001292</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>LF</td>
+<td>2022</td>
+<td>Marcio Luis Valenca Araujo</td>
+<td>2148475</td>
+<td>5120220001284</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>SAJ</td>
+<td>2022</td>
+<td>Marcio Luis Valenca Araujo</td>
+<td>2148475</td>
+<td>5120220001284</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>LF</td>
+<td>2022</td>
+<td>Marcio Luis Valenca Araujo</td>
+<td>2148475</td>
+<td>5120220002485</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>VAL</td>
+<td>2022</td>
+<td>Marcio Luis Valenca Araujo</td>
+<td>2148475</td>
+<td>5120220002485</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>LF</td>
+<td>2021</td>
+<td>Marcio Luis Valenca Araujo</td>
+<td>2148475</td>
+<td>5120210020120</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>LF</td>
+<td>2020</td>
+<td>Isabelle Matos Pinheiro</td>
+<td>1919552</td>
+<td>5120200024769</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>LF</td>
+<td>2020</td>
+<td>Marcio Luis Valenca Araujo</td>
+<td>2148475</td>
+<td>5120200024769</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>SSA</td>
+<td>2020</td>
+<td>Isabelle Matos Pinheiro</td>
+<td>1919552</td>
+<td>5120200024769</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>LF</td>
+<td>2019</td>
+<td>Marcio Luis Valenca Araujo</td>
+<td>2148475</td>
+<td>5120190019342</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>LF</td>
+<td>2018</td>
+<td>Edson Jose Dias Machado Filho</td>
+<td>2647987</td>
+<td>5120180008640</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>LF</td>
+<td>2018</td>
+<td>Marcio Luis Valenca Araujo</td>
+<td>2148475</td>
+<td>5120180517013</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>LF</td>
+<td>2015</td>
+<td>Marcio Luis Valenca Araujo</td>
+<td>2148475</td>
+<td>5120150015923</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>LF</td>
+<td>2008</td>
+<td>Josemir da Cruz Alexandrino</td>
+<td>1098511</td>
+<td>0805723</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>PA</td>
+<td>2023</td>
+<td>Josilene Felix da Rocha</td>
+<td>1125831</td>
+<td>1020230101950</td>
+</tr>
+<tr>
+<td>Desenho Insdustrial</td>
+<td>PA</td>
+<td>2020</td>
+<td>Carlos de Moraes Brito</td>
+<td>1994508</td>
+<td>30202000435</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>PA</td>
+<td>2020</td>
+<td>Welber Leal de Araujo Miranda</td>
+<td>1722214</td>
+<td>10202001095</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>PA</td>
+<td>2017</td>
+<td>Danielle Bandeira de Mello Delgado</td>
+<td>1672792</td>
+<td>1020170129</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>PA</td>
+<td>2013</td>
+<td>Tharsia Cristiany de Carvalho Costa</td>
+<td>2170589</td>
+<td>1020130118893</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>PA</td>
+<td>2012</td>
+<td>Marley Fagundes Tavares</td>
+<td>3068997</td>
+<td>102012021136</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>PS</td>
+<td>2016</td>
+<td>Diego Cerqueira Montes</td>
+<td>3284111</td>
+<td>1020160075254</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>PS</td>
+<td>2016</td>
+<td>Diego Cerqueira Montes</td>
+<td>3284111</td>
+<td>1020160012937</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>PS</td>
+<td>2016</td>
+<td>Diego Cerqueira Montes</td>
+<td>3284111</td>
+<td>1020160011680</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>PS</td>
+<td>2016</td>
+<td>Rauldenis Almeida Fonseca Santos</td>
+<td>1218472</td>
+<td>1020160085853</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>PS</td>
+<td>2014</td>
+<td>Diego Cerqueira Montes</td>
+<td>3284111</td>
+<td>1020140286870</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>PS</td>
+<td>2014</td>
+<td>Diego Cerqueira Montes</td>
+<td>3284111</td>
+<td>1020140239669</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>PS</td>
+<td>2012</td>
+<td>Cleiton Marcio Pinto Braga</td>
+<td>3374467</td>
+<td>1020120012014</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>PS</td>
+<td>2012</td>
+<td>Luciano da Silva Lima</td>
+<td>2694702</td>
+<td>000049</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>PS</td>
+<td>2011</td>
+<td>Luciano da Silva Lima</td>
+<td>2694702</td>
+<td>000169</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>SAJ</td>
+<td>2025</td>
+<td>Leandro Costa Souza</td>
+<td>1974319</td>
+<td>5120250045280</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>SAJ</td>
+<td>2024</td>
+<td>Isabella Sampaio Santos</td>
+<td>3405152</td>
+<td>1020240112679</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>SAJ</td>
+<td>2024</td>
+<td>Peterson Albuquerque Lobato</td>
+<td>3272198</td>
+<td>10202401127</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>VAL</td>
+<td>2024</td>
+<td>Peterson Albuquerque Lobato</td>
+<td>3272198</td>
+<td>10202401127</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>SAJ</td>
+<td>2022</td>
+<td>Isabella Sampaio Santos</td>
+<td>3405152</td>
+<td>51202200024</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>SAJ</td>
+<td>2013</td>
+<td>Antonio Messias Lopes Cruz</td>
+<td>1300115</td>
+<td>512013009243</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>SAM</td>
+<td>2020</td>
+<td>Daniel dos Anjos Costa</td>
+<td>1256286</td>
+<td>5120200017410</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>SAM</td>
+<td>2020</td>
+<td>Daniel dos Anjos Costa</td>
+<td>1256286</td>
+<td>5120200012353</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>SAM</td>
+<td>2020</td>
+<td>Daniel dos Anjos Costa</td>
+<td>1256286</td>
+<td>5120200012337</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>SAM</td>
+<td>2020</td>
+<td>Daniel dos Anjos Costa</td>
+<td>1256286</td>
+<td>5120200012361</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>SAM</td>
+<td>2020</td>
+<td>Daniel dos Anjos Costa</td>
+<td>1256286</td>
+<td>5120200000037</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>SAM</td>
+<td>2019</td>
+<td>Andre Antunes Jorge</td>
+<td>2284587</td>
+<td>5120190003403</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>SEA</td>
+<td>2024</td>
+<td>Maria Alice Oliveira Costa Leal</td>
+<td>2161528</td>
+<td>5120240030441</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>SEA</td>
+<td>2023</td>
+<td>Monck Charles Nunes de Albuquerque</td>
+<td>3074421</td>
+<td>51202300377</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>SF</td>
+<td>2023</td>
+<td>Jader Cristiano Magalhaes de Albuquerque</td>
+<td>1347061</td>
+<td>5120240026894</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>SF</td>
+<td>2022</td>
+<td>Domingo Stalin Aguero Martinez</td>
+<td>1883913</td>
+<td>5120220000792</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>SF</td>
+<td>2022</td>
+<td>Leonardo Silva Menezes</td>
+<td>2164135</td>
+<td>10202201332</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>SSA</td>
+<td>2022</td>
+<td>Leonardo Silva Menezes</td>
+<td>2164135</td>
+<td>10202201332</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>SF</td>
+<td>2022</td>
+<td>Leonardo Silva Menezes</td>
+<td>2164135</td>
+<td>10202202446</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>SF</td>
+<td>2021</td>
+<td>Kilton Renan Alves Pereira</td>
+<td>1156891</td>
+<td>1020210213221</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>SF</td>
+<td>2016</td>
+<td>Marilena Meira</td>
+<td>1881227</td>
+<td>10201600558</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>SF</td>
+<td>2016</td>
+<td>Marilena Meira</td>
+<td>1881227</td>
+<td>10201600858</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>SF</td>
+<td>2015</td>
+<td>Marilena Meira</td>
+<td>1881227</td>
+<td>10201503317</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>SF</td>
+<td>2014</td>
+<td>Elba Gomes dos Santos Leal</td>
+<td>1584703</td>
+<td>1020140297618</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>SF</td>
+<td>2014</td>
+<td>Marilena Meira</td>
+<td>1881227</td>
+<td>10201402071</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>SF</td>
+<td>2014</td>
+<td>Marilena Meira</td>
+<td>1881227</td>
+<td>1020140234462</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>SF</td>
+<td>2013</td>
+<td>Marilena Meira</td>
+<td>1881227</td>
+<td>1020130212717</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>SF</td>
+<td>2013</td>
+<td>Marilena Meira</td>
+<td>1881227</td>
+<td>1020130212784</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>SF</td>
+<td>2013</td>
+<td>Marilena Meira</td>
+<td>1881227</td>
+<td>1020130212776</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>SF</td>
+<td>2012</td>
+<td>Marilena Meira</td>
+<td>1881227</td>
+<td>1020120002612</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>SF</td>
+<td>2012</td>
+<td>Marilena Meira</td>
+<td>1881227</td>
+<td>1020120002612</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>SF</td>
+<td>2012</td>
+<td>Marilena Meira</td>
+<td>1881227</td>
+<td>11120000905</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>SF</td>
+<td>2012</td>
+<td>Marilena Meira</td>
+<td>1881227</td>
+<td>1020120335298</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>SF</td>
+<td>2012</td>
+<td>Marilena Meira</td>
+<td>1881227</td>
+<td>11120000904</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>SF</td>
+<td>2012</td>
+<td>Marilena Meira</td>
+<td>1881227</td>
+<td>11120000903</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>SF</td>
+<td>2012</td>
+<td>Marilena Meira</td>
+<td>1881227</td>
+<td>1020120320215</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>SF</td>
+<td>2012</td>
+<td>Marilena Meira</td>
+<td>1881227</td>
+<td>11120000055</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>SF</td>
+<td>2011</td>
+<td>Marilena Meira</td>
+<td>1881227</td>
+<td>221106730261</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>SF</td>
+<td>2011</td>
+<td>Marilena Meira</td>
+<td>1881227</td>
+<td>00221109056839</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>SF</td>
+<td>2011</td>
+<td>Marilena Meira</td>
+<td>1881227</td>
+<td>011110000662</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>SF</td>
+<td>2011</td>
+<td>Marilena Meira</td>
+<td>1881227</td>
+<td>11044020</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>SF</td>
+<td>2010</td>
+<td>Marilena Meira</td>
+<td>1881227</td>
+<td>10201401010</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>SF</td>
+<td>2010</td>
+<td>Marilena Meira</td>
+<td>1881227</td>
+<td>10056386</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>SF</td>
+<td>2010</td>
+<td>Marilena Meira</td>
+<td>1881227</td>
+<td>10017542</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>SSA</td>
+<td>2026</td>
+<td>Antonio Gabriel Souza Almeida</td>
+<td>1802713</td>
+<td>102026000776</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>SSA</td>
+<td>2025</td>
+<td>Lucas Barbosa da Silva</td>
+<td>3508204</td>
+<td>1020250097184</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>SSA</td>
+<td>2025</td>
+<td>Marcus Vinicius Teixeira Navarro</td>
+<td>1174014</td>
+<td>51202517570</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>SSA</td>
+<td>2024</td>
+<td>Andrea de Almeida Brito</td>
+<td>1425346</td>
+<td>5120240013822</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>SSA</td>
+<td>2024</td>
+<td>Andrea de Almeida Brito</td>
+<td>1425346</td>
+<td>5120240052038</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>SSA</td>
+<td>2024</td>
+<td>Francislei Santa Anna Santos</td>
+<td>1495536</td>
+<td>1020240100</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>SSA</td>
+<td>2024</td>
+<td>Jose Alejandro Moreno Alfonzo</td>
+<td>1281331</td>
+<td>2020240045322</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>SSA</td>
+<td>2024</td>
+<td>Marcus Vinicius Linhares de Oliveira</td>
+<td>1762481</td>
+<td>5120240009221</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>SSA</td>
+<td>2023</td>
+<td>Andrea de Almeida Brito</td>
+<td>1425346</td>
+<td>5120230013765</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>SSA</td>
+<td>2023</td>
+<td>Guillermo Alberto Lopez</td>
+<td>2777235</td>
+<td>1020230009387</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>SSA</td>
+<td>2023</td>
+<td>Jose Alejandro Moreno Alfonzo</td>
+<td>1281331</td>
+<td>2020230167468</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>SSA</td>
+<td>2023</td>
+<td>Marcus Vinicius Teixeira Navarro</td>
+<td>1174014</td>
+<td>10202300872</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>SSA</td>
+<td>2022</td>
+<td>Andrea de Almeida Brito</td>
+<td>1425346</td>
+<td>5120220026538</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>SSA</td>
+<td>2022</td>
+<td>Andrea de Almeida Brito</td>
+<td>1425346</td>
+<td>5120220026546</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>SSA</td>
+<td>2022</td>
+<td>Antonio Carlos dos Santos Souza</td>
+<td>2419000</td>
+<td>5120220008</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>SSA</td>
+<td>2022</td>
+<td>Antonio Gabriel Souza Almeida</td>
+<td>1802713</td>
+<td>1020220244669</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>SSA</td>
+<td>2022</td>
+<td>Edelvio de Barros Gomes</td>
+<td>1968191</td>
+<td>10202201552</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>SSA</td>
+<td>2022</td>
+<td>Edelvio de Barros Gomes</td>
+<td>1968191</td>
+<td>10202201438</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>SSA</td>
+<td>2022</td>
+<td>Luana Bastos Santos</td>
+<td>3346027</td>
+<td>10202202107</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>SSA</td>
+<td>2022</td>
+<td>Marcus Vinicius Teixeira Navarro</td>
+<td>1174014</td>
+<td>1020220133255</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>SSA</td>
+<td>2021</td>
+<td>Antonio Gabriel Souza Almeida</td>
+<td>1802713</td>
+<td>202021008322</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>SSA</td>
+<td>2021</td>
+<td>* não mapeado *</td>
+<td>&lt;VinculoQueryset [&lt;Vinculo: Ebenezer Silva Cavalcanti (268728) (Servidor)&gt;]&gt;</td>
+<td>2020210243770</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>SSA</td>
+<td>2021</td>
+<td>Michell Thompson Ferreira Santiago</td>
+<td>3191863</td>
+<td>1020210241306</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>SSA</td>
+<td>2020</td>
+<td>Ana Paula dos Anjos Cordeiro</td>
+<td>1533370</td>
+<td>1020200109545</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>SSA</td>
+<td>2020</td>
+<td>Andrea de Almeida Brito</td>
+<td>1425346</td>
+<td>5120200011500</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>SSA</td>
+<td>2020</td>
+<td>Andrea de Almeida Brito</td>
+<td>1425346</td>
+<td>5120200011497</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>SSA</td>
+<td>2020</td>
+<td>Andrea de Almeida Brito</td>
+<td>1425346</td>
+<td>5120200010857</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>SSA</td>
+<td>2020</td>
+<td>Florencio Mendes Oliveira Filho</td>
+<td>1049966</td>
+<td>5120200010857</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>SSA</td>
+<td>2020</td>
+<td>Andrea de Almeida Brito</td>
+<td>1425346</td>
+<td>5120200010830</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>SSA</td>
+<td>2020</td>
+<td>Florencio Mendes Oliveira Filho</td>
+<td>1049966</td>
+<td>5120200010830</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>SSA</td>
+<td>2020</td>
+<td>Antonio Carlos dos Santos Souza</td>
+<td>2419000</td>
+<td>1020200139568</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>SSA</td>
+<td>2020</td>
+<td>Edgard Bacic de Carvalho</td>
+<td>1862047</td>
+<td>10202002549</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>SSA</td>
+<td>2020</td>
+<td>Edgard Bacic de Carvalho</td>
+<td>1862047</td>
+<td>10202002057</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>SSA</td>
+<td>2020</td>
+<td>Florencio Mendes Oliveira Filho</td>
+<td>1049966</td>
+<td>5120200023290</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>SSA</td>
+<td>2020</td>
+<td>Florencio Mendes Oliveira Filho</td>
+<td>1049966</td>
+<td>5120200020003</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>SSA</td>
+<td>2020</td>
+<td>Florencio Mendes Oliveira Filho</td>
+<td>1049966</td>
+<td>5120200018645</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>SSA</td>
+<td>2020</td>
+<td>Florencio Mendes Oliveira Filho</td>
+<td>1049966</td>
+<td>512020001287</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>SSA</td>
+<td>2020</td>
+<td>Florencio Mendes Oliveira Filho</td>
+<td>1049966</td>
+<td>512020001154</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>SSA</td>
+<td>2020</td>
+<td>Florencio Mendes Oliveira Filho</td>
+<td>1049966</td>
+<td>5120200011551</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>SSA</td>
+<td>2020</td>
+<td>Florencio Mendes Oliveira Filho</td>
+<td>1049966</td>
+<td>510200011497</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>SSA</td>
+<td>2020</td>
+<td>Isabelle Matos Pinheiro</td>
+<td>1919552</td>
+<td>10202001395</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>SSA</td>
+<td>2020</td>
+<td>Jose Alejandro Moreno Alfonzo</td>
+<td>1281331</td>
+<td>5120220026600</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>SSA</td>
+<td>2020</td>
+<td>Juliana Ribeiro Manhaes da Silva</td>
+<td>1572294</td>
+<td>5120220010208</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>SSA</td>
+<td>2020</td>
+<td>Luanda Kivia de Oliveira Rodrigues</td>
+<td>1929527</td>
+<td>10202001550</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>SSA</td>
+<td>2020</td>
+<td>Lucas Barbosa da Silva</td>
+<td>3508204</td>
+<td>10202000125</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>SSA</td>
+<td>2020</td>
+<td>Regina Maria Cunha Leite</td>
+<td>1936148</td>
+<td>5120200026230</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>SSA</td>
+<td>2020</td>
+<td>Vitor Leao Filardi</td>
+<td>1768397</td>
+<td>1020200012</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>SSA</td>
+<td>2020</td>
+<td>* não mapeado *</td>
+<td>&lt;VinculoQueryset [&lt;Vinculo: Wilson Otto Gomes Batista (282497) (Servidor)&gt;]&gt;</td>
+<td>51202000229</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>SSA</td>
+<td>2019</td>
+<td>Antonio Carlos dos Santos Souza</td>
+<td>2419000</td>
+<td>5120190008332</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>SSA</td>
+<td>2019</td>
+<td>Antonio Carlos dos Santos Souza</td>
+<td>2419000</td>
+<td>5120190002970</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>SSA</td>
+<td>2019</td>
+<td>Elane Santos Souza</td>
+<td>3441310</td>
+<td>2020190132</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>SSA</td>
+<td>2019</td>
+<td>Jose Mario Araujo</td>
+<td>1301662</td>
+<td>202019013245</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>SSA</td>
+<td>2019</td>
+<td>Mayara Cristina Fernandes de Carvalho</td>
+<td>3250680</td>
+<td>1020190060778</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>SSA</td>
+<td>2019</td>
+<td>Tiago de Oliveira Silva</td>
+<td>1272360</td>
+<td>5120190017340</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>SSA</td>
+<td>2019</td>
+<td>Tiago de Oliveira Silva</td>
+<td>1272360</td>
+<td>5120190017358</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>SSA</td>
+<td>2019</td>
+<td>Tiago de Oliveira Silva</td>
+<td>1272360</td>
+<td>5120190017366</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>SSA</td>
+<td>2019</td>
+<td>* não mapeado *</td>
+<td>&lt;VinculoQueryset [&lt;Vinculo: Wilson Otto Gomes Batista (282497) (Servidor)&gt;]&gt;</td>
+<td>51201900233</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>SSA</td>
+<td>2018</td>
+<td>Antonio Carlos dos Santos Souza</td>
+<td>2419000</td>
+<td>5120180010431</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>SSA</td>
+<td>2018</td>
+<td>Jose Alejandro Moreno Alfonzo</td>
+<td>1281331</td>
+<td>1020180161300</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>SSA</td>
+<td>2018</td>
+<td>Luanda Kivia de Oliveira Rodrigues</td>
+<td>1929527</td>
+<td>20201807265</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>SSA</td>
+<td>2017</td>
+<td>Andrea de Almeida Brito</td>
+<td>1425346</td>
+<td>5120170007446</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>SSA</td>
+<td>2017</td>
+<td>Simone Pereira de Lima</td>
+<td>1912797</td>
+<td>1020170018750</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>SSA</td>
+<td>2017</td>
+<td>* não mapeado *</td>
+<td>&lt;VinculoQueryset [&lt;Vinculo: Wagna Piler Carvalho dos Santos (393182) (Servidor)&gt;]&gt;</td>
+<td>112017010393</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>SSA</td>
+<td>2017</td>
+<td>* não mapeado *</td>
+<td>&lt;VinculoQueryset [&lt;Vinculo: Wagna Piler Carvalho dos Santos (393182) (Servidor)&gt;]&gt;</td>
+<td>10201701039</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>SSA</td>
+<td>2016</td>
+<td>Francislei Santa Anna Santos</td>
+<td>1495536</td>
+<td>1020160124751</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>SSA</td>
+<td>2016</td>
+<td>* não mapeado *</td>
+<td>&lt;VinculoQueryset [&lt;Vinculo: Raimundo Jorge Abreu de Jesus (268587) (Servidor)&gt;]&gt;</td>
+<td>1020160186463</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>SSA</td>
+<td>2016</td>
+<td>Vitor Leao Filardi</td>
+<td>1768397</td>
+<td>1020160153484</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>SSA</td>
+<td>2016</td>
+<td>* não mapeado *</td>
+<td>&lt;VinculoQueryset [&lt;Vinculo: Wilson Otto Gomes Batista (282497) (Servidor)&gt;]&gt;</td>
+<td>10201601247</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>SSA</td>
+<td>2015</td>
+<td>Andrea de Almeida Brito</td>
+<td>1425346</td>
+<td>20160003758</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>SSA</td>
+<td>2015</td>
+<td>Edelvio de Barros Gomes</td>
+<td>1968191</td>
+<td>10201502392</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>SSA</td>
+<td>2015</td>
+<td>Francislei Santa Anna Santos</td>
+<td>1495536</td>
+<td>1020150324480</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>SSA</td>
+<td>2015</td>
+<td>Luciene Santos Carvalho</td>
+<td>1575401</td>
+<td>1020150326041</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>SSA</td>
+<td>2015</td>
+<td>Luciene Santos Carvalho</td>
+<td>1575401</td>
+<td>1020150326050</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>SSA</td>
+<td>2015</td>
+<td>Walter Alves Gomes Junior</td>
+<td>1575153</td>
+<td>1020150239262</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>SSA</td>
+<td>2014</td>
+<td>* não mapeado *</td>
+<td>&lt;VinculoQueryset [&lt;Vinculo: Claudio Mario Nascimento (268736) (Servidor)&gt;]&gt;</td>
+<td>102015012082</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>SSA</td>
+<td>2014</td>
+<td>Denise Santos de Sa</td>
+<td>1611949</td>
+<td>1020140272909</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>SSA</td>
+<td>2014</td>
+<td>* não mapeado *</td>
+<td>&lt;VinculoQueryset [&lt;Vinculo: Ebenezer Silva Cavalcanti (268728) (Servidor)&gt;]&gt;</td>
+<td>1020140307400</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>SSA</td>
+<td>2014</td>
+<td>Lauro Cassio Martins de Paula</td>
+<td>3087989</td>
+<td>5120130014816</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>SSA</td>
+<td>2014</td>
+<td>Lauro Cassio Martins de Paula</td>
+<td>3087989</td>
+<td>5120130014573</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>SSA</td>
+<td>2014</td>
+<td>Luanda Kivia de Oliveira Rodrigues</td>
+<td>1929527</td>
+<td>1020140289623</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>SSA</td>
+<td>2014</td>
+<td>Stefani Silva Pires</td>
+<td>1962670</td>
+<td>1478231991855</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>SSA</td>
+<td>2014</td>
+<td>Marcus Vinicius Teixeira Navarro</td>
+<td>1174014</td>
+<td>51201300120</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>SSA</td>
+<td>2014</td>
+<td>Marcus Vinicius Teixeira Navarro</td>
+<td>1174014</td>
+<td>51201300120</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>SSA</td>
+<td>2013</td>
+<td>Marcus Vinicius Teixeira Navarro</td>
+<td>1174014</td>
+<td>51201300120</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>SSA</td>
+<td>2013</td>
+<td>Marcus Vinicius Teixeira Navarro</td>
+<td>1174014</td>
+<td>51201300120</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>SSA</td>
+<td>2013</td>
+<td>Henrique Jose Caribe Ribeiro</td>
+<td>1178075</td>
+<td>1020130144886</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>SSA</td>
+<td>2013</td>
+<td>Marcus Fernandes da Silva</td>
+<td>1647986</td>
+<td>5120140003396</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>SSA</td>
+<td>2011</td>
+<td>Eduardo Telmo Fonseca Santos</td>
+<td>1334407</td>
+<td>us20130169827a1</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>SSA</td>
+<td>2011</td>
+<td>Eduardo Telmo Fonseca Santos</td>
+<td>1334407</td>
+<td>us20130170765a1</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>SSA</td>
+<td>2011</td>
+<td>Eduardo Telmo Fonseca Santos</td>
+<td>1334407</td>
+<td>221101163849</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>SSA</td>
+<td>2011</td>
+<td>Rodrigo Estevam Coelho</td>
+<td>1141354</td>
+<td>0000221104434231</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>SSA</td>
+<td>2011</td>
+<td>Rodrigo Estevam Coelho</td>
+<td>1141354</td>
+<td>0000221104434126</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>SSA</td>
+<td>2011</td>
+<td>Vitor Leao Filardi</td>
+<td>1768397</td>
+<td>221109055280</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>SSA</td>
+<td>2011</td>
+<td>* não mapeado *</td>
+<td>&lt;VinculoQueryset [&lt;Vinculo: Wilson Otto Gomes Batista (282497) (Servidor)&gt;]&gt;</td>
+<td>1101586</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>SSA</td>
+<td>2010</td>
+<td>Allan Edgard Silva Freitas</td>
+<td>1367321</td>
+<td>5120130010489</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>SSA</td>
+<td>2010</td>
+<td>Edelvio de Barros Gomes</td>
+<td>1968191</td>
+<td>10009973</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>SSA</td>
+<td>2010</td>
+<td>Eduardo Telmo Fonseca Santos</td>
+<td>1334407</td>
+<td>us20120173347a1</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>SSA</td>
+<td>2010</td>
+<td>Eduardo Telmo Fonseca Santos</td>
+<td>1334407</td>
+<td>us20120170801a</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>SSA</td>
+<td>2010</td>
+<td>Eduardo Telmo Fonseca Santos</td>
+<td>1334407</td>
+<td>us20110155808a1</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>SSA</td>
+<td>2009</td>
+<td>Eduardo Telmo Fonseca Santos</td>
+<td>1334407</td>
+<td>0906032</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>SSA</td>
+<td>2009</td>
+<td>Genisson Silva Coutinho</td>
+<td>1190597</td>
+<td>0904831</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>SSA</td>
+<td>2008</td>
+<td>Cristiane Freire Silvao</td>
+<td>1190572</td>
+<td>8802959</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>SSA</td>
+<td>2008</td>
+<td>Vanessa Mendes Santos</td>
+<td>1521608</td>
+<td>0802052</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>SSA</td>
+<td>2006</td>
+<td>Antonio Carlos dos Santos Souza</td>
+<td>2419000</td>
+<td>072066</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>SSA</td>
+<td>2004</td>
+<td>Paschoal Molinari Neto</td>
+<td>3300847</td>
+<td>061922</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>SSA</td>
+<td>2002</td>
+<td>Vanessa Mendes Santos</td>
+<td>1521608</td>
+<td>0200007</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>VAL</td>
+<td>2025</td>
+<td>Peterson Albuquerque Lobato</td>
+<td>3272198</td>
+<td>5120250025130</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>VAL</td>
+<td>2024</td>
+<td>Peterson Albuquerque Lobato</td>
+<td>3272198</td>
+<td>10202401126</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>VAL</td>
+<td>2022</td>
+<td>Peterson Albuquerque Lobato</td>
+<td>3272198</td>
+<td>10202201732</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>VAL</td>
+<td>2021</td>
+<td>Peterson Albuquerque Lobato</td>
+<td>3272198</td>
+<td>5120210032136</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>VAL</td>
+<td>2019</td>
+<td>Peterson Albuquerque Lobato</td>
+<td>3272198</td>
+<td>5120190015150</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>VAL</td>
+<td>2019</td>
+<td>Peterson Albuquerque Lobato</td>
+<td>3272198</td>
+<td>5120190015177</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>VAL</td>
+<td>2019</td>
+<td>Peterson Albuquerque Lobato</td>
+<td>3272198</td>
+<td>5120190015126</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>VAL</td>
+<td>2019</td>
+<td>Peterson Albuquerque Lobato</td>
+<td>3272198</td>
+<td>5120190015169</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>VAL</td>
+<td>2019</td>
+<td>Peterson Albuquerque Lobato</td>
+<td>3272198</td>
+<td>5120190009878</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>VAL</td>
+<td>2019</td>
+<td>Peterson Albuquerque Lobato</td>
+<td>3272198</td>
+<td>1020190093838</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>VAL</td>
+<td>2017</td>
+<td>Ivana Carolina Alves da Silva Souza</td>
+<td>3388957</td>
+<td>5120180012051</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>VAL</td>
+<td>2011</td>
+<td>Raigenis da Paz Fiuza</td>
+<td>1586087</td>
+<td>011110000865</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>VAL</td>
+<td>2011</td>
+<td>Raigenis da Paz Fiuza</td>
+<td>1586087</td>
+<td>10027482</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>VAL</td>
+<td>2011</td>
+<td>Vanessa dos Santos Rios</td>
+<td>3271674</td>
+<td>115761</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>VAL</td>
+<td>2010</td>
+<td>Raigenis da Paz Fiuza</td>
+<td>1586087</td>
+<td>10027483</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>VAL</td>
+<td>2010</td>
+<td>Raigenis da Paz Fiuza</td>
+<td>1586087</td>
+<td>001080000830</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>VAL</td>
+<td>2009</td>
+<td>Peterson Albuquerque Lobato</td>
+<td>3272198</td>
+<td>698818022</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>VAL</td>
+<td>2009</td>
+<td>Raigenis da Paz Fiuza</td>
+<td>1586087</td>
+<td>011090000769</td>
+</tr>
+<tr>
+<td>Desenho Insdustrial</td>
+<td>VC</td>
+<td>2023</td>
+<td>Tarcisio Mereles Angelo Araujo</td>
+<td>3519630</td>
+<td>3020230024174</td>
+</tr>
+<tr>
+<td>Desenho Insdustrial</td>
+<td>VC</td>
+<td>2023</td>
+<td>Tarcisio Mereles Angelo Araujo</td>
+<td>3519630</td>
+<td>3020230024190</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>VC</td>
+<td>2023</td>
+<td>Tarcisio Mereles Angelo Araujo</td>
+<td>3519630</td>
+<td>5120230029262</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>VC</td>
+<td>2022</td>
+<td>Antonio de Araujo Pereira</td>
+<td>1281266</td>
+<td>000</td>
+</tr>
+<tr>
+<td>Software</td>
+<td>VC</td>
+<td>2021</td>
+<td>Alexandro dos Santos Silva</td>
+<td>2628146</td>
+<td>5120210021142</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>VC</td>
+<td>2015</td>
+<td>Marcelo Mendonca dos Santos</td>
+<td>2726818</td>
+<td>1020150103832</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>VC</td>
+<td>2015</td>
+<td>Marcelo Mendonca dos Santos</td>
+<td>2726818</td>
+<td>1020150103662</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>VC</td>
+<td>2014</td>
+<td>Bruna Figueredo Lopes Mosckem</td>
+<td>1318633</td>
+<td>1020140173978</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>VC</td>
+<td>2013</td>
+<td>Alberto dos Santos Reboucas</td>
+<td>2214347</td>
+<td>1020130289299</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>VC</td>
+<td>2012</td>
+<td>Jaime dos Santos Filho</td>
+<td>1301613</td>
+<td>1020120014238</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>VC</td>
+<td>2010</td>
+<td>ANDREA LOPES DE OLIVEIRA FERREIRA</td>
+<td>1548512</td>
+<td>7648831b2</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>VC</td>
+<td>2008</td>
+<td>ANDREA LOPES DE OLIVEIRA FERREIRA</td>
+<td>1548512</td>
+<td>040508221wo</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>VC</td>
+<td>2008</td>
+<td>Alberto dos Santos Reboucas</td>
+<td>2214347</td>
+<td>08057974</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>VC</td>
+<td>2006</td>
+<td>ANDREA LOPES DE OLIVEIRA FERREIRA</td>
+<td>1548512</td>
+<td>20060127971</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>VC</td>
+<td>2005</td>
+<td>ANDREA LOPES DE OLIVEIRA FERREIRA</td>
+<td>1548512</td>
+<td>us2006127971a1</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>VC</td>
+<td>2005</td>
+<td>ANDREA LOPES DE OLIVEIRA FERREIRA</td>
+<td>1548512</td>
+<td>in200502272p1</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>VC</td>
+<td>2003</td>
+<td>ANDREA LOPES DE OLIVEIRA FERREIRA</td>
+<td>1548512</td>
+<td>cn1732256a</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>VC</td>
+<td>2003</td>
+<td>ANDREA LOPES DE OLIVEIRA FERREIRA</td>
+<td>1548512</td>
+<td>au2003283088a8</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>VC</td>
+<td>2003</td>
+<td>ANDREA LOPES DE OLIVEIRA FERREIRA</td>
+<td>1548512</td>
+<td>wo2004050822a1</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>VC</td>
+<td>2003</td>
+<td>ANDREA LOPES DE OLIVEIRA FERREIRA</td>
+<td>1548512</td>
+<td>ep1565546a1</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>VC</td>
+<td>2003</td>
+<td>ANDREA LOPES DE OLIVEIRA FERREIRA</td>
+<td>1548512</td>
+<td>au2003283088a1</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>VC</td>
+<td>2002</td>
+<td>ANDREA LOPES DE OLIVEIRA FERREIRA</td>
+<td>1548512</td>
+<td>200205242a</td>
+</tr>
+<tr>
+<td>Patente</td>
+<td>VC</td>
+<td>2001</td>
+<td>Elvio Prado da Silva</td>
+<td>1807942</td>
+<td>81036019</td>
+</tr>
+</tbody></table>
+<h2 id="4-distribuicao-temporal" class="atx">4. Distribuição Temporal</h2>
+<table>
+<thead>
+<tr>
+<th>Ano</th>
+<th>DINOV</th>
+<th>Dashboard</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>2001</td>
+<td>0</td>
+<td>1</td>
+</tr>
+<tr>
+<td>2002</td>
+<td>0</td>
+<td>2</td>
+</tr>
+<tr>
+<td>2003</td>
+<td>0</td>
+<td>5</td>
+</tr>
+<tr>
+<td>2004</td>
+<td>0</td>
+<td>1</td>
+</tr>
+<tr>
+<td>2005</td>
+<td>0</td>
+<td>2</td>
+</tr>
+<tr>
+<td>2006</td>
+<td>0</td>
+<td>2</td>
+</tr>
+<tr>
+<td>2008</td>
+<td>3</td>
+<td>9</td>
+</tr>
+<tr>
+<td>2009</td>
+<td>1</td>
+<td>7</td>
+</tr>
+<tr>
+<td>2010</td>
+<td>1</td>
+<td>11</td>
+</tr>
+<tr>
+<td>2011</td>
+<td>4</td>
+<td>25</td>
+</tr>
+<tr>
+<td>2012</td>
+<td>4</td>
+<td>27</td>
+</tr>
+<tr>
+<td>2013</td>
+<td>4</td>
+<td>19</td>
+</tr>
+<tr>
+<td>2014</td>
+<td>4</td>
+<td>31</td>
+</tr>
+<tr>
+<td>2015</td>
+<td>7</td>
+<td>23</td>
+</tr>
+<tr>
+<td>2016</td>
+<td>5</td>
+<td>24</td>
+</tr>
+<tr>
+<td>2017</td>
+<td>4</td>
+<td>22</td>
+</tr>
+<tr>
+<td>2018</td>
+<td>6</td>
+<td>25</td>
+</tr>
+<tr>
+<td>2019</td>
+<td>9</td>
+<td>47</td>
+</tr>
+<tr>
+<td>2020</td>
+<td>9</td>
+<td>101</td>
+</tr>
+<tr>
+<td>2021</td>
+<td>7</td>
+<td>54</td>
+</tr>
+<tr>
+<td>2022</td>
+<td>12</td>
+<td>226</td>
+</tr>
+<tr>
+<td>2023</td>
+<td>13</td>
+<td>59</td>
+</tr>
+<tr>
+<td>2024</td>
+<td>19</td>
+<td>72</td>
+</tr>
+<tr>
+<td>2025</td>
+<td>33</td>
+<td>51</td>
+</tr>
+<tr>
+<td>2026</td>
+<td>2</td>
+<td>7</td>
+</tr>
+</tbody></table>
+<h2 id="5-distribuicao-por-campus" class="atx">5. Distribuição por Campus</h2>
+<table>
+<thead>
+<tr>
+<th>Campus</th>
+<th>DINOV</th>
+<th>Dashboard</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>SSA</td>
+<td>86</td>
+<td>282</td>
+</tr>
+<tr>
+<td>LF</td>
+<td>11</td>
+<td>133</td>
+</tr>
+<tr>
+<td>VAL</td>
+<td>13</td>
+<td>84</td>
+</tr>
+<tr>
+<td>SAJ</td>
+<td>0</td>
+<td>51</td>
+</tr>
+<tr>
+<td>SF</td>
+<td>3</td>
+<td>46</td>
+</tr>
+<tr>
+<td>CAM</td>
+<td>5</td>
+<td>44</td>
+</tr>
+<tr>
+<td>JAC</td>
+<td>0</td>
+<td>40</td>
+</tr>
+<tr>
+<td>FS</td>
+<td>4</td>
+<td>30</td>
+</tr>
+<tr>
+<td>VC</td>
+<td>3</td>
+<td>25</td>
+</tr>
+<tr>
+<td>IRE</td>
+<td>1</td>
+<td>17</td>
+</tr>
+<tr>
+<td>EUN</td>
+<td>2</td>
+<td>15</td>
+</tr>
+<tr>
+<td>ILH</td>
+<td>4</td>
+<td>13</td>
+</tr>
+<tr>
+<td>EC</td>
+<td>0</td>
+<td>14</td>
+</tr>
+<tr>
+<td>SAM</td>
+<td>5</td>
+<td>8</td>
+</tr>
+<tr>
+<td>JAG</td>
+<td>0</td>
+<td>12</td>
+</tr>
+<tr>
+<td>PA</td>
+<td>4</td>
+<td>6</td>
+</tr>
+<tr>
+<td>BAR</td>
+<td>0</td>
+<td>10</td>
+</tr>
+<tr>
+<td>PS</td>
+<td>0</td>
+<td>9</td>
+</tr>
+<tr>
+<td>SEA</td>
+<td>2</td>
+<td>4</td>
+</tr>
+<tr>
+<td>JEQ</td>
+<td>0</td>
+<td>6</td>
+</tr>
+<tr>
+<td>JUA</td>
+<td>0</td>
+<td>4</td>
+</tr>
+<tr>
+<td>desconhecido</td>
+<td>2</td>
+<td>0</td>
+</tr>
+<tr>
+<td>PIS</td>
+<td>1</td>
+<td>0</td>
+</tr>
+<tr>
+<td>Lauro de Freitas, Camaçari e Feira de Santana</td>
+<td>1</td>
+<td>0</td>
+</tr>
+</tbody></table>
+<h2 id="6-registros-casados--consistencia" class="atx">6. Registros Casados — Consistência</h2>
+<p>Total de chaves casadas: <strong>112</strong>. Abaixo, comparamos tipo, ano e campus dos registros que aparecem em ambas as fontes.</p>
+<h3 id="61-tipo-dashboard-vs-objeto" class="atx">6.1 Tipo (Dashboard vs OBJETO)</h3>
+<table>
+<thead>
+<tr>
+<th>Resultado</th>
+<th>Quantidade</th>
+<th>%</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Consistente</td>
+<td>296</td>
+<td>100.0%</td>
+</tr>
+<tr>
+<td>Divergente</td>
+<td>0</td>
+<td>0.0%</td>
+</tr>
+</tbody></table>
+<h3 id="62-ano-dashboard-vs-ano-deposito" class="atx">6.2 Ano (Dashboard vs ANO DEPÓSITO)</h3>
+<table>
+<thead>
+<tr>
+<th>Resultado</th>
+<th>Quantidade</th>
+<th>%</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Consistente</td>
+<td>208</td>
+<td>70.3%</td>
+</tr>
+<tr>
+<td>Divergente</td>
+<td>88</td>
+<td>29.7%</td>
+</tr>
+</tbody></table>
+<p><strong>Divergências de Ano:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Nº INPI (DINOV)</th>
+<th>ANO DEPÓSITO (DINOV)</th>
+<th>Ano (Dashboard)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>BR 102015026201-9</td>
+<td>2015</td>
+<td>2017</td>
+</tr>
+<tr>
+<td>BR 102015026201-9</td>
+<td>2015</td>
+<td>2017</td>
+</tr>
+<tr>
+<td>11781-2</td>
+<td>2011</td>
+<td>2014</td>
+</tr>
+<tr>
+<td>BR 512014001255-7</td>
+<td>2014</td>
+<td>2012</td>
+</tr>
+<tr>
+<td>BR 512015001183-9</td>
+<td>2015</td>
+<td>2013</td>
+</tr>
+<tr>
+<td>BR 512015001183-9</td>
+<td>2015</td>
+<td>2013</td>
+</tr>
+<tr>
+<td>BR 512015001183-9</td>
+<td>2015</td>
+<td>2013</td>
+</tr>
+<tr>
+<td>BR 512015001183-9</td>
+<td>2015</td>
+<td>2013</td>
+</tr>
+<tr>
+<td>BR 512018000204-8</td>
+<td>2018</td>
+<td>2015</td>
+</tr>
+<tr>
+<td>BR 512018000249-8</td>
+<td>2018</td>
+<td>2017</td>
+</tr>
+<tr>
+<td>BR512018001050-4</td>
+<td>2018</td>
+<td>2017</td>
+</tr>
+<tr>
+<td>BR512018001050-4</td>
+<td>2018</td>
+<td>2017</td>
+</tr>
+<tr>
+<td>BR512018001050-4</td>
+<td>2018</td>
+<td>2017</td>
+</tr>
+<tr>
+<td>BR512018001050-4</td>
+<td>2018</td>
+<td>2017</td>
+</tr>
+<tr>
+<td>BR 512020000282-0</td>
+<td>2020</td>
+<td>2019</td>
+</tr>
+<tr>
+<td>BR 51 2021 001107-4</td>
+<td>2021</td>
+<td>2020</td>
+</tr>
+<tr>
+<td>BR 51 2021 001107-4</td>
+<td>2021</td>
+<td>2020</td>
+</tr>
+<tr>
+<td>BR 51 2021 001214-3</td>
+<td>2021</td>
+<td>2020</td>
+</tr>
+<tr>
+<td>BR 51 2022 000 851-3</td>
+<td>2022</td>
+<td>2020</td>
+</tr>
+<tr>
+<td>BR 51 2022 000 911-0</td>
+<td>2022</td>
+<td>2021</td>
+</tr>
+<tr>
+<td>BR 51 2022 000 911-0</td>
+<td>2022</td>
+<td>2021</td>
+</tr>
+<tr>
+<td>BR 51 2022 000 911-0</td>
+<td>2022</td>
+<td>2021</td>
+</tr>
+<tr>
+<td>BR 51 2022 000 911-0</td>
+<td>2022</td>
+<td>2021</td>
+</tr>
+<tr>
+<td>BR302023000382-7</td>
+<td>2024</td>
+<td>2023</td>
+</tr>
+<tr>
+<td>BR 512023000225-9</td>
+<td>2023</td>
+<td>2022</td>
+</tr>
+<tr>
+<td>BR 512023000225-9</td>
+<td>2023</td>
+<td>2022</td>
+</tr>
+<tr>
+<td>BR 512023000227-5</td>
+<td>2023</td>
+<td>2021</td>
+</tr>
+<tr>
+<td>BR 512023000227-5</td>
+<td>2023</td>
+<td>2021</td>
+</tr>
+<tr>
+<td>BR 512023000227-5</td>
+<td>2023</td>
+<td>2021</td>
+</tr>
+<tr>
+<td>BR 512023000227-5</td>
+<td>2023</td>
+<td>2021</td>
+</tr>
+<tr>
+<td>BR 512023000227-5</td>
+<td>2023</td>
+<td>2021</td>
+</tr>
+<tr>
+<td>BR 512023000227-5</td>
+<td>2023</td>
+<td>2021</td>
+</tr>
+<tr>
+<td>BR 512023000227-5</td>
+<td>2023</td>
+<td>2021</td>
+</tr>
+<tr>
+<td>BR 512023000227-5</td>
+<td>2023</td>
+<td>2021</td>
+</tr>
+<tr>
+<td>BR 512023000227-5</td>
+<td>2023</td>
+<td>2021</td>
+</tr>
+<tr>
+<td>BR 512023000227-5</td>
+<td>2023</td>
+<td>2021</td>
+</tr>
+<tr>
+<td>BR 512023000227-5</td>
+<td>2023</td>
+<td>2021</td>
+</tr>
+<tr>
+<td>BR 512023000227-5</td>
+<td>2023</td>
+<td>2021</td>
+</tr>
+<tr>
+<td>BR512023001134-7</td>
+<td>2023</td>
+<td>2022</td>
+</tr>
+<tr>
+<td>BR 51 2023 003603-0</td>
+<td>2023</td>
+<td>2022</td>
+</tr>
+<tr>
+<td>BR512023004008-8</td>
+<td>2023</td>
+<td>2022</td>
+</tr>
+<tr>
+<td>BR512023004008-8</td>
+<td>2023</td>
+<td>2022</td>
+</tr>
+<tr>
+<td>BR512023004008-8</td>
+<td>2023</td>
+<td>2022</td>
+</tr>
+<tr>
+<td>BR512023004008-8</td>
+<td>2023</td>
+<td>2022</td>
+</tr>
+<tr>
+<td>BR512023004008-8</td>
+<td>2023</td>
+<td>2022</td>
+</tr>
+<tr>
+<td>BR512023004008-8</td>
+<td>2023</td>
+<td>2022</td>
+</tr>
+<tr>
+<td>BR512023004008-8</td>
+<td>2023</td>
+<td>2022</td>
+</tr>
+<tr>
+<td>BR512023004008-8</td>
+<td>2023</td>
+<td>2022</td>
+</tr>
+<tr>
+<td>BR512023004008-8</td>
+<td>2023</td>
+<td>2022</td>
+</tr>
+<tr>
+<td>BR 51 2024 000226-0</td>
+<td>2024</td>
+<td>2023</td>
+</tr>
+<tr>
+<td>... e mais 38 divergências</td>
+<td></td>
+<td></td>
+</tr>
+</tbody></table>
+<h3 id="63-campus-dashboard-vs-campus" class="atx">6.3 Campus (Dashboard vs CAMPUS)</h3>
+<table>
+<thead>
+<tr>
+<th>Resultado</th>
+<th>Quantidade</th>
+<th>%</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Consistente</td>
+<td>197</td>
+<td>68.4%</td>
+</tr>
+<tr>
+<td>Divergente</td>
+<td>91</td>
+<td>31.6%</td>
+</tr>
+</tbody></table>
+<p><strong>Divergências de Campus:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Nº INPI (DINOV)</th>
+<th>CAMPUS (DINOV)</th>
+<th>Campus (Dashboard)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>MU8903003-6/ PI 0925423-4</td>
+<td>Salvador → code SSA</td>
+<td>EUN</td>
+</tr>
+<tr>
+<td>BR 512015000928-1</td>
+<td>Salvador → code SSA</td>
+<td>FS</td>
+</tr>
+<tr>
+<td>BR 512015000928-1</td>
+<td>Salvador → code SSA</td>
+<td>FS</td>
+</tr>
+<tr>
+<td>BR 512015000928-1</td>
+<td>Salvador → code SSA</td>
+<td>FS</td>
+</tr>
+<tr>
+<td>BR 512016001116-5</td>
+<td>Salvador → code SSA</td>
+<td>CAM</td>
+</tr>
+<tr>
+<td>BR 512016001116-5</td>
+<td>Salvador → code SSA</td>
+<td>CAM</td>
+</tr>
+<tr>
+<td>BR 512016001116-5</td>
+<td>Salvador → code SSA</td>
+<td>CAM</td>
+</tr>
+<tr>
+<td>BR 512016001116-5</td>
+<td>Salvador → code SSA</td>
+<td>CAM</td>
+</tr>
+<tr>
+<td>BR 512018000204-8</td>
+<td>Santo Amaro → code SAM</td>
+<td>LF</td>
+</tr>
+<tr>
+<td>BR 512018000249-8</td>
+<td>Santo Amaro → code SAM</td>
+<td>LF</td>
+</tr>
+<tr>
+<td>BR512018001050-4</td>
+<td>Santo Amaro → code SAM</td>
+<td>LF</td>
+</tr>
+<tr>
+<td>BR512018001050-4</td>
+<td>Santo Amaro → code SAM</td>
+<td>LF</td>
+</tr>
+<tr>
+<td>BR512018001050-4</td>
+<td>Santo Amaro → code SAM</td>
+<td>LF</td>
+</tr>
+<tr>
+<td>BR512018001050-4</td>
+<td>Santo Amaro → code SAM</td>
+<td>LF</td>
+</tr>
+<tr>
+<td>BR 512019000843-0</td>
+<td>Santo Amaro → code SAM</td>
+<td>SSA</td>
+</tr>
+<tr>
+<td>BR 302015004729-1</td>
+<td>Paulo Afonso → code PA</td>
+<td>SF</td>
+</tr>
+<tr>
+<td>BR 512019002157-6</td>
+<td>Salvador → code SSA</td>
+<td>LF</td>
+</tr>
+<tr>
+<td>BR 512019002157-6</td>
+<td>Salvador → code SSA</td>
+<td>LF</td>
+</tr>
+<tr>
+<td>BR 512019002157-6</td>
+<td>Salvador → code SSA</td>
+<td>SF</td>
+</tr>
+<tr>
+<td>BR 512019002157-6</td>
+<td>Salvador → code SSA</td>
+<td>SF</td>
+</tr>
+<tr>
+<td>BR 512020001910-2</td>
+<td>Salvador → code SSA</td>
+<td>LF</td>
+</tr>
+<tr>
+<td>BR 51 2020 002795-4</td>
+<td>Salvador → code SSA</td>
+<td>LF</td>
+</tr>
+<tr>
+<td>BR 51 2022 000 272-8</td>
+<td>Salvador → code SSA</td>
+<td>JAC</td>
+</tr>
+<tr>
+<td>BR 51 2022 000 272-8</td>
+<td>Salvador → code SSA</td>
+<td>JAC</td>
+</tr>
+<tr>
+<td>BR 51 2022 000 272-8</td>
+<td>Salvador → code SSA</td>
+<td>JAC</td>
+</tr>
+<tr>
+<td>BR 51 2022 000 272-8</td>
+<td>Salvador → code SSA</td>
+<td>JAC</td>
+</tr>
+<tr>
+<td>BR 51 2022 000 273-6</td>
+<td>Salvador → code SSA</td>
+<td>JAC</td>
+</tr>
+<tr>
+<td>BR 51 2022 000 273-6</td>
+<td>Salvador → code SSA</td>
+<td>JAC</td>
+</tr>
+<tr>
+<td>BR 51 2022 000 273-6</td>
+<td>Salvador → code SSA</td>
+<td>JAC</td>
+</tr>
+<tr>
+<td>BR 51 2022 000 273-6</td>
+<td>Salvador → code SSA</td>
+<td>JAC</td>
+</tr>
+<tr>
+<td>BR 51 2022 000 275-2</td>
+<td>Salvador → code SSA</td>
+<td>JAC</td>
+</tr>
+<tr>
+<td>BR 51 2022 000 275-2</td>
+<td>Salvador → code SSA</td>
+<td>JAC</td>
+</tr>
+<tr>
+<td>BR 51 2022 000 275-2</td>
+<td>Salvador → code SSA</td>
+<td>JAC</td>
+</tr>
+<tr>
+<td>BR 51 2022 000 275-2</td>
+<td>Salvador → code SSA</td>
+<td>JAC</td>
+</tr>
+<tr>
+<td>BR 51 2022 000 277-9</td>
+<td>Salvador → code SSA</td>
+<td>JAC</td>
+</tr>
+<tr>
+<td>BR 51 2022 000 277-9</td>
+<td>Salvador → code SSA</td>
+<td>JAC</td>
+</tr>
+<tr>
+<td>BR 51 2022 000 277-9</td>
+<td>Salvador → code SSA</td>
+<td>JAC</td>
+</tr>
+<tr>
+<td>BR 51 2022 000 277-9</td>
+<td>Salvador → code SSA</td>
+<td>JAC</td>
+</tr>
+<tr>
+<td>BR 51 2022 000 851-3</td>
+<td>Salvador → code SSA</td>
+<td>LF</td>
+</tr>
+<tr>
+<td>BR 51 2022 000 911-0</td>
+<td>Salvador → code SSA</td>
+<td>JAG</td>
+</tr>
+<tr>
+<td>BR 51 2022 000 911-0</td>
+<td>Salvador → code SSA</td>
+<td>JAG</td>
+</tr>
+<tr>
+<td>BR 51 2022 000 911-0</td>
+<td>Salvador → code SSA</td>
+<td>JAG</td>
+</tr>
+<tr>
+<td>BR 51 2022 000 911-0</td>
+<td>Salvador → code SSA</td>
+<td>JAG</td>
+</tr>
+<tr>
+<td>BR 51 2022 000 911-0</td>
+<td>Salvador → code SSA</td>
+<td>LF</td>
+</tr>
+<tr>
+<td>BR 51 2022 000 911-0</td>
+<td>Salvador → code SSA</td>
+<td>LF</td>
+</tr>
+<tr>
+<td>BR 51 2022 000 911-0</td>
+<td>Salvador → code SSA</td>
+<td>LF</td>
+</tr>
+<tr>
+<td>BR 51 2022 000 911-0</td>
+<td>Salvador → code SSA</td>
+<td>LF</td>
+</tr>
+<tr>
+<td>BR 30 2023 000382-7</td>
+<td>Paulo Afonso → code PA</td>
+<td>SF</td>
+</tr>
+<tr>
+<td>BR302023000382-7</td>
+<td>Paulo Afonso → code PA</td>
+<td>SF</td>
+</tr>
+<tr>
+<td>BR 512023000227-5</td>
+<td>Lauro de Freitas → code LF</td>
+<td>FS</td>
+</tr>
+<tr>
+<td>... e mais 41 divergências</td>
+<td></td>
+<td></td>
+</tr>
+</tbody></table>
+<h2 id="7-observacoes-e-sugestoes" class="atx">7. Observações e Sugestões</h2>
+<ul>
+<li><strong>Campo CAMPUS do CSV</strong>: em algumas linhas, este campo contém nomes de inventores ou informações adicionais junto com o campus. A validação tenta mapear o nome da cidade para o código do campus, mas pode não reconhecer valores muito divergentes. Uma sugestão é uniformizar este campo na planilha DINOV para facilitar futuras análises.</li>
+<li><strong>1 registros</strong> da DINOV com campus não identificado automaticamente (o campo <code>CAMPUS</code> não corresponde exatamente a nenhuma cidade IFBA conhecida). Revisão manual pode ser necessária.</li>
+</ul>
+<h3 id="71-registros-apenas-na-dinov--sugestoes" class="atx">7.1 Registros apenas na DINOV — sugestões</h3>
+<p>Os <strong>35 registros</strong> que estão no CSV da DINOV mas não aparecem no Dashboard são concessões já formalizadas no INPI cujos inventores talvez ainda não tenham incluído o registro em seus Currículos Lattes.
+A tabela da seção 2 inclui os contatos extraídos do próprio CSV da DINOV. Uma sugestão é que o setor responsável utilize esses contatos para dialogar com os inventores e, se for o caso, solicitar a atualização dos Lattes com o número do registro concedido.</p>
+<h3 id="72-registros-apenas-no-dashboard--sugestoes" class="atx">7.2 Registros apenas no Dashboard — sugestões</h3>
+<p>Os <strong>369 registros</strong> que estão no Dashboard mas não constam no CSV da DINOV podem ter diferentes explicações. Seguem algumas possibilidades:</p>
+<ol>
+<li><strong>Pedido ainda não concedido</strong>: o pesquisador pode ter cadastrado no Lattes um pedido de PI que está em andamento, foi indeferido ou não chegou a ser depositado. Sugere-se verificar o status no Lattes ou na base do INPI.</li>
+<li><strong>Concedido mas ainda não registrado na planilha DINOV</strong>: pode ser um título concedido recentemente ou que ainda não foi incorporado ao controle da DINOV. Uma consulta pontual na base do INPI ajudaria a confirmar.</li>
+<li><strong>Tipo fora do escopo da planilha</strong>: marcas, cultivares e registros estrangeiros podem não ser cobertos pela planilha atual da DINOV.</li>
+<li><strong>Registro estrangeiro</strong>: patentes depositadas em outros escritórios (USPTO, EPO, WIPO) podem não estar na base da DINOV.</li>
+</ol>
+<blockquote>
+<p>💡 <strong>Nota:</strong> 10 registros não tiveram o nome do pesquisador identificado automaticamente. O Servidor ID pode ser cruzado com a base do SUAP/DP-PRPGI para obter nome e e-mail.</p>
+</blockquote>
+<hr>
+<p><em>Relatório gerado pela <strong>Assessoria de Ciência de Dados — PRPGI/IFBA</strong>.</em></p>
+<p><em>Prof. Dr. Davi Franco Rêgo</em></p>
+</article>
+</body>
+</html>
