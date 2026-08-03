@@ -1,16 +1,15 @@
-// Tests for pure utility functions defined in src/script.js
+// Tests for pure utility functions defined in the src/ dashboard modules
 'use strict';
 
 const path = require('path');
-const { createBrowserContext, loadScript, CAMPUS_TO_CITY, IFBA_COORDS } = require('./helpers/browserEnv');
+const { createBrowserContext, loadDashboard, CAMPUS_TO_CITY, IFBA_COORDS } = require('./helpers/browserEnv');
 
-const SCRIPT_PATH = path.join(__dirname, '..', 'src', 'script.js');
 
 let ctx;
 
 beforeAll(() => {
   ctx = createBrowserContext();
-  loadScript(ctx, SCRIPT_PATH);
+  loadDashboard(ctx);
 });
 
 // ─── formatDateTimePtBr ───────────────────────────────────────────────────────
@@ -376,5 +375,40 @@ describe('DGP Unidade → map coords (regression: grupos sem campus no mapa)', (
 
   test('UBA resolves via canonical UBAITABA key (typo fix)', () => {
     expect(ctx.lookupCoords('UBAITABA')).not.toBeNull();
+  });
+});
+
+// ─── Carga dos módulos (regressão da modularização) ──────────────────────────
+
+describe('módulos do dashboard', () => {
+  const { DASHBOARD_SCRIPTS } = require('./helpers/browserEnv');
+  const fs = require('fs');
+
+  test('index.html carrega shared.js e os módulos na mesma ordem do helper', () => {
+    const html = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf-8');
+    const noHtml = [...html.matchAll(/<script src="src\/([\w.]+)"><\/script>/g)].map(m => m[1]);
+    expect(noHtml).toEqual(['shared.js', ...DASHBOARD_SCRIPTS]);
+  });
+
+  test('todas as funções públicas existem depois da carga completa', () => {
+    // Quebrar a ordem dos scripts ou perder uma região no split derrubaria isto.
+    const esperadas = [
+      'processData', 'renderKPIsCientifica', 'renderChartsCientifica',
+      'renderKPIsTecnica', 'renderChartsTecnica', 'renderKPIsInovacao',
+      'renderChartsInovacao', 'renderKPIsGrupos', 'renderChartsGrupos',
+      'renderKPIsOrientacoes', 'renderChartsOrientacoes', 'renderKPIsIC',
+      'renderChartsIC', 'renderGenericMap', 'openMapModal', 'closeMapModal',
+      'renderTables', 'generateCampusYearTable', 'exportTableToExcel',
+      'createChart', 'initDashboard', 'showToast', 'updateFilterVisibility',
+      'formatDateTimePtBr', 'extractServidorIds', 'getChartColors',
+      'mapUnidadeToCampus', 'lookupCoords'
+    ];
+    for (const nome of esperadas) {
+      expect(typeof ctx[nome]).toBe('function');
+    }
+  });
+
+  test('src/script.js não existe mais — foi dividido nos módulos', () => {
+    expect(fs.existsSync(path.join(__dirname, '..', 'src', 'script.js'))).toBe(false);
   });
 });

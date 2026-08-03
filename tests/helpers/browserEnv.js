@@ -125,4 +125,31 @@ function loadScript(ctx, scriptPath) {
   return ctx;
 }
 
-module.exports = { createBrowserContext, loadScript, CAMPUS_TO_CITY, IFBA_COORDS };
+/**
+ * Ordem de carga dos scripts do dashboard — a mesma do index.html.
+ * shared.js fica de fora: createBrowserContext já o carrega no contexto.
+ */
+const DASHBOARD_SCRIPTS = [
+  'core.js', 'filters.js', 'charts.js', 'maps.js', 'tables.js',
+  'pesquisadores.js', 'posgraduacao.js', 'cache.js'
+];
+
+/**
+ * Carrega o dashboard inteiro no contexto, na ordem do index.html. Usar isto
+ * em vez de apontar para um módulo isolado: as funções de um arquivo dependem
+ * de globais definidos nos outros, exatamente como no browser.
+ */
+function loadDashboard(ctx, apenas = DASHBOARD_SCRIPTS) {
+  const base = path.join(__dirname, '..', '..', 'src');
+  apenas.forEach(f => loadScript(ctx, path.join(base, f)));
+  return ctx;
+}
+
+module.exports = {
+  createBrowserContext,
+  loadScript,
+  loadDashboard,
+  DASHBOARD_SCRIPTS,
+  CAMPUS_TO_CITY,
+  IFBA_COORDS
+};

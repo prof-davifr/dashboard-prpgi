@@ -13,13 +13,16 @@
 </head>
 <body>
 
-    <div id="loading">
+<!-- Primeiro elemento focável: permite pular os filtros e ir direto às abas. -->
+<a href="#tabs-nav" class="sr-only skip-link">Pular para o conteúdo</a>
+
+    <div id="loading" role="status" aria-live="polite">
         <div class="spinner"></div>
         <p style="margin-top:20px; font-weight:600; font-size:1.2rem; color:var(--accent);" id="loading-text">Carregando dados dos campi...</p>
     </div>
 
     
-    <div class="controls">
+    <div class="controls" role="group" aria-label="Filtros do painel">
         <select id="period-filter">
             <option value="all">Carregando períodos...</option>
         </select>
@@ -67,29 +70,29 @@
     </div>
 
     <!-- Tabs Navigation -->
-    <div class="tabs">
-        <button class="tab-btn active" data-target="tab-cientifica">Produção Científica</button>
-        <button class="tab-btn" data-target="tab-tecnica">Produção Técnica</button>
-        <button class="tab-btn" data-target="tab-inovacao">Inovação</button>
-        <button class="tab-btn" data-target="tab-grupos">Grupos de Pesquisa</button>
-        <button class="tab-btn" data-target="tab-pesquisadores">Pesquisadores</button>
-        <button class="tab-btn" data-target="tab-orientacoes">Orientações</button>
-        <button class="tab-btn" data-target="tab-posgraduacao">Pós-Graduação</button>
-        <button class="tab-btn" data-target="tab-ic">Iniciação Científica</button>
+    <div class="tabs" id="tabs-nav" role="tablist" aria-label="Áreas de indicadores">
+        <button class="tab-btn active" id="aba-cientifica" data-target="tab-cientifica" role="tab" aria-selected="true" aria-controls="tab-cientifica" tabindex="0">Produção Científica</button>
+        <button class="tab-btn" id="aba-tecnica" data-target="tab-tecnica" role="tab" aria-selected="false" aria-controls="tab-tecnica" tabindex="-1">Produção Técnica</button>
+        <button class="tab-btn" id="aba-inovacao" data-target="tab-inovacao" role="tab" aria-selected="false" aria-controls="tab-inovacao" tabindex="-1">Inovação</button>
+        <button class="tab-btn" id="aba-grupos" data-target="tab-grupos" role="tab" aria-selected="false" aria-controls="tab-grupos" tabindex="-1">Grupos de Pesquisa</button>
+        <button class="tab-btn" id="aba-pesquisadores" data-target="tab-pesquisadores" role="tab" aria-selected="false" aria-controls="tab-pesquisadores" tabindex="-1">Pesquisadores</button>
+        <button class="tab-btn" id="aba-orientacoes" data-target="tab-orientacoes" role="tab" aria-selected="false" aria-controls="tab-orientacoes" tabindex="-1">Orientações</button>
+        <button class="tab-btn" id="aba-posgraduacao" data-target="tab-posgraduacao" role="tab" aria-selected="false" aria-controls="tab-posgraduacao" tabindex="-1">Pós-Graduação</button>
+        <button class="tab-btn" id="aba-ic" data-target="tab-ic" role="tab" aria-selected="false" aria-controls="tab-ic" tabindex="-1">Iniciação Científica</button>
     </div>
 
     <!-- Tab 1: Produção Científica -->
-    <section id="tab-cientifica" class="tab-content active">
+    <section id="tab-cientifica" class="tab-content active" role="tabpanel" aria-labelledby="aba-cientifica" tabindex="0">
         <div class="kpi-grid" id="kpi-cientifica"></div>
         <div class="charts-container">
             <div class="chart-row-full chart-card">
                 <div class="chart-title">Evolução Temporal da Produção Científica</div>
-                <div class="chart-wrapper large"><canvas id="chart-cientifica-evolucao"></canvas></div>
+                <div class="chart-wrapper large"><canvas id="chart-cientifica-evolucao" role="img" aria-label="Gráfico: Evolução Temporal da Produção Científica"></canvas></div>
             </div>
             <div class="chart-row-split">
                 <div class="chart-card">
                     <div class="chart-title">Distribuição Qualis</div>
-                    <div class="chart-wrapper"><canvas id="chart-cientifica-pie"></canvas></div>
+                    <div class="chart-wrapper"><canvas id="chart-cientifica-pie" role="img" aria-label="Gráfico: Distribuição Qualis"></canvas></div>
                 </div>
                 <div class="chart-card">
                     <div class="chart-title">Distribuição Geográfica</div>
@@ -109,17 +112,17 @@
     </section>
 
     <!-- Tab 2: Produção Técnica -->
-    <section id="tab-tecnica" class="tab-content">
+    <section id="tab-tecnica" class="tab-content" role="tabpanel" aria-labelledby="aba-tecnica" tabindex="0">
         <div class="kpi-grid" id="kpi-tecnica"></div>
         <div class="charts-container">
             <div class="chart-row-full chart-card">
                 <div class="chart-title">Evolução Temporal da Produção Técnica</div>
-                <div class="chart-wrapper large"><canvas id="chart-tecnica-evolucao"></canvas></div>
+                <div class="chart-wrapper large"><canvas id="chart-tecnica-evolucao" role="img" aria-label="Gráfico: Evolução Temporal da Produção Técnica"></canvas></div>
             </div>
             <div class="chart-row-split">
                 <div class="chart-card">
                     <div class="chart-title">Tipos de Produção Técnica</div>
-                    <div class="chart-wrapper"><canvas id="chart-tecnica-pie"></canvas></div>
+                    <div class="chart-wrapper"><canvas id="chart-tecnica-pie" role="img" aria-label="Gráfico: Tipos de Produção Técnica"></canvas></div>
                 </div>
                 <div class="chart-card">
                     <div class="chart-title">Distribuição Geográfica</div>
@@ -140,23 +143,23 @@
     </section>
 
     <!-- Tab 3: Inovação -->
-    <section id="tab-inovacao" class="tab-content">
+    <section id="tab-inovacao" class="tab-content" role="tabpanel" aria-labelledby="aba-inovacao" tabindex="0">
         <div class="kpi-grid" id="kpi-inovacao"></div>
         <div class="charts-container">
             <div class="chart-row-split">
                 <div class="chart-card">
                     <div class="chart-title">Patentes e Softwares</div>
-                    <div class="chart-wrapper"><canvas id="chart-inovacao-evo-1"></canvas></div>
+                    <div class="chart-wrapper"><canvas id="chart-inovacao-evo-1" role="img" aria-label="Gráfico: Patentes e Softwares"></canvas></div>
                 </div>
                 <div class="chart-card">
                     <div class="chart-title">Marcas e Outros</div>
-                    <div class="chart-wrapper"><canvas id="chart-inovacao-evo-2"></canvas></div>
+                    <div class="chart-wrapper"><canvas id="chart-inovacao-evo-2" role="img" aria-label="Gráfico: Marcas e Outros"></canvas></div>
                 </div>
             </div>
             <div class="chart-row-split">
                 <div class="chart-card">
                     <div class="chart-title">Registros por Tipo</div>
-                    <div class="chart-wrapper"><canvas id="chart-inovacao-pie"></canvas></div>
+                    <div class="chart-wrapper"><canvas id="chart-inovacao-pie" role="img" aria-label="Gráfico: Registros por Tipo"></canvas></div>
                 </div>
                 <div class="chart-card">
                     <div class="chart-title">Distribuição Geográfica</div>
@@ -177,17 +180,17 @@
     </section>
 
     <!-- Tab 4: Grupos de Pesquisa -->
-    <section id="tab-grupos" class="tab-content">
+    <section id="tab-grupos" class="tab-content" role="tabpanel" aria-labelledby="aba-grupos" tabindex="0">
         <div class="kpi-grid" id="kpi-grupos"></div>
         <div class="charts-container">
             <div class="chart-card">
                 <div class="chart-title">Evolução dos Grupos de Pesquisa</div>
-                <div class="chart-wrapper large"><canvas id="chart-grupos-evo-combined"></canvas></div>
+                <div class="chart-wrapper large"><canvas id="chart-grupos-evo-combined" role="img" aria-label="Gráfico: Evolução dos Grupos de Pesquisa"></canvas></div>
             </div>
             <div class="chart-row-split">
                 <div class="chart-card">
                     <div class="chart-title">Grupos por Área</div>
-                    <div class="chart-wrapper"><canvas id="chart-grupos-pie"></canvas></div>
+                    <div class="chart-wrapper"><canvas id="chart-grupos-pie" role="img" aria-label="Gráfico: Grupos por Área"></canvas></div>
                 </div>
                 <div class="chart-card">
                     <div class="chart-title">Distribuição Geográfica</div>
@@ -207,17 +210,17 @@
     </section>
 
     <!-- Tab 5: Pesquisadores -->
-    <section id="tab-pesquisadores" class="tab-content">
+    <section id="tab-pesquisadores" class="tab-content" role="tabpanel" aria-labelledby="aba-pesquisadores" tabindex="0">
         <div class="kpi-grid" id="kpi-pesquisadores"></div>
         <div class="charts-container">
             <div class="chart-row-full chart-card">
                 <div class="chart-title">Evolução Temporal de Pesquisadores Ativos</div>
-                <div class="chart-wrapper large"><canvas id="chart-pesquisadores-evolucao"></canvas></div>
+                <div class="chart-wrapper large"><canvas id="chart-pesquisadores-evolucao" role="img" aria-label="Gráfico: Evolução Temporal de Pesquisadores Ativos"></canvas></div>
             </div>
             <div class="chart-row-split">
                 <div class="chart-card">
                     <div class="chart-title">Distribuição por Campus</div>
-                    <div class="chart-wrapper"><canvas id="chart-pesquisadores-campus"></canvas></div>
+                    <div class="chart-wrapper"><canvas id="chart-pesquisadores-campus" role="img" aria-label="Gráfico: Distribuição por Campus"></canvas></div>
                 </div>
                 <div class="chart-card">
                     <div class="chart-title">Distribuição Geográfica</div>
@@ -227,11 +230,11 @@
             <div class="chart-row-split">
                 <div class="chart-card">
                     <div class="chart-title">Produção por Tipo</div>
-                    <div class="chart-wrapper"><canvas id="chart-pesquisadores-producao"></canvas></div>
+                    <div class="chart-wrapper"><canvas id="chart-pesquisadores-producao" role="img" aria-label="Gráfico: Produção por Tipo"></canvas></div>
                 </div>
                 <div class="chart-card">
                     <div class="chart-title">Pesquisadores por Área (Grupos DGP)</div>
-                    <div class="chart-wrapper"><canvas id="chart-pesquisadores-area"></canvas></div>
+                    <div class="chart-wrapper"><canvas id="chart-pesquisadores-area" role="img" aria-label="Gráfico: Pesquisadores por Área (Grupos DGP)"></canvas></div>
                 </div>
             </div>
         </div>
@@ -248,23 +251,23 @@
     </section>
 
     <!-- Tab 6: Orientações -->
-    <section id="tab-orientacoes" class="tab-content">
+    <section id="tab-orientacoes" class="tab-content" role="tabpanel" aria-labelledby="aba-orientacoes" tabindex="0">
         <div class="kpi-grid" id="kpi-orientacoes"></div>
         <div class="charts-container">
             <div class="chart-row-split">
                 <div class="chart-card">
                     <div class="chart-title">Orientações Concluídas</div>
-                    <div class="chart-wrapper"><canvas id="chart-orientacoes-evo-1"></canvas></div>
+                    <div class="chart-wrapper"><canvas id="chart-orientacoes-evo-1" role="img" aria-label="Gráfico: Orientações Concluídas"></canvas></div>
                 </div>
                 <div class="chart-card">
                     <div class="chart-title">Orientações em Andamento</div>
-                    <div class="chart-wrapper"><canvas id="chart-orientacoes-evo-2"></canvas></div>
+                    <div class="chart-wrapper"><canvas id="chart-orientacoes-evo-2" role="img" aria-label="Gráfico: Orientações em Andamento"></canvas></div>
                 </div>
             </div>
             <div class="chart-row-split">
                 <div class="chart-card">
                     <div class="chart-title">Nível de Orientação</div>
-                    <div class="chart-wrapper"><canvas id="chart-orientacoes-pie"></canvas></div>
+                    <div class="chart-wrapper"><canvas id="chart-orientacoes-pie" role="img" aria-label="Gráfico: Nível de Orientação"></canvas></div>
                 </div>
                 <div class="chart-card">
                     <div class="chart-title">Distribuição Geográfica</div>
@@ -284,7 +287,7 @@
     </section>
 
     <!-- Tab 6: Pós-Graduação -->
-    <section id="tab-posgraduacao" class="tab-content">
+    <section id="tab-posgraduacao" class="tab-content" role="tabpanel" aria-labelledby="aba-posgraduacao" tabindex="0">
         <div class="chart-card" style="margin-bottom: 1.5rem;">
             <div class="chart-title">Filtros de Gestão da Pós-Graduação</div>
             <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center;">
@@ -333,31 +336,31 @@
             <div class="charts-container">
                 <div class="chart-row-full chart-card">
                     <div class="chart-title" title="Volume de ingressos por ano de entrada e modalidade do programa.">Entradas por Coorte e Categoria</div>
-                    <div class="chart-wrapper large"><canvas id="chart-posgraduacao-evolucao"></canvas></div>
+                    <div class="chart-wrapper large"><canvas id="chart-posgraduacao-evolucao" role="img" aria-label="Gráfico: Entradas por Coorte e Categoria"></canvas></div>
                 </div>
                 <div class="chart-row-split">
                     <div class="chart-card">
                         <div class="chart-title" title="Distribuição de desfechos (Concluído, Ativo, Evasão/Desligamento, Outros) para coortes maduras.">Desfecho das Coortes</div>
-                        <div class="chart-wrapper"><canvas id="chart-posgraduacao-status"></canvas></div>
+                        <div class="chart-wrapper"><canvas id="chart-posgraduacao-status" role="img" aria-label="Gráfico: Desfecho das Coortes"></canvas></div>
                     </div>
                     <div class="chart-card">
                         <div class="chart-title" title="Compara conclusão, evasão e pendência ativa por modalidade, apenas em coortes maduras.">Risco por Categoria (Coortes Maduras)</div>
-                        <div class="chart-wrapper"><canvas id="chart-posgraduacao-categoria"></canvas></div>
+                        <div class="chart-wrapper"><canvas id="chart-posgraduacao-categoria" role="img" aria-label="Gráfico: Risco por Categoria (Coortes Maduras)"></canvas></div>
                     </div>
                 </div>
                 <div class="chart-row-split">
                     <div class="chart-card">
                         <div class="chart-title" title="Programas com maior volume de alunos ativos, separados em fluxo regular e pendência ativa.">Programas com Maior Volume Ativo</div>
-                        <div class="chart-wrapper"><canvas id="chart-posgraduacao-topcursos"></canvas></div>
+                        <div class="chart-wrapper"><canvas id="chart-posgraduacao-topcursos" role="img" aria-label="Gráfico: Programas com Maior Volume Ativo"></canvas></div>
                     </div>
                     <div class="chart-card">
                         <div class="chart-title" title="Compara fluxo regular, pendência ativa e evasão/desligamento por campus.">Situação Ativa por Campus</div>
-                        <div class="chart-wrapper"><canvas id="chart-posgraduacao-campusrisk"></canvas></div>
+                        <div class="chart-wrapper"><canvas id="chart-posgraduacao-campusrisk" role="img" aria-label="Gráfico: Situação Ativa por Campus"></canvas></div>
                     </div>
                 </div>
                 <div class="chart-row-full chart-card">
                     <div class="chart-title" title="Evolução anual das taxas de conclusão, evasão/desligamento e pendência ativa para coortes maduras.">Taxas por Ano de Coorte (Maduras)</div>
-                    <div class="chart-wrapper large"><canvas id="chart-posgraduacao-completion"></canvas></div>
+                    <div class="chart-wrapper large"><canvas id="chart-posgraduacao-completion" role="img" aria-label="Gráfico: Taxas por Ano de Coorte (Maduras)"></canvas></div>
                 </div>
             </div>
         </div>
@@ -367,16 +370,16 @@
             <div class="charts-container">
                 <div class="chart-row-full chart-card">
                     <div class="chart-title">Coortes por Situação (Programa)</div>
-                    <div class="chart-wrapper large"><canvas id="chart-posgraduacao-curso-evolucao"></canvas></div>
+                    <div class="chart-wrapper large"><canvas id="chart-posgraduacao-curso-evolucao" role="img" aria-label="Gráfico: Coortes por Situação (Programa)"></canvas></div>
                 </div>
                 <div class="chart-row-split">
                     <div class="chart-card">
                         <div class="chart-title">Desfecho por Coorte</div>
-                        <div class="chart-wrapper"><canvas id="chart-posgraduacao-curso-status"></canvas></div>
+                        <div class="chart-wrapper"><canvas id="chart-posgraduacao-curso-status" role="img" aria-label="Gráfico: Desfecho por Coorte"></canvas></div>
                     </div>
                     <div class="chart-card">
                         <div class="chart-title">Taxas (Conclusão, Evasão, Pendência)</div>
-                        <div class="chart-wrapper"><canvas id="chart-posgraduacao-curso-campus"></canvas></div>
+                        <div class="chart-wrapper"><canvas id="chart-posgraduacao-curso-campus" role="img" aria-label="Gráfico: Taxas (Conclusão, Evasão, Pendência)"></canvas></div>
                     </div>
                 </div>
             </div>
@@ -387,16 +390,16 @@
             <div class="charts-container">
                 <div class="chart-row-full chart-card">
                     <div class="chart-title">Ranking de Programas por Risco</div>
-                    <div class="chart-wrapper large"><canvas id="chart-posgraduacao-campus-evolucao"></canvas></div>
+                    <div class="chart-wrapper large"><canvas id="chart-posgraduacao-campus-evolucao" role="img" aria-label="Gráfico: Ranking de Programas por Risco"></canvas></div>
                 </div>
                 <div class="chart-row-split">
                     <div class="chart-card">
                         <div class="chart-title">Comparativo de Campi</div>
-                        <div class="chart-wrapper"><canvas id="chart-posgraduacao-campus-cursos"></canvas></div>
+                        <div class="chart-wrapper"><canvas id="chart-posgraduacao-campus-cursos" role="img" aria-label="Gráfico: Comparativo de Campi"></canvas></div>
                     </div>
                     <div class="chart-card">
                         <div class="chart-title">Composição por Categoria</div>
-                        <div class="chart-wrapper"><canvas id="chart-posgraduacao-campus-categorias"></canvas></div>
+                        <div class="chart-wrapper"><canvas id="chart-posgraduacao-campus-categorias" role="img" aria-label="Gráfico: Composição por Categoria"></canvas></div>
                     </div>
                 </div>
             </div>
@@ -408,27 +411,27 @@
     </section>
 
     <!-- Tab 8: Iniciação Científica -->
-    <section id="tab-ic" class="tab-content">
+    <section id="tab-ic" class="tab-content" role="tabpanel" aria-labelledby="aba-ic" tabindex="0">
         <div class="kpi-grid" id="kpi-ic"></div>
         <div class="charts-container">
             <div class="chart-row-full chart-card">
                 <div class="chart-title">Evolução Temporal dos Projetos de IC</div>
-                <div class="chart-wrapper large"><canvas id="chart-ic-evolucao"></canvas></div>
+                <div class="chart-wrapper large"><canvas id="chart-ic-evolucao" role="img" aria-label="Gráfico: Evolução Temporal dos Projetos de IC"></canvas></div>
             </div>
             <div class="chart-row-split">
                 <div class="chart-card">
                     <div class="chart-title">Distribuição por Modalidade</div>
-                    <div class="chart-wrapper"><canvas id="chart-ic-modalidade"></canvas></div>
+                    <div class="chart-wrapper"><canvas id="chart-ic-modalidade" role="img" aria-label="Gráfico: Distribuição por Modalidade"></canvas></div>
                 </div>
                 <div class="chart-card">
                     <div class="chart-title">Distribuição por Fomento</div>
-                    <div class="chart-wrapper"><canvas id="chart-ic-fomento"></canvas></div>
+                    <div class="chart-wrapper"><canvas id="chart-ic-fomento" role="img" aria-label="Gráfico: Distribuição por Fomento"></canvas></div>
                 </div>
             </div>
             <div class="chart-row-split">
                 <div class="chart-card">
                     <div class="chart-title">Distribuição por Área do Conhecimento</div>
-                    <div class="chart-wrapper"><canvas id="chart-ic-area"></canvas></div>
+                    <div class="chart-wrapper"><canvas id="chart-ic-area" role="img" aria-label="Gráfico: Distribuição por Área do Conhecimento"></canvas></div>
                 </div>
                 <div class="chart-card">
                     <div class="chart-title">Distribuição Geográfica</div>
@@ -448,11 +451,11 @@
     </section>
 
     <!-- Methodology Modal -->
-    <div class="modal-overlay" id="methodology-modal">
+    <div class="modal-overlay" id="methodology-modal" role="dialog" aria-modal="true" aria-labelledby="methodology-modal-title" aria-hidden="true">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>Sobre os Dados e Metodologia</h2>
-                <button class="modal-close" id="modal-close">×</button>
+                <h2 id="methodology-modal-title">Sobre os Dados e Metodologia</h2>
+                <button class="modal-close" id="modal-close" aria-label="Fechar">×</button>
             </div>
             <div class="modal-body">
                 <div class="modal-section">
@@ -613,19 +616,26 @@
         </div>
     </footer>
 
-    <!-- shared.js define CAMPUS_TO_CITY/IFBA_COORDS/mapUnidadeToCampus e
-         precisa vir antes dos demais scripts, que os consomem. -->
+    <!-- Ordem importa: cada script define globais que os seguintes consomem.
+         shared.js  → CAMPUS_TO_CITY, IFBA_COORDS, mapUnidadeToCampus
+         core.js    → STATE, $, utilidades, abas e modais
+         cache.js   → initDashboard, carregado por último (usa todos os render*) -->
     <script src="src/shared.js"></script>
+    <script src="src/core.js"></script>
+    <script src="src/filters.js"></script>
+    <script src="src/charts.js"></script>
+    <script src="src/maps.js"></script>
+    <script src="src/tables.js"></script>
     <script src="src/pesquisadores.js"></script>
     <script src="src/posgraduacao.js"></script>
-    <script src="src/script.js"></script>
+    <script src="src/cache.js"></script>
 
     <!-- Map modal -->
-    <div class="map-modal-overlay" id="map-modal">
+    <div class="map-modal-overlay" id="map-modal" role="dialog" aria-modal="true" aria-labelledby="map-modal-title" aria-hidden="true">
         <div class="map-modal-content">
             <div class="map-modal-header">
                 <h2 id="map-modal-title">Mapa</h2>
-                <button class="map-modal-close" id="map-modal-close">&times;</button>
+                <button class="map-modal-close" id="map-modal-close" aria-label="Fechar mapa">&times;</button>
             </div>
             <div class="map-modal-body">
                 <div id="map-modal-map"></div>
