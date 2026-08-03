@@ -217,6 +217,66 @@ function main() {
     ...findFiles(DADOS_DIR, '.xlsx'),
     ...findFiles(DADOS_DIR, '.xls')
   ].filter(f => getSourceKey(f.filePath) !== 'ic');
+
+  // ─── Dedup XLS files by campus: prefer scraper .xlsx with real data,
+  //      fall back to .xls from old/ if scraper file is empty (just "vazio") ──
+  const xlsByCampus = {};
+  for (const f of xlsFiles) {
+    const rawName = path.basename(f.fileName, path.extname(f.fileName));
+    const code = normalizeCampusCode(rawName.split('-')[0]);
+    if (!xlsByCampus[code]) xlsByCampus[code] = [];
+    xlsByCampus[code].push(f);
+  }
+
+  function hasRealData(filePath) {
+    try {
+      const wb = XLSX.readFile(filePath);
+      const sheets = wb.SheetNames.filter(s => s.toLowerCase() !== 'vazio');
+      if (sheets.length === 0) return false;
+      // Check at least one non-vazio sheet has more than 1 row
+      for (const sn of sheets) {
+        const rows = XLSX.utils.sheet_to_json(wb.Sheets[sn], { raw: false, defval: null });
+        if (rows.length > 0) return true;
+      }
+      return false;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  const dedupedXlsFiles = [];
+  for (const [code, files] of Object.entries(xlsByCampus)) {
+    // Sort: prefer scraper-SUAPCNPQ over old/, and newer format (.xlsx) over .xls
+    const scraperFiles = files.filter(f => getSourceKey(f.filePath) === 'scraper-SUAPCNPQ');
+    const otherFiles = files.filter(f => getSourceKey(f.filePath) !== 'scraper-SUAPCNPQ');
+
+    // Try scraper files first (newest data)
+    const bestScraper = scraperFiles.find(f => hasRealData(f.filePath));
+    if (bestScraper) {
+      dedupedXlsFiles.push(bestScraper);
+      if (otherFiles.length > 0) {
+        console.log(`   Campus ${code}: using scraper data, skipping ${otherFiles.length} older file(s)`);
+      }
+      continue;
+    }
+
+    // Fall back to any file with real data (old/ directory, etc.)
+    const bestOther = otherFiles.find(f => hasRealData(f.filePath));
+    if (bestOther) {
+      dedupedXlsFiles.push(bestOther);
+      if (scraperFiles.length > 0) {
+        console.log(`   Campus ${code}: scraper file empty, falling back to ${bestOther.fileName}`);
+      }
+      continue;
+    }
+
+    // No file has data — keep one scraper file for consistency (will produce zero records)
+    if (scraperFiles.length > 0) {
+      dedupedXlsFiles.push(scraperFiles[0]);
+    } else if (otherFiles.length > 0) {
+      dedupedXlsFiles.push(otherFiles[0]);
+    }
+  }
   const csvFiles = findFiles(DADOS_DIR, '.csv');
   const dgpCsvSelection = selectDgpGroupsCsvFiles(csvFiles);
 
@@ -225,7 +285,7 @@ function main() {
     return dgpCsvSelection.selected && file.filePath === dgpCsvSelection.selected.filePath;
   });
 
-  console.log(`   Found ${xlsFiles.length} XLSX files and ${csvFiles.length} CSV files.`);
+  console.log(`   Found ${dedupedXlsFiles.length} campus files (after dedup) and ${csvFiles.length} CSV files.`);
   if (dgpCsvSelection.selected) {
     console.log(`   Using DGP groups source: ${dgpCsvSelection.selected.fileName}`);
   }
@@ -235,7 +295,7 @@ function main() {
 
   const result = {
     meta: {
-      files: xlsFiles.map(f => f.fileName),
+      files: dedupedXlsFiles.map(f => f.fileName),
       sourceFiles: {},
       sourceDates: {},
       campuses: [],
@@ -254,7 +314,7 @@ function main() {
   };
 
   // Process XLS files
-  for (const { fileName, filePath } of xlsFiles) {
+  for (const { fileName, filePath } of dedupedXlsFiles) {
     registerSourceFile(result.meta, filePath, fileName);
     // Campus code is the filename without extension, normalized (e.g. VDC.xlsx → VC)
     // For old format CAMPUS-YYYY-YYYY.xls, take only the code before first dash
@@ -591,7 +651,7 @@ function main() {
     andamento: []
   };
 
-  for (const { fileName, filePath } of xlsFiles) {
+  for (const { fileName, filePath } of dedupedXlsFiles) {
     const rawName = path.basename(fileName, path.extname(fileName));
     const campusCode = normalizeCampusCode(rawName.split('-')[0]);
     try {
