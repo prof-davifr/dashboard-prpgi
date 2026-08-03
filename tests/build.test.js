@@ -13,6 +13,9 @@ const {
   selectDgpGroupsCsvFiles,
   pseudonymize,
   shortHash,
+  loadOrCreateSalt,
+  SALT_FILE,
+  SALT_BACKUP_FILE,
   SHEET_MAP,
   SOURCE_LABELS
 } = require('../scripts/build');
@@ -563,5 +566,101 @@ describe('dedupKey no data.json', () => {
 
   test('grupos tem o tamanho esperado (regressão do CSV alheio)', () => {
     expect(data.grupos.length).toBeLessThan(300);
+  });
+});
+
+// ─── Salt de pseudonimização: persistência e restauração ─────────────────────
+
+describe('loadOrCreateSalt', () => {
+  let tmp;
+  const mudo = () => {};
+
+  beforeEach(() => {
+    tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'salt-test-'));
+  });
+
+  afterEach(() => {
+    fs.rmSync(tmp, { recursive: true, force: true });
+  });
+
+  const caminhos = () => ({
+    local: path.join(tmp, '.build-salt'),
+    backup: path.join(tmp, 'config', 'build-salt')
+  });
+
+  test('cria os dois arquivos na primeira execução', () => {
+    const { local, backup } = caminhos();
+    const salt = loadOrCreateSalt(local, backup, mudo);
+
+    expect(salt).toMatch(/^[0-9a-f]{64}$/);
+    expect(fs.existsSync(local)).toBe(true);
+    expect(fs.existsSync(backup)).toBe(true);
+    expect(fs.readFileSync(backup, 'utf-8').trim()).toBe(salt);
+  });
+
+  test('reusa o salt local em execuções seguintes', () => {
+    const { local, backup } = caminhos();
+    const primeiro = loadOrCreateSalt(local, backup, mudo);
+    const segundo = loadOrCreateSalt(local, backup, mudo);
+    expect(segundo).toBe(primeiro);
+  });
+
+  test('restaura do backup quando o salt local some (reclone, máquina nova)', () => {
+    const { local, backup } = caminhos();
+    const original = loadOrCreateSalt(local, backup, mudo);
+
+    fs.unlinkSync(local);
+    const restaurado = loadOrCreateSalt(local, backup, mudo);
+
+    // O ponto do backup: sem ele nasceria um salt novo e todos os pseudônimos
+    // do data.json mudariam, gerando um diff de 21 MB sem mudança de dado.
+    expect(restaurado).toBe(original);
+    expect(fs.existsSync(local)).toBe(true);
+  });
+
+  test('a restauração preserva os pseudônimos', () => {
+    const { local, backup } = caminhos();
+    const original = loadOrCreateSalt(local, backup, mudo);
+    const antes = pseudonymize('Maria da Silva', original);
+
+    fs.unlinkSync(local);
+    const restaurado = loadOrCreateSalt(local, backup, mudo);
+
+    expect(pseudonymize('Maria da Silva', restaurado)).toBe(antes);
+  });
+
+  test('faz backup de um salt local preexistente que ainda não tinha cópia', () => {
+    const { local, backup } = caminhos();
+    fs.writeFileSync(local, 'salt-que-ja-existia\n');
+
+    const salt = loadOrCreateSalt(local, backup, mudo);
+
+    expect(salt).toBe('salt-que-ja-existia');
+    expect(fs.readFileSync(backup, 'utf-8').trim()).toBe('salt-que-ja-existia');
+  });
+
+  test('o local vence o backup quando ambos existem', () => {
+    const { local, backup } = caminhos();
+    fs.mkdirSync(path.dirname(backup), { recursive: true });
+    fs.writeFileSync(backup, 'do-backup\n');
+    fs.writeFileSync(local, 'do-local\n');
+
+    expect(loadOrCreateSalt(local, backup, mudo)).toBe('do-local');
+    // e não sobrescreve o backup existente
+    expect(fs.readFileSync(backup, 'utf-8').trim()).toBe('do-backup');
+  });
+
+  test('grava os dois arquivos como 0600 — é segredo', () => {
+    const { local, backup } = caminhos();
+    loadOrCreateSalt(local, backup, mudo);
+
+    for (const f of [local, backup]) {
+      expect(fs.statSync(f).mode & 0o777).toBe(0o600);
+    }
+  });
+
+  test('o backup fica fora da árvore do projeto', () => {
+    expect(SALT_BACKUP_FILE.startsWith(path.join(__dirname, '..'))).toBe(false);
+    expect(SALT_FILE.startsWith(path.join(__dirname, '..'))).toBe(true);
   });
 });

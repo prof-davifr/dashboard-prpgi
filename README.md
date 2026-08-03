@@ -62,10 +62,26 @@ dados pessoais nele:
   esses campos para contar pessoas distintas.
 - **Lattes**: `Servidor` já é a matrícula SIAPE, não o nome.
 
-A pseudonimização usa um salt em `.build-salt`, criado automaticamente no primeiro
-build e **não versionado**. Guarde-o junto dos backups: mantê-lo faz os pseudônimos
-serem estáveis entre builds (diffs pequenos no `data.json`); perdê-lo apenas troca
-todos os pseudônimos no próximo build, sem perda de dados.
+#### O salt de pseudonimização
+
+A pseudonimização usa um salt criado automaticamente no primeiro build e guardado
+em dois lugares, nenhum deles versionado:
+
+| Arquivo | Papel |
+|---|---|
+| `.build-salt` (raiz do projeto) | usado pelo build |
+| `~/.config/dashboard-prpgi/build-salt` | cópia de segurança, fora da árvore do projeto |
+
+Ambos com permissão `0600`. **É segredo**: quem o tiver consegue reverter os
+pseudônimos do `data.json` por força bruta (matrículas são enumeráveis).
+
+Se `.build-salt` sumir — reclone, `git clean`, máquina nova — o build o restaura
+da cópia e avisa no console, mantendo os pseudônimos idênticos. Perder **os dois**
+não causa perda de dados, mas gera um salt novo: o `data.json` seguinte reescreve
+todos os pseudônimos e o diff fica com 21 MB sem nenhuma mudança real. Se isso
+acontecer, recupere o salt antigo antes de commitar.
+
+Ao migrar de máquina, copie `~/.config/dashboard-prpgi/build-salt` junto.
 
 `data-groups.json` (~64 MB) **não é versionado**: contém nomes, contatos e
 composição das equipes de pesquisa, e não é consumido pelo dashboard. Ele é

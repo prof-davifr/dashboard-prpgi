@@ -43,7 +43,9 @@ Always run `npm run build`, `npm run validate` and `npm test` after touching the
 - `ic`: `orientador` and `bolsista` are pseudonyms — the dashboard only uses them for distinct counts (`renderKPIsIC`).
 - Lattes datasets already carry only the SIAPE ID in `Servidor`, never a name.
 
-`pseudonymize()` (top of `scripts/build.js`) hashes with a salt kept in `.build-salt` (gitignored, auto-created). Stable salt ⇒ stable pseudonyms ⇒ small `data.json` diffs; losing it only reshuffles pseudonyms on the next build.
+`pseudonymize()` (top of `scripts/build.js`) hashes with a salt kept in two unversioned places: `.build-salt` at the repo root (what the build reads) and `~/.config/dashboard-prpgi/build-salt` (backup, outside the tree). Both `0600` — it is a secret; with it, the pseudonyms are brute-forceable.
+
+`loadOrCreateSalt()` handles three cases: local salt present (backs it up if the copy is missing), local missing but backup present (**restores**, keeping pseudonyms stable), neither present (generates both and warns). The backup exists because a reclone or a new machine would otherwise silently mint a new salt and rewrite every pseudonym — a 21 MB diff with no real data change.
 
 Before adding any field to `data.json`, check it against this rule — `npm run validate` and `tests/build.test.js` will fail the build/CI if a name/matrícula/e-mail field reappears.
 
