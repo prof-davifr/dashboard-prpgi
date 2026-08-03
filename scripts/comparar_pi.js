@@ -605,4 +605,18 @@ function main() {
   console.log(`  Só Dashboard: ${onlyDashRecords.length}`);
 }
 
-main();
+if (require.main === module) {
+  main();
+}
+
+// Exportadas para tests/comparar-pi.test.js — a lógica de casamento entre
+// DINOV e Dashboard era validada só a olho, rodando o script e lendo o relatório.
+module.exports = {
+  normalizeINPI,
+  extractDashboardNumber,
+  mapTipoDashboard,
+  mapCampusCSV,
+  CSV_PATH,
+  REPORT_PATH,
+  REPORT_INTERNO_PATH
+};
