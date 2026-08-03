@@ -1,14 +1,14 @@
 // comparar_pi.js — Validação: DINOV (CSV) vs Dashboard (data.json → inovacao[])
-// Gera validacao/relatorio-comparacao-PI.md
+// Gera docs/validacao/relatorio-comparacao-PI.md
 
 const XLSX = require('xlsx');
 const fs = require('fs');
 const path = require('path');
 
 // ─── Config ───────────────────────────────────────────────────────────────
-const CSV_PATH = path.join(__dirname, 'Controle propriedade intelectual DINOV 2026 - CONCEDIDOS.csv');
+const CSV_PATH = path.join(__dirname, '..', 'docs', 'validacao', 'Controle propriedade intelectual DINOV 2026 - CONCEDIDOS.csv');
 const DATA_PATH = path.join(__dirname, '..', 'data.json');
-const REPORT_PATH = path.join(__dirname, 'relatorio-comparacao-PI.md');
+const REPORT_PATH = path.join(__dirname, '..', 'docs', 'validacao', 'relatorio-comparacao-PI.md');
 
 // CAMPUS_TO_CITY (synced with src/script.js)
 const CAMPUS_TO_CITY = {

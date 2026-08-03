@@ -228,13 +228,13 @@
 
 <pre style="background:#f5f5f5;padding:1rem;border-radius:4px;font-size:13px;">
 Excel (25 campi) ─┐
-                  ├──> build.js ──> data.json (~27 MB) ──> Dashboard
+                  ├──> scripts/build.js ──> data.json (~27 MB) ──> Dashboard
 CSV DGP ──────────┘
 CSV Pós-Graduação ─┘
 </pre>
 
 <ul>
-<li><code>build.js</code> (Node.js + SheetJS) varre <code>dados/</code>, processa cada fonte, aplica normalizações e gera o JSON consolidado</li>
+<li><code>scripts/build.js</code> (Node.js + SheetJS) varre <code>dados/</code>, processa cada fonte, aplica normalizações e gera o JSON consolidado</li>
 <li>O frontend carrega <code>data.json</code> via <code>fetch</code> único na inicialização</li>
 <li>Toda lógica de filtro, agregação e desduplicação é executada no cliente (client-side BI)</li>
 </ul>

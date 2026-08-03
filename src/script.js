@@ -1,5 +1,5 @@
 // script.js – PRPGI Dashboard core logic
-// Data is pre-built into data.json by build.js (run: npm run build)
+// Data is pre-built into data.json by scripts/build.js (run: node scripts/build.js)
 
 
 const STATE = {

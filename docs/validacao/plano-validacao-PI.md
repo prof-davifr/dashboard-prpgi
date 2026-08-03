@@ -12,7 +12,7 @@ Comparar os registros de Propriedade Intelectual (PI) concedidos, controlados pe
 
 | Item | Descrição |
 |------|-----------|
-| Arquivo | `validacao/Controle propriedade intelectual DINOV 2026 - CONCEDIDOS.csv` |
+| Arquivo | `docs/validacao/Controle propriedade intelectual DINOV 2026 - CONCEDIDOS.csv` |
 | Registros | ~298 |
 | Encoding | `latin1` (ISO-8859-1) |
 | Observação | Células com multi-linhas e campos com vírgula entre aspas |
@@ -111,7 +111,7 @@ Para registros **só Dashboard**:
 
 ## 5. Relatório de Saída
 
-Formato: Markdown (`validacao/relatorio-comparacao-PI.md`)
+Formato: Markdown (`docs/validacao/relatorio-comparacao-PI.md`)
 
 Estrutura:
 1. **Sumário Executivo** — tabela com contagens totais
@@ -124,18 +124,18 @@ Estrutura:
 
 ## 6. Script de Validação
 
-Será criado `validacao/comparar_pi.js` com:
+Será criado `scripts/comparar_pi.js` com:
 
 ```
-node validacao/comparar_pi.js
+node scripts/comparar_pi.js
 ```
 
-Dependências: `xlsx` (já instalado, usado pelo `build.js`) — para parsing robusto do CSV (encoding latin1, quoted fields, multi-line cells).
+Dependências: `xlsx` (já instalado, usado pelo `scripts/build.js`) — para parsing robusto do CSV (encoding latin1, quoted fields, multi-line cells).
 
 ## 7. Não Escopo
 
 - ❌ Não altera `data.json`
-- ❌ Não altera `build.js`
+- ❌ Não altera `scripts/build.js`
 - ❌ Não altera `index.html`, `src/script.js` ou qualquer arquivo do dashboard
 - ❌ Não integra a validação no pipeline de build
 - ❌ Não propaga dados do CSV para o dashboard

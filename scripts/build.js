@@ -6,9 +6,9 @@ const XLSX = require('xlsx');
 const fs = require('fs');
 const path = require('path');
 
-const DADOS_DIR = path.join(__dirname, 'dados');
-const OUTPUT_FILE = path.join(__dirname, 'data.json');
-const OUTPUT_GROUPS = path.join(__dirname, 'data-groups.json');
+const DADOS_DIR = path.join(__dirname, '..', 'dados');
+const OUTPUT_FILE = path.join(__dirname, '..', 'data.json');
+const OUTPUT_GROUPS = path.join(__dirname, '..', 'data-groups.json');
 
 // Normalize non-standard campus codes that appear in filenames or raw data
 const CAMPUS_CODE_FIX = {

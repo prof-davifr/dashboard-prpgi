@@ -13,7 +13,7 @@ const {
   selectDgpGroupsCsvFiles,
   SHEET_MAP,
   SOURCE_LABELS
-} = require('../build');
+} = require('../scripts/build');
 
 // ─── findFiles ────────────────────────────────────────────────────────────────
 

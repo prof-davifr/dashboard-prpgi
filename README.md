@@ -23,7 +23,7 @@ O projeto é organizado para ser leve e fácil de manter, utilizando uma arquite
 - `data.json`: Base de dados consolidada (gerada durante o build).
 
 ### Ferramentas e Dados
-- `build.js`: Script Node.js que unifica e otimiza os dados brutos.
+- `scripts/build.js`: Script Node.js que unifica e otimiza os dados brutos.
 - `dados/`: Repositório de fontes brutas (Excel/CSV) organizadas por scraper.
 - `package.json`: Definições de dependências e scripts de automação.
 
@@ -43,7 +43,7 @@ Para atualizar os números do dashboard, siga o processo de *ETL* simplificado:
     ```bash
     npm run build
     # ou
-    node build.js
+    node scripts/build.js
     ```
 3. **Validação**: Verifique o tamanho e conteúdo do novo `data.json` gerado.
 4. **Deploy**: Faça o push para o repositório. O GitHub Pages atualizará a visualização automaticamente.

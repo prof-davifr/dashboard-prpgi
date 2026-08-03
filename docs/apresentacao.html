@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Painel de Dados da PRPGI – Apresentação</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/theme/white.css">
+<style>
+  :root {
+    --ifba-green: #32a041;
+    --ifba-dark: #1a5e28;
+    --ifba-light: #e8f5e9;
+    --ifba-accent: #1565c0;
+    --ifba-warn: #e65100;
+    --ifba-gray: #455a64;
+  }
+  .reveal { font-family: 'Segoe UI', system-ui, sans-serif; font-size: 28px; }
+  .reveal h1, .reveal h2, .reveal h3 { text-transform: none; font-weight: 700; }
+  .reveal h1 { font-size: 2.3em; color: var(--ifba-dark); }
+  .reveal h2 { font-size: 1.8em; color: var(--ifba-dark); border-bottom: 4px solid var(--ifba-green); padding-bottom: 0.3em; display: inline-block; margin-bottom: 0.6em; }
+  .reveal h3 { font-size: 1.3em; color: var(--ifba-gray); }
+  .reveal ul, .reveal ol { text-align: left; }
+  .reveal li { margin: 0.4em 0; }
+  .reveal .slides section { padding: 40px 60px; }
+  .reveal pre { font-size: 0.55em; width: 100%; box-shadow: none; }
+  .reveal code { background: #f5f5f5; padding: 2px 8px; border-radius: 4px; font-size: 0.9em; }
+  .reveal table { font-size: 0.7em; margin: 0 auto; }
+  .reveal table th { background: var(--ifba-green); color: white; padding: 8px 14px; }
+  .reveal table td { padding: 6px 14px; border-bottom: 1px solid #ddd; }
+  .reveal .small { font-size: 0.7em; }
+  .reveal .smaller { font-size: 0.6em; }
+  .reveal .left { text-align: left; }
+
+  .title-slide { background: linear-gradient(135deg, var(--ifba-dark) 0%, var(--ifba-green) 100%); }
+  .title-slide h1 { color: white !important; font-size: 2.6em; }
+  .title-slide h3 { color: rgba(255,255,255,0.9) !important; }
+  .title-slide p { color: rgba(255,255,255,0.8); }
+
+  .kpi-box { display: inline-block; background: var(--ifba-light); border-left: 5px solid var(--ifba-green); padding: 12px 24px; margin: 8px; border-radius: 6px; text-align: center; min-width: 140px; }
+  .kpi-box .num { font-size: 2em; font-weight: 800; color: var(--ifba-dark); }
+  .kpi-box .lbl { font-size: 0.7em; color: var(--ifba-gray); }
+
+  .source-card { display: inline-block; width: 44%; vertical-align: top; text-align: left; background: #f9f9f9; border-radius: 10px; padding: 16px 20px; margin: 8px; border-top: 4px solid var(--ifba-green); font-size: 0.7em; }
+  .source-card strong { color: var(--ifba-dark); }
+
+  .two-col { display: flex; gap: 20px; }
+  .two-col > div { flex: 1; text-align: left; }
+
+  .flow-arrow { font-size: 1.5em; color: var(--ifba-green); margin: 0 10px; }
+  .flow-box { display: inline-block; background: var(--ifba-light); border: 2px solid var(--ifba-green); border-radius: 8px; padding: 10px 20px; margin: 5px; font-weight: 600; font-size: 0.8em; }
+
+  .tag { display: inline-block; background: var(--ifba-accent); color: white; padding: 3px 10px; border-radius: 12px; font-size: 0.65em; margin: 2px; }
+
+  .highlight-green { color: var(--ifba-green); font-weight: 700; }
+  .highlight-orange { color: var(--ifba-warn); font-weight: 700; }
+
+  .arch-diagram { font-size: 0.65em; line-height: 2; }
+</style>
+</head>
+<body>
+<div class="reveal"><div class="slides">
+
+<!-- SLIDE 1: Título -->
+<section class="title-slide">
+  <div style="display:flex; justify-content:center; align-items:center; margin-bottom:35px;">
+    <img src="assets/ifba-logo-branco.svg" alt="Instituto Federal da Bahia" style="height:110px;">
+  </div>
+  <h1>Painel de Dados da PRPGI</h1>
+  <h3>Indicadores de Pesquisa, Pós-Graduação e Inovação do IFBA</h3>
+  <p style="margin-top:30px; font-size:0.9em; color:rgba(255,255,255,0.9);">Prof. Dr. Davi Franco Rêgo<br><span style="font-size:0.75em;">Assessor de Ciência de Dados – PRPGI</span></p>
+  <p style="margin-top:15px;"><span class="small">portal.ifba.edu.br/prpgi/dashboards-1/dashboards</span></p>
+</section>
+
+<!-- SLIDE 2: Contexto -->
+<section>
+  <h2>Contexto Institucional</h2>
+  <br>
+  <div class="two-col">
+    <div>
+      <h3>IFBA</h3>
+      <ul>
+        <li>Instituto Federal da Bahia</li>
+        <li><strong>25 campi</strong> espalhados pelo estado</li>
+        <li>Sede em Salvador</li>
+        <li>Ensino, Pesquisa, Extensão e Inovação</li>
+      </ul>
+    </div>
+    <div>
+      <h3>PRPGI</h3>
+      <ul>
+        <li>Pró-Reitoria de Pesquisa, Pós-Graduação e Inovação</li>
+        <li>Coordena 4 eixos estratégicos</li>
+        <li>Necessita de dados consolidados para <strong>tomada de decisão</strong></li>
+      </ul>
+    </div>
+  </div>
+  <p class="small" style="margin-top:20px; color:var(--ifba-gray);">25 campi • ~2.000 pesquisadores ativos • Dezenas de programas de pós-graduação</p>
+</section>
+
+<!-- SLIDE 3: O Problema -->
+<section>
+  <h2>O Problema</h2>
+  <br>
+  <div style="display:flex; gap:30px; align-items:flex-start;">
+    <div style="flex:1; text-align:left;">
+      <h3 style="color:#c62828;">Antes 🔴</h3>
+      <ul>
+        <li>Dados espalhados em <strong>diversas fontes distintas</strong> e isoladas</li>
+        <li>Plataforma Lattes, DGP-CNPq, SUAP, planilhas da IC — cada uma com seu formato</li>
+        <li>Análise manual, lenta e propensa a erros</li>
+        <li>Sem visão geográfica consolidada</li>
+        <li>Impossível comparar campi de forma justa</li>
+      </ul>
+    </div>
+    <div style="flex:1; text-align:left;">
+      <h3 style="color:var(--ifba-green);">Depois 🟢</h3>
+      <ul>
+        <li><strong>Painel de Dados unificado</strong> em tempo real</li>
+        <li>Pipeline automatizado de ETL</li>
+        <li>Consolidação de todas as fontes</li>
+        <li>Filtros interativos e métricas calculadas</li>
+        <li>Mapas georreferenciados</li>
+        <li>Comparação justa (por servidor, desduplicada)</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 4: Visão Geral -->
+<section>
+  <h2>Visão Geral do Painel de Dados</h2>
+  <br>
+  <div style="display:flex; flex-wrap:wrap; justify-content:center; gap:12px;">
+    <div class="kpi-box"><div class="num">8</div><div class="lbl">Abas Temáticas</div></div>
+    <div class="kpi-box"><div class="num">4</div><div class="lbl">Fontes de Dados</div></div>
+    <div class="kpi-box"><div class="num">~30 MB</div><div class="lbl">Base Consolidada</div></div>
+    <div class="kpi-box"><div class="num">25</div><div class="lbl">Campi</div></div>
+  </div>
+  <br>
+  <div class="left" style="font-size:0.8em;">
+    <p><strong>Abas do painel de dados:</strong></p>
+    <p>
+      <span class="tag">Produção Científica</span>
+      <span class="tag">Produção Técnica</span>
+      <span class="tag">Inovação</span>
+      <span class="tag">Grupos de Pesquisa</span>
+      <span class="tag">Pesquisadores</span>
+      <span class="tag">Orientações</span>
+      <span class="tag">Pós-Graduação</span>
+      <span class="tag">Iniciação Científica</span>
+    </p>
+  </div>
+  <p class="small" style="margin-top:16px;">Cada aba contém <strong>KPIs, gráficos, mapas e tabelas detalhadas</strong> com exportação para Excel</p>
+</section>
+
+<!-- SLIDE 5: Arquitetura -->
+<section>
+  <h2>Arquitetura de Dados (ETL)</h2>
+  <br>
+  <div class="arch-diagram" style="text-align:center;">
+    <div style="display:flex; flex-wrap:wrap; justify-content:center; align-items:center; gap:8px; margin-bottom:20px;">
+      <div class="flow-box">📥 Coleta<br><span style="font-weight:400;font-size:0.8em;">Scrapers / SUAP</span></div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-box">🗂️ dados/<br><span style="font-weight:400;font-size:0.8em;">XLSX + CSV</span></div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-box">⚙️ scripts/build.js<br><span style="font-weight:400;font-size:0.8em;">Node.js + SheetJS</span></div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-box">📦 data.json<br><span style="font-weight:400;font-size:0.8em;">~30 MB estático</span></div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-box">🌐 GitHub Pages<br><span style="font-weight:400;font-size:0.8em;">HTTPS estático</span></div>
+    </div>
+  </div>
+  <div class="left" style="font-size:0.75em;">
+    <p><strong>Pipeline:</strong></p>
+    <ol>
+      <li><strong>Scrapers</strong> extraem dados do Lattes, DGP-CNPq, SUAP e Google Sheets</li>
+      <li>Arquivos são depositados em <code>dados/</code> organizados por fonte</li>
+      <li><code>node scripts/build.js</code> lê todos os arquivos e gera <code>data.json</code></li>
+      <li>Frontend estático carrega o JSON e renderiza tudo no navegador</li>
+      <li><strong>Zero backend</strong> – deploy via GitHub Pages</li>
+    </ol>
+  </div>
+</section>
+
+<!-- SLIDE 6: Fontes de Dados -->
+<section>
+  <h2>As 4 Fontes de Dados</h2>
+  <br>
+  <div>
+    <div class="source-card">
+      <strong>📚 Plataforma Lattes (CNPq)</strong><br>
+      <span class="small">Produção Científica, Técnica, Inovação e Orientações</span><br>
+      <span class="smaller">Extraído dos currículos Lattes dos servidores. Arquivos Excel por campus: <code>BAR-2000-2026.xlsx</code></span>
+    </div>
+    <div class="source-card">
+      <strong>🔬 DGP (CNPq)</strong><br>
+      <span class="small">Grupos de Pesquisa e Pesquisadores</span><br>
+      <span class="smaller">Diretório de Grupos de Pesquisa do CNPq. CSV: <code>coletor_dgp_ifba.csv</code></span>
+    </div>
+    <div class="source-card">
+      <strong>🎓 SUAP Pós-Graduação</strong><br>
+      <span class="small">Alunos de Mestrado, Doutorado e Especialização</span><br>
+      <span class="smaller">Sistema acadêmico institucional. CSV: <code>alunos_pos_*.csv</code></span>
+    </div>
+    <div class="source-card">
+      <strong>🧪 Iniciação Científica</strong><br>
+      <span class="small">Projetos IC (PIBIC, PIBITI, etc.)</span><br>
+      <span class="smaller">Planilha da Plataforma Nilo Peçanha (PNP-SETEC/MEC). Ciclos anuais com orientadores, bolsistas e fomento</span>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 7: Stack Tecnológico -->
+<section>
+  <h2>Stack Tecnológico</h2>
+  <br>
+  <table>
+    <tr><th>Camada</th><th>Tecnologia</th><th>Papel</th></tr>
+    <tr><td>📊 Visualização</td><td>Chart.js 4.4</td><td>Gráficos interativos (linha, barra, pizza)</td></tr>
+    <tr><td>🗺️ Mapas</td><td>Leaflet.js 1.9</td><td>Mapas georreferenciados com clusters</td></tr>
+    <tr><td>📋 Processamento</td><td>SheetJS (xlsx)</td><td>Leitura de Excel no Node.js e no browser</td></tr>
+    <tr><td>⚙️ Build</td><td>Node.js + Jest</td><td>Pipeline ETL + testes unitários</td></tr>
+    <tr><td>🎨 UI</td><td>Vanilla CSS</td><td>Estilização responsiva, variáveis CSS</td></tr>
+    <tr><td>🚀 Deploy</td><td>GitHub Pages</td><td>Hospedagem estática e gratuita</td></tr>
+  </table>
+  <p class="small" style="margin-top:15px;color:var(--ifba-gray);">
+    <strong>Zero dependências de backend.</strong> Tudo roda no navegador após o build.
+  </p>
+</section>
+
+<!-- SLIDE 8: Diferenciais Técnicos -->
+<section>
+  <h2>Diferenciais Técnicos</h2>
+  <br>
+  <div class="left" style="font-size:0.8em;">
+    <table>
+      <tr><th>Característica</th><th>Benefício</th></tr>
+      <tr><td>🏗️ <strong>Arquitetura estática</strong></td><td>Zero custo de servidor, deploy via GitHub Pages</td></tr>
+      <tr><td>🔄 <strong>Desduplicação inteligente</strong></td><td>Coautorias entre servidores não inflam os números</td></tr>
+      <tr><td>📐 <strong>Métricas relativas</strong></td><td>Comparação justa: produção por servidor ativo</td></tr>
+      <tr><td>🎯 <strong>Análise de coortes maduras</strong></td><td>Evita comparar turmas recentes com programas consolidados</td></tr>
+      <tr><td>📦 <strong>ETL automatizado</strong></td><td>De dezenas de planilhas para um JSON unificado</td></tr>
+      <tr><td>🧪 <strong>Testes unitários</strong></td><td>Jest cobre funções puras do build e do frontend</td></tr>
+      <tr><td>📱 <strong>Responsivo</strong></td><td>Funciona em desktop, tablet e mobile</td></tr>
+      <tr><td>🔌 <strong>Pronto para iframe</strong></td><td>Integrável em portais institucionais</td></tr>
+    </table>
+  </div>
+</section>
+
+<!-- SLIDE 9: Impacto -->
+<section>
+  <h2>Impacto e Resultados</h2>
+  <br>
+  <div class="left" style="font-size:0.8em;">
+    <p><strong>O Painel de Dados permite à PRPGI:</strong></p>
+    <ul>
+      <li>✅ <strong>Monitorar</strong> a produção científica dos 25 campi em tempo real</li>
+      <li>✅ <strong>Identificar</strong> campi com baixa produção e orientar políticas de fomento</li>
+      <li>✅ <strong>Acompanhar</strong> a evasão na pós-graduação e agir preventivamente</li>
+      <li>✅ <strong>Comparar</strong> programas de pós-graduação por taxas de conclusão</li>
+      <li>✅ <strong>Mapear</strong> a distribuição geográfica dos grupos de pesquisa</li>
+      <li>✅ <strong>Prestar contas</strong> à comunidade e aos órgãos de fomento</li>
+      <li>✅ <strong>Subsidiar</strong> relatórios institucionais e planejamento estratégico</li>
+    </ul>
+  </div>
+</section>
+
+<!-- SLIDE 10: Perguntas -->
+<section>
+  <h2>Perguntas que o Painel de Dados Responde</h2>
+  <br>
+  <div class="left" style="font-size:0.8em;">
+    <table>
+      <tr><th>Eixo</th><th>Perguntas</th></tr>
+      <tr><td>📄 Produção Científica</td><td>Qual campus mais publica? A produção está crescendo ou estagnada? Qual o perfil Qualis das publicações? Quais áreas concentram mais artigos?</td></tr>
+      <tr><td>🔬 Grupos de Pesquisa</td><td>Onde estão os grupos de pesquisa? Quantos pesquisadores e estudantes cada grupo mobiliza? Quais áreas do conhecimento predominam?</td></tr>
+      <tr><td>🎓 Pós-Graduação</td><td>Qual programa tem maior taxa de evasão? Qual a taxa de conclusão por coorte? Onde há pendência ativa que exige intervenção?</td></tr>
+      <tr><td>🧪 Iniciação Científica</td><td>Quantos projetos IC temos por campus? Qual a distribuição entre PIBIC, PIBITI e outras modalidades? De onde vem o fomento?</td></tr>
+      <tr><td>👥 Pesquisadores</td><td>Quantos pesquisadores ativos temos? Qual o perfil de produção por campus? A base de pesquisadores está crescendo?</td></tr>
+      <tr><td>💡 Inovação</td><td>Quantas patentes e registros de software o IFBA produziu? Quais campi se destacam em propriedade intelectual?</td></tr>
+    </table>
+  </div>
+</section>
+
+<!-- SLIDE 11: Próximos Passos -->
+<section>
+  <h2>Próximos Passos</h2>
+  <br>
+  <div class="left" style="font-size:0.8em;">
+    <table>
+      <tr><th>Prioridade</th><th>Melhoria</th><th>Status</th></tr>
+      <tr><td>🔴 Alta</td><td>Automação completa dos scrapers (pipeline CI/CD)</td><td>Planejado</td></tr>
+      <tr><td>🔴 Alta</td><td>Indicadores de extensão universitária</td><td>Planejado</td></tr>
+      <tr><td>🟡 Média</td><td>Integração com API do Lattes (em substituição a exportações manuais)</td><td>Estudo</td></tr>
+      <tr><td>🟡 Média</td><td>Painel de dados de programas de pós-graduação individuais</td><td>Planejado</td></tr>
+      <tr><td>🟢 Baixa</td><td>Modo escuro e personalização de temas</td><td>Ideia</td></tr>
+    </table>
+  </div>
+</section>
+
+<!-- SLIDE 12: Demo / Encerramento -->
+<section style="text-align:center;">
+  <h2 style="border:none;">Demonstração ao Vivo</h2>
+  <br>
+  <p style="font-size:1.2em;">🔗 <a href="https://portal.ifba.edu.br/prpgi/dashboards-1/dashboards/" target="_blank" style="color:var(--ifba-green);">portal.ifba.edu.br/prpgi/dashboards-1/dashboards</a></p>
+  <br>
+  <div style="font-size:0.7em; color:var(--ifba-gray);">
+    <p>Código-fonte: <a href="https://github.com/prof-davifr/dashboard-prpgi" target="_blank">github.com/prof-davifr/dashboard-prpgi</a></p>
+    <p style="margin-top:30px;">Tecnologias: Chart.js • Leaflet • SheetJS • Node.js • GitHub Pages</p>
+  </div>
+</section>
+
+<!-- SLIDE 13: Q&A -->
+<section class="title-slide" style="text-align:center;">
+  <h1 style="font-size:3em;">?</h1>
+  <h3 style="color:white !important;">Perguntas &amp; Respostas</h3>
+  <br>
+  <p style="color:rgba(255,255,255,0.9); font-size:0.85em;">Prof. Dr. Davi Franco Rêgo</p>
+  <p style="color:rgba(255,255,255,0.7); font-size:0.7em;">Assessor de Ciência de Dados – PRPGI</p>
+  <p style="color:rgba(255,255,255,0.7); font-size:0.7em; margin-top:10px;">Painel de Dados da PRPGI – IFBA</p>
+</section>
+
+</div></div>
+
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
+<script>
+  Reveal.initialize({
+    hash: true,
+    center: true,
+    transition: 'slide',
+    transitionSpeed: 'default',
+    width: 1200,
+    height: 700,
+    margin: 0.05,
+    slideNumber: 'c/t',
+    controls: true,
+    progress: true,
+    overview: true,
+    // 15 minutes ≈ 20 slides → ~45s per slide
+    // Speaker can navigate freely
+  });
+</script>
+</body>
+</html>

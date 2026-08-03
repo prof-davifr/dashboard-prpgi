@@ -26,7 +26,8 @@
 ```
 /
 ├── index.html           # Dashboard (única página)
-├── build.js             # Pipeline de ETL (Node.js)
+├── scripts/
+│   └── build.js         # Pipeline de ETL (Node.js)
 ├── data.json            # Saída do build (~31 MB, commitado)
 ├── data-groups.json     # Saída detalhada (~63 MB, commitado)
 ├── dados/               # Fontes brutas (gitignored)
@@ -260,7 +261,7 @@ Anual, conforme preenchimento dos ciclos na planilha compartilhada.
 
 ---
 
-## 3. Pipeline de Build (`build.js`)
+## 3. Pipeline de Build (`scripts/build.js`)
 
 ### 3.1 Fluxo Geral
 
@@ -279,7 +280,7 @@ Anual, conforme preenchimento dos ciclos na planilha compartilhada.
              │            │            │
              v            v            v
         ┌─────────────────────────────────────┐
-        │           build.js                  │
+        │       scripts/build.js              │
         │  parseCSV / XLSX.readFile           │
         │  SHEET_MAP / campusMap              │
         │  desduplicação / normalização       │
@@ -445,7 +446,7 @@ STATE.filtered.*
 ### 5.2 Mapas de Normalização por Fonte
 
 #### Para IC (nomes de cidade → código)
-Fonte `build.js` — usado nas sheets de ciclo do IC e na pós-graduação. Suporta variantes com e sem acentos, ortografia alternativa.
+Fonte `scripts/build.js` — usado nas sheets de ciclo do IC e na pós-graduação. Suporta variantes com e sem acentos, ortografia alternativa.
 
 #### Para DGP (Unidade → código)
 Fonte `script.js` — função `filterGroupsCampus`: a string `Unidade` (ex: `"IFBA - Salvador"`) é comparada via `includes()` com os nomes de cidade mapeados em `CAMPUS_TO_CITY`.
@@ -609,22 +610,22 @@ Destinado ao relatório de grupos de pesquisa (não ao dashboard principal).
 |---|---|---|
 | Código de campus → Cidade | `src/script.js` | `CAMPUS_TO_CITY` |
 | Cidade → Coordenadas | `src/script.js` | `IFBA_COORDS` |
-| Cidade → Código (IC) | `build.js` | `campusMap` |
-| Nome de sheet → Chave interna | `build.js` | `SHEET_MAP` |
-| Rótulo de fonte → Nome legível | `build.js` | `SOURCE_LABELS` |
+| Cidade → Código (IC) | `scripts/build.js` | `campusMap` |
+| Nome de sheet → Chave interna | `scripts/build.js` | `SHEET_MAP` |
+| Rótulo de fonte → Nome legível | `scripts/build.js` | `SOURCE_LABELS` |
 
 ### 9.2 Checklist para Adicionar Nova Fonte
 
 1. Criar subdiretório em `dados/` com o nome do scraper
-2. Adicionar entrada em `SOURCE_LABELS` no `build.js`
-3. Implementar processamento no `main()` do `build.js`
+2. Adicionar entrada em `SOURCE_LABELS` no `scripts/build.js`
+3. Implementar processamento no `main()` do `scripts/build.js`
 4. Adicionar array no `result` e em `STATE.raw` no frontend
 5. Verificar filtro IFBA (não IFBaiano)
 6. Adicionar aba no `index.html` (botão + seção de conteúdo)
 7. Adicionar funções de renderização (KPIs, charts, mapa, tabela)
 8. Verificar mapeamento de campus
 9. Atualizar este documento (proveniência)
-10. Executar `node build.js` e `npm test`
+10. Executar `node scripts/build.js` e `npm test`
 11. Atualizar `AGENTS.md`
 
 ### 9.3 Testes Associados
