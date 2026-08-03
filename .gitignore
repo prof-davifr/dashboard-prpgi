@@ -24,3 +24,13 @@ __pycache__/
 dados/
 AGENTS.md
 Mockup do Dashboard.pdf
+
+# LGPD — nunca versionar
+# Salt da pseudonimização: se for publicado, os hashes de data.json
+# passam a ser reversíveis por força bruta. Guardar em backup seguro:
+# perdê-lo só troca os pseudônimos no próximo build (sem perda de dados).
+.build-salt
+# Contém nomes, e-mails e contatos de pesquisadores (PesquisadoresNomes,
+# Lider, Contato, membrosMap) e não é consumido pelo dashboard.
+# Regenerar localmente com `npm run build`; consumidor: relatorio-grupos-pesquisa.
+data-groups.json

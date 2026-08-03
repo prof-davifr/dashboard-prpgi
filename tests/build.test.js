@@ -11,6 +11,7 @@ const {
   isPostGraduationCsv,
   isDgpGroupsCsv,
   selectDgpGroupsCsvFiles,
+  pseudonymize,
   SHEET_MAP,
   SOURCE_LABELS
 } = require('../scripts/build');
@@ -396,5 +397,89 @@ describe('selectDgpGroupsCsvFiles', () => {
     const out = selectDgpGroupsCsvFiles([collector, alunos]);
     expect(out.selected.filePath).toBe(collector.filePath);
     expect(out.ignored.map(f => f.filePath)).not.toContain(alunos.filePath);
+  });
+});
+
+// ─── LGPD: pseudonimização ────────────────────────────────────────────────────
+
+describe('pseudonymize', () => {
+  const SALT = 'salt-de-teste';
+
+  test('é determinístico para o mesmo salt', () => {
+    expect(pseudonymize('Maria da Silva', SALT))
+      .toBe(pseudonymize('Maria da Silva', SALT));
+  });
+
+  test('produz saídas diferentes para pessoas diferentes', () => {
+    expect(pseudonymize('Maria da Silva', SALT))
+      .not.toBe(pseudonymize('João Souza', SALT));
+  });
+
+  test('muda com o salt (não é reversível a partir do repositório público)', () => {
+    expect(pseudonymize('Maria da Silva', SALT))
+      .not.toBe(pseudonymize('Maria da Silva', 'outro-salt'));
+  });
+
+  test('normaliza caixa e espaços — mesma pessoa, mesmo pseudônimo', () => {
+    const canonico = pseudonymize('Eduardo Oliveira Teles', SALT);
+    expect(pseudonymize('Eduardo Oliveira teles', SALT)).toBe(canonico);
+    expect(pseudonymize('  EDUARDO OLIVEIRA TELES  ', SALT)).toBe(canonico);
+  });
+
+  test('preserva valores vazios para que .filter(Boolean) siga funcionando', () => {
+    expect(pseudonymize('', SALT)).toBe('');
+    expect(pseudonymize(null, SALT)).toBe('');
+    expect(pseudonymize(undefined, SALT)).toBe('');
+    expect(pseudonymize('   ', SALT)).toBe('');
+  });
+
+  test('não vaza o valor original na saída', () => {
+    const out = pseudonymize('Maria da Silva', SALT);
+    expect(out).toMatch(/^[0-9a-f]{16}$/);
+    expect(out.toLowerCase()).not.toContain('maria');
+  });
+
+  test('aceita entradas numéricas (matrícula)', () => {
+    expect(pseudonymize(20162640001, SALT)).toBe(pseudonymize('20162640001', SALT));
+  });
+});
+
+// ─── LGPD: guarda de regressão sobre o data.json publicado ────────────────────
+
+describe('data.json publicado não contém dados pessoais', () => {
+  const data = JSON.parse(
+    fs.readFileSync(path.join(__dirname, '..', 'data.json'), 'utf-8')
+  );
+  const DATASETS = [
+    'bibliografica', 'tecnica', 'inovacao', 'concluidas',
+    'andamento', 'grupos', 'posgraduacao', 'ic'
+  ];
+  const PII_FIELD = /nome|matricula|matrícula|e-?mail|cpf|telefone|contato/i;
+
+  test.each(DATASETS)('%s não expõe campos de nome/matrícula/e-mail', (ds) => {
+    const campos = new Set();
+    data[ds].forEach(r => Object.keys(r).forEach(k => campos.add(k)));
+    const vazando = [...campos].filter(k => PII_FIELD.test(k));
+    expect(vazando).toEqual([]);
+  });
+
+  test('posgraduacao mantém dedupKey pseudonimizado (não a matrícula)', () => {
+    const chaves = data.posgraduacao.map(r => r.dedupKey).filter(Boolean);
+    expect(chaves.length).toBeGreaterThan(0);
+    chaves.forEach(k => expect(k).toMatch(/^[0-9a-f]{16}$/));
+  });
+
+  test('ic mantém orientador/bolsista pseudonimizados', () => {
+    for (const campo of ['orientador', 'bolsista']) {
+      const vals = data.ic.map(r => r[campo]).filter(Boolean);
+      expect(vals.length).toBeGreaterThan(0);
+      vals.forEach(v => expect(v).toMatch(/^[0-9a-f]{16}$/));
+    }
+  });
+
+  test('as contagens de únicos da aba IC continuam calculáveis', () => {
+    const u = f => new Set(data.ic.map(r => r[f]).filter(Boolean)).size;
+    expect(u('orientador')).toBeGreaterThan(400);
+    expect(u('bolsista')).toBeGreaterThan(1000);
   });
 });
