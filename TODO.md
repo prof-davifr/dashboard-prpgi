@@ -38,7 +38,7 @@ Frontend estático (Chart.js + Leaflet + SheetJS) + pipeline ETL em `scripts/bui
 - [x] Logo oficial IFBA (marca vertical 2015, versão branca) na capa — `docs/assets/ifba-logo-branco.svg`
 
 ### Testes
-- [x] Jest: 205 testes em 4 suítes (build, campus-filter, posgraduacao, script.utils)
+- [x] Jest: 261 testes em 6 suítes (build, campus-filter, posgraduacao, script.utils, comparar-pi, acessibilidade)
 - [x] Testes VM-based sem browser/jsdom (`tests/helpers/browserEnv.js`)
 - [x] Cobertura E2E de filtro de campus contra `data.json` real (26 testes)
 
@@ -49,6 +49,17 @@ Frontend estático (Chart.js + Leaflet + SheetJS) + pipeline ETL em `scripts/bui
 - [x] **`npm run build` / `npm run validate`** — scripts criados e README/CLAUDE.md reconciliados
 - [x] **CI** — `.github/workflows/ci.yml` roda `npm test`, `npm run validate` (estrutura, códigos de campus, ausência de PII) e guarda de 50 MB por arquivo versionado
 - [x] Seção obsoleta de monorepo/subtree removida do `CLAUDE.md` (o repositório é independente)
+
+### Fase 3 — dados, performance, estrutura e acessibilidade (ago/2026)
+- [x] **`docs/validacao/` não versiona mais dados pessoais** — a planilha da DINOV (com `INVENTORES`, `CONTATO`, `Whatsapp`) foi para `dados/validacao/`; `comparar_pi.js` gera relatório público (sem nomes) e interno (completo, não versionado), abortando se PII escapar para o público. `.md`/`.html`/`.pdf` antigos purgados do histórico
+- [x] **Guarda de PII em todo arquivo versionado** — `validate-data.js` varre e-mails e telefones em todo texto sob controle de versão, não só no `data.json`
+- [x] **Validação bloqueante no build** — `build.js` valida antes de escrever e sai com erro, em vez de só `console.warn`
+- [x] **`data.json` de 32 MB → 21 MB** — `dedupKey` virou hash de 16 hex (`shortHash`); era metade do arquivo. Contagens de chaves distintas idênticas. `inovacao` mantém a chave longa, que o `comparar_pi.js` parseia
+- [x] **Regressão corrigida: CSV alheio virava grupo de pesquisa** — qualquer `.csv` sob `dados/` fora do DGP/pós caía no processamento de grupos por eliminação (197 → 494 grupos)
+- [x] **`comparar_pi.js` coberto por testes** — funções de casamento exportadas e testadas; bloco ponta a ponta se autodesabilita sem a planilha (caso do CI)
+- [x] **`src/script.js` (1.618 linhas) dividido** em `core`/`filters`/`charts`/`maps`/`tables`/`cache`; `loadDashboard()` no helper de teste
+- [x] **Acessibilidade** — padrão ARIA de abas com navegação por setas, `aria-label` nos 32 gráficos, diálogos com trap e devolução de foco, `caption`/`scope` nas tabelas, `--accent-text` para contraste AA, `:focus-visible` global, skip link
+- [x] Verificação no Chrome via DevTools Protocol contra o `data.json` real: 31 KPIs, 14 gráficos, 151 marcadores, zero erros de console
 
 ---
 
@@ -62,7 +73,8 @@ Frontend estático (Chart.js + Leaflet + SheetJS) + pipeline ETL em `scripts/bui
   git push --force origin copilot/organize-campi-dropdown-alphabetically
   ```
   Depois: mesmo com o force-push, os objetos antigos continuam alcançáveis por SHA no GitHub até a coleta de lixo deles — para remoção efetiva, abrir chamado no GitHub Support pedindo a purga, e tratar os dados como já expostos
-- [ ] **LGPD: `docs/validacao/` versiona dados pessoais** — descoberto em ago/2026, não estava mapeado. `Controle propriedade intelectual DINOV 2026 - CONCEDIDOS.csv` (298 linhas, versionado e público) tem colunas `INVENTORES`, `COTITULAR NOME`, `CONTATO` e `Whatsapp`, com 135 linhas contendo padrão de telefone. Os relatórios gerados (`relatorio-comparacao-PI.md`/`.html`/`.pdf`) também referenciam inventores. Decidir com a PRPGI: mover o CSV para `dados/` (gitignored) e regerar os relatórios sem colunas pessoais, ou anonimizar na origem. Exige nova purga de histórico
+- [ ] **Confirmar com a PRPGI o que pode ser público** — a régua atual foi definida tecnicamente (nada de nome, matrícula, e-mail ou telefone no que é versionado). Falta o aval formal sobre granularidade por aba e sobre o tratamento dos dados já expostos no histórico do GitHub
+- [ ] **`docs/validacao/relatorio-comparacao-PI.pdf` e `.html`** — foram removidos por vazarem inventores e contatos. Se ainda forem entregáveis, regerar a partir do `.md` público
 
 ### 🟡 Alta
 
@@ -71,15 +83,11 @@ Frontend estático (Chart.js + Leaflet + SheetJS) + pipeline ETL em `scripts/bui
 
 ### 🟢 Média
 
-- [ ] **Performance: payload de 34 MB no iframe** — primeira carga lenta em conexões móveis; 78k registros técnicos processados no browser. Opções: pré-agregação por campus/ano/área no build para KPIs e gráficos, carregar datasets por aba (fetch sob demanda), habilitar compressão (brotli/gzip) no GitHub Pages
-- [ ] **Modularizar `src/script.js` (1.688 linhas monolítico)** — separar `filters.js`, `charts.js`, `maps.js`, `tables.js`, `cache.js` (precedente: `pesquisadores.js`/`posgraduacao.js`)
-- [ ] **`comparar_pi.js` (561 linhas, validação manual de PI) como teste automatizado** — transformar em suíte de integridade (cross-check dados.json × fonte DINOV)
-- [ ] **Acessibilidade** — contraste, aria-labels, navegação por teclado nos gráficos/tabelas, foco em modais
-- [ ] **Validação de dados no build** — schemas por dataset (campos obrigatórios, anos válidos, códigos de campus), falhar o build com relatório claro em vez de apenas `console.warn`
+- [ ] **Pré-agregação por campus/ano/área no build** — **medir antes de fazer.** Números de ago/2026 (desktop): `data.json` são 21 MB, mas o GitHub Pages já serve gzipado, então o download real é **2,2 MB**. O custo dominante é `JSON.parse` (346 ms), seguido do dedup (194 ms) e do filtro (63 ms) sobre 163 mil registros. Num celular mediano isso é ~1–1,7 s de parse, uma vez só (a Cache API evita repetir). A pré-agregação ataca CPU, não bytes — só compensa se o parse virar queixa real de usuário
+- [ ] **Acessibilidade: rodar auditoria com leitor de tela** — a estrutura está corrigida (ARIA de abas, rótulo nos 32 gráficos, diálogos com trap de foco, `caption`/`scope` nas tabelas, contraste AA, foco visível), tudo coberto por `tests/acessibilidade.test.js`. Falta a validação qualitativa com NVDA/Orca e a descrição textual dos dados de cada gráfico (tabela alternativa)
 
 ### 🔵 Baixa
 
-- [ ] **Modo escuro** (citado no slide 11)
 - [ ] **Drill-down por pesquisador** — clicar num servidor e ver a produção completa (exige decisão LGPD)
 - [ ] **Comparação lado a lado entre campi** — seletor multi-campus nos gráficos
 - [ ] **Filtro por área do conhecimento** na produção científica
@@ -96,3 +104,5 @@ Frontend estático (Chart.js + Leaflet + SheetJS) + pipeline ETL em `scripts/bui
 - `data-groups.json` pode estar defasado em relação a `data.json` se o build falhar no meio (verificar atomicidade da escrita dos dois arquivos)
 - `AGENTS.md` (gitignored) ainda pode ter instruções divergentes sobre o comando de build — README e `CLAUDE.md` foram reconciliados em `npm run build`
 - O salt de pseudonimização (`.build-salt`) não é versionado: se for perdido, os pseudônimos de `data.json` mudam no build seguinte, gerando um diff grande (sem perda de dados). Incluir no backup
+- Nenhuma função de renderização tem teste unitário. Para verificar de verdade, dirigir o Chrome pelo DevTools Protocol (`--headless=new --remote-debugging-port=9222`) e checar o DOM vivo. `--dump-dom` com `--virtual-time-budget` **não serve**: fotografa antes de o `data.json` carregar e a página parece travada em "Carregando dados…" mesmo funcionando
+- A guarda de telefone em `validate-data.js` exige DDD entre parênteses ou celular com 9 inicial. O formato solto `NNNN-NNNN` é ambíguo demais (colide com números do INPI e intervalos de ano) e não é detectado — a guarda de e-mail é a rede principal

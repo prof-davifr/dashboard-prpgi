@@ -49,7 +49,10 @@ Before adding any field to `data.json`, check it against this rule — `npm run 
 
 Key mechanics to know before touching the pipeline:
 - **Servidor extraction**: the `Servidor` field is a stringified queryset (`<Vinculo: Nome (ID) (Servidor)>`); IDs (7+ digit regex) and names are extracted to support multi-author expansion (one record per author) and cross-source name resolution (Lattes ↔ DGP).
-- **Dedup key**: title normalized (NFD, lowercase, strip accents/non-alphanumeric, 150 chars) — used by the frontend's "Desduplicar" toggle to collapse multi-author records.
+- **Dedup key**: title normalized (NFD, lowercase, strip accents/non-alphanumeric, 150 chars), then hashed to 16 hex by `shortHash()` — the frontend only compares these for equality, and the full strings were 15.8 MB of a 32 MB file. **`inovacao` keeps the long key**: `scripts/comparar_pi.js` parses the INPI number out of it (`numerodoregistro…dataderegistro`).
+- **`shortHash` vs `pseudonymize`**: `shortHash` has no salt (public titles, must be reproducible by anyone running the build); `pseudonymize` is salted (personal data, must not be brute-forceable).
+- **Validation is blocking**: `main()` runs `validate()` from `scripts/validate-data.js` on the result and exits non-zero *before* writing, so a broken `data.json` never reaches GitHub Pages.
+- **Only CSVs from known sources are processed** — a `.csv` under `dados/` that is neither DGP nor pós-graduação is skipped and listed. Previously anything unrecognized fell through into the research-groups path.
 - **Campus normalization** — see below.
 - Never commit raw `dados/` contents (gitignored); after adding files there, regenerate with `npm run build` and check the printed size/campus list/record counts.
 
@@ -75,7 +78,20 @@ Campus codes cover 25 IFBA campuses (BAR, BRU, CAM, CFO, EC, EUN, FS, ILH, IRE, 
 
 ## Frontend architecture
 
-- No build step for frontend — `index.html` loads `src/shared.js` (first — the others depend on it), `src/script.js`, `src/style.css`, `src/posgraduacao.js`, `src/pesquisadores.js` directly, plus Chart.js/Leaflet/SheetJS via CDN.
+- No build step for frontend — `index.html` loads plain global scripts in a fixed order, plus Chart.js/Leaflet/SheetJS via CDN. **The order matters**: each file defines globals the later ones consume.
+
+| File | Responsibility |
+|---|---|
+| `src/shared.js` | campus mappings (see above) — first, everything depends on it |
+| `src/core.js` | `STATE`, `$`, date/format helpers, servidor counts, tab switching, modals, toast |
+| `src/filters.js` | `processData()` — the single filtering entry point |
+| `src/charts.js` | `createChart` + every `renderKPIs*` / `renderCharts*` |
+| `src/maps.js` | `renderGenericMap` + the expanded-map modal |
+| `src/tables.js` | `generateCampusYearTable`, `renderTable*`, Excel export |
+| `src/pesquisadores.js`, `src/posgraduacao.js` | per-tab logic |
+| `src/cache.js` | `initDashboard` + Cache API load — last, uses all renderers |
+
+`tests/helpers/browserEnv.js` exposes `loadDashboard(ctx)`, which loads this same list into the VM context in the same order. Use it instead of pointing at a single module.
 - Data flow: `data.json` fetched with a stale-while-revalidate Cache API pattern → `STATE.raw.*` (the 8 arrays) → `processData()` (re-run on every filter change: period, campus, dedup toggle, relative-metrics toggle) → `STATE.filtered.*` → per-tab `renderKPIs*()` / `renderCharts*()` (Chart.js) / `renderGenericMap()` (Leaflet) / table generators.
 - Tabs map to data sources roughly 1:1 (Produção Científica → `bibliografica`, Produção Técnica → `tecnica`, Inovação → `inovacao`, Grupos de Pesquisa/Pesquisadores → `grupos` + productions, Orientações → `concluidas`+`andamento`, Pós-Graduação → `posgraduacao`, IC → `ic`).
 - "p/ Servidor" (relative metrics) toggle divides KPIs/charts/map values by the count of distinct active `Servidor` IDs in the current period/campus selection.
@@ -87,6 +103,9 @@ Campus codes cover 25 IFBA campuses (BAR, BRU, CAM, CFO, EC, EUN, FS, ILH, IRE, 
 - `tests/build.test.js` covers `scripts/build.js` pure functions (`findFiles`, `parseCSV`, `getSourceKey`, `registerSourceFile`, DGP CSV selection, `pseudonymize`, `SHEET_MAP`, `SOURCE_LABELS`) plus the LGPD guard asserting `data.json` carries no personal fields.
 - `tests/script.utils.test.js` / `tests/posgraduacao.test.js` cover frontend utilities using a custom VM-based browser stub (`tests/helpers/browserEnv.js`) — no real browser or jsdom.
 - `tests/campus-filter.test.js` runs the real `mapUnidadeToCampus` from `src/shared.js` against the committed `data.json`. To check the guard still bites, break accent normalization in `src/shared.js` and confirm the suite fails.
+- `tests/comparar-pi.test.js` covers the DINOV × dashboard matching functions. Its end-to-end block **self-disables** when `dados/validacao/…CONCEDIDOS.csv` is absent (the CI case). Note `describe.skip` does not work for this — Jest still executes the block body — hence the plain `if`.
+- `tests/acessibilidade.test.js` asserts the ARIA tab pattern, canvas labels, dialog semantics, table `caption`/`scope`, and computes WCAG contrast ratios from `src/style.css`. A new chart without an `aria-label` fails the suite.
+- No render function is covered by unit tests. For real verification, drive Chrome over the DevTools Protocol (`--headless=new --remote-debugging-port=9222`) and assert on the live DOM. Plain `--dump-dom`/`--virtual-time-budget` does **not** work here: it snapshots before `data.json` finishes loading, so the page looks stuck on "Carregando dados…" even when nothing is wrong.
 
 ## Checklist for adding a new data source
 
