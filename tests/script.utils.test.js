@@ -350,3 +350,31 @@ describe('CAMPUS_TO_CITY (defined in script.js)', () => {
     });
   });
 });
+
+// ─── Regression: DGP "Unidade" → canonical city → map coords ────────────────
+// Groups from DGP have Unidade like "IFBA - Campus Vitória da Conquista".
+// renderGenericMap must resolve these to a city present in IFBA_COORDS,
+// otherwise lookupCoords returns null and the group is hidden from the map.
+
+describe('DGP Unidade → map coords (regression: grupos sem campus no mapa)', () => {
+  test.each([
+    ['IFBA - Campus Salvador', 'SSA', 'SALVADOR'],
+    ['IFBA - Campus Vitória da Conquista', 'VC', 'VITÓRIA DA CONQUISTA'],
+    ['IFBA - Campus Eunápolis', 'EUN', 'EUNÁPOLIS'],
+    ['IFBA - Campus Porto Seguro', 'PS', 'PORTO SEGURO'],
+    ['IFBA - Campus Barreiras', 'BAR', 'BARREIRAS'],
+    ['IFBA - Campus Santo Antônio de Jesus', 'SAJ', 'SANTO ANTÔNIO DE JESUS'],
+    ['Polo de Inovação Salvador', 'PIS', 'POLO DE INOVAÇÃO SALVADOR'],
+    ['Salvador', 'SSA', 'SALVADOR']
+  ])('%s → %s → %s resolve no mapa', (unidade, code, city) => {
+    const resolvedCode = ctx.mapUnidadeToCampus(unidade);
+    expect(resolvedCode).toBe(code);
+    const canonicalCity = CAMPUS_TO_CITY[resolvedCode];
+    expect(canonicalCity).toBe(city);
+    expect(ctx.lookupCoords(canonicalCity)).not.toBeNull();
+  });
+
+  test('UBA resolves via canonical UBAITABA key (typo fix)', () => {
+    expect(ctx.lookupCoords('UBAITABA')).not.toBeNull();
+  });
+});

@@ -190,14 +190,15 @@ function createChart(ctxId, type, data, options = {}) {
 
 function mapUnidadeToCampus(unidade) {
   if (!unidade) return "";
-  const u = unidade.toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  const norm = s => s.toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  const u = norm(unidade);
   // Handle generic IFBA headquarters references
   if (u.includes('INSTITUTO FEDERAL') && !u.includes('CAMPUS') && !u.includes('POLO')) {
     return "SSA";
   }
   const sorted = Object.entries(CAMPUS_TO_CITY).sort((a, b) => b[1].length - a[1].length);
   for (const [code, city] of sorted) {
-    if (u.includes(city)) return code;
+    if (u.includes(norm(city))) return code;
   }
   return "SSA"; // Fallback: treat unidentifiable as Salvador
 }
@@ -612,6 +613,7 @@ const IFBA_COORDS = {
   "SANTO ANTONIO DE JESUS": [-12.9680, -39.2618],
   "SEABRA": [-12.4187, -41.7702],
   "EUCLIDES DA CUNHA": [-10.5085, -39.0150],
+  "UBAITABA": [-14.2255, -39.3245],
   "UBABAITABA": [-14.2255, -39.3245],
   "JAGUAQUARA": [-13.5283, -39.9713],
   "PORTO SEGURO": [-16.4442, -39.0644],
@@ -660,10 +662,12 @@ function renderGenericMap(data, mapId, color, label, pesquisadoresData = null) {
   data.forEach(r => {
     // If it's DGP data, it has city/unidade; if it's Lattes, it has Servidor field with campus
     let city = "";
-    if (r["Unidade"] || r["Cidade"]) {
-      city = (r["Unidade"] || r["Cidade"]).trim().toUpperCase();
-    } else if (r.campus) {
+    if (r.campus) {
       city = CAMPUS_TO_CITY[r.campus] || r.campus;
+    } else if (r["Unidade"] || r["Cidade"]) {
+      // DGP data: Unidade is like "IFBA - Campus Salvador" → resolve to canonical city
+      const campusCode = mapUnidadeToCampus(r["Unidade"] || r["Cidade"]);
+      city = CAMPUS_TO_CITY[campusCode] || (r["Unidade"] || r["Cidade"]).trim().toUpperCase();
     }
     if (city) cityCount[city] = (cityCount[city] || 0) + 1;
   });
@@ -1453,11 +1457,8 @@ function renderTableGrupos() {
   data.forEach(r => {
     const year = parseInt(r["AnoFormacao"], 10);
     const unidade = r["Unidade"] || "";
-    // Map unidade to campus code
-    let campus = "";
-    Object.entries(CAMPUS_TO_CITY).forEach(([code, city]) => {
-      if (unidade.toUpperCase().includes(city)) campus = code;
-    });
+    // Map unidade to campus code (longest-city-first, same as filters)
+    const campus = mapUnidadeToCampus(unidade);
     
     if (!year || !campus) return;
     
