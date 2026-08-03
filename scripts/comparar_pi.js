@@ -10,16 +10,9 @@ const CSV_PATH = path.join(__dirname, '..', 'docs', 'validacao', 'Controle propr
 const DATA_PATH = path.join(__dirname, '..', 'data.json');
 const REPORT_PATH = path.join(__dirname, '..', 'docs', 'validacao', 'relatorio-comparacao-PI.md');
 
-// CAMPUS_TO_CITY (synced with src/script.js)
-const CAMPUS_TO_CITY = {
-  BAR: 'Barreiras', BRU: 'Brumado', CAM: 'Camaçari', CFO: 'Campo Formoso',
-  EC: 'Euclides da Cunha', EUN: 'Eunápolis', FS: 'Feira de Santana',
-  ILH: 'Ilhéus', IRE: 'Irecê', JAC: 'Jacobina', JAG: 'Jaguaquara',
-  JEQ: 'Jequié', JUA: 'Juazeiro', LF: 'Lauro de Freitas', PA: 'Paulo Afonso',
-  PIS: 'Polo de Inovação Salvador', PS: 'Porto Seguro', SAJ: 'Santo Antônio de Jesus',
-  SAM: 'Santo Amaro', SEA: 'Seabra', SF: 'Simões Filho', SSA: 'Salvador',
-  UBA: 'Ubaitaba', VAL: 'Valença', VC: 'Vitória da Conquista'
-};
+// Fonte única (src/shared.js). As cidades vêm em maiúsculas, mas CITY_TO_CAMPUS
+// abaixo normaliza para minúsculas sem acento — a caixa é indiferente aqui.
+const { CAMPUS_TO_CITY } = require('../src/shared');
 
 // ─── Servidor ID → Name mapping (from SUAPCNPQ XLSX files) ────────────
 function buildServidorNameMap() {

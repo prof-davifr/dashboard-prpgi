@@ -3,6 +3,8 @@
   "version": "1.0.0",
   "description": "Dashboard PRPGI",
   "scripts": {
+    "build": "node scripts/build.js",
+    "validate": "node scripts/validate-data.js",
     "start": "npx live-server --port=8080",
     "test": "jest"
   },

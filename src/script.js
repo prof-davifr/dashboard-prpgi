@@ -188,20 +188,8 @@ function createChart(ctxId, type, data, options = {}) {
   });
 }
 
-function mapUnidadeToCampus(unidade) {
-  if (!unidade) return "";
-  const norm = s => s.toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-  const u = norm(unidade);
-  // Handle generic IFBA headquarters references
-  if (u.includes('INSTITUTO FEDERAL') && !u.includes('CAMPUS') && !u.includes('POLO')) {
-    return "SSA";
-  }
-  const sorted = Object.entries(CAMPUS_TO_CITY).sort((a, b) => b[1].length - a[1].length);
-  for (const [code, city] of sorted) {
-    if (u.includes(norm(city))) return code;
-  }
-  return "SSA"; // Fallback: treat unidentifiable as Salvador
-}
+// CAMPUS_TO_CITY, IFBA_COORDS, normalizeText, mapUnidadeToCampus e lookupCoords
+// vivem em src/shared.js (carregado antes deste arquivo em index.html).
 
 function processData() {
   const filterVal = $('period-filter').value;
@@ -578,65 +566,6 @@ function renderKPIsTecnica() {
     <div class="kpi-card"><div class="kpi-label">Apresentações${labelSuffix}</div><div class="kpi-value">${apresentacoesDisplay}</div></div>
     <div class="kpi-card"><div class="kpi-label">Cursos/Eventos${labelSuffix}</div><div class="kpi-value">${cursosDisplay}</div></div>
   `;
-}
-
-// Shared precise coordinates for all IFBA cities
-// This dashboard covers IFBA (Instituto Federal da Bahia) only.
-// Do NOT add coordinates for IFBaiano (Instituto Federal Baiano) campuses.
-const IFBA_COORDS = {
-  "SALVADOR": [-12.9714, -38.5014],
-  "FEIRA DE SANTANA": [-12.2666, -38.9666],
-  "VITÓRIA DA CONQUISTA": [-14.8661, -40.8394],
-  "VITORIA DA CONQUISTA": [-14.8661, -40.8394],
-  "ILHÉUS": [-14.7889, -39.0494],
-  "ILHEUS": [-14.7889, -39.0494],
-  "ITABUNA": [-14.7869, -39.2800],
-  "JEQUIÉ": [-13.8580, -40.0830],
-  "JEQUIE": [-13.8580, -40.0830],
-  "VALENÇA": [-13.3700, -39.0730],
-  "VALENCA": [-13.3700, -39.0730],
-  "SANTO AMARO": [-12.5445, -38.7135],
-  "CAMAÇARI": [-12.6975, -38.3241],
-  "CAMACARI": [-12.6975, -38.3241],
-  "SIMÕES FILHO": [-12.7844, -38.4025],
-  "SIMOES FILHO": [-12.7844, -38.4025],
-  "IRECÊ": [-11.3040, -41.8557],
-  "IRECE": [-11.3040, -41.8557],
-  "BARREIRAS": [-12.1528, -44.9900],
-  "BRUMADO": [-14.2045, -41.6663],
-  "EUNÁPOLIS": [-16.3720, -39.5815],
-  "EUNAPOLIS": [-16.3720, -39.5815],
-  "JACOBINA": [-11.1818, -40.5181],
-  "JUAZEIRO": [-9.4124, -40.5055],
-  "PAULO AFONSO": [-9.4005, -38.2163],
-  "SANTO ANTÔNIO DE JESUS": [-12.9680, -39.2618],
-  "SANTO ANTONIO DE JESUS": [-12.9680, -39.2618],
-  "SEABRA": [-12.4187, -41.7702],
-  "EUCLIDES DA CUNHA": [-10.5085, -39.0150],
-  "UBAITABA": [-14.2255, -39.3245],
-  "UBABAITABA": [-14.2255, -39.3245],
-  "JAGUAQUARA": [-13.5283, -39.9713],
-  "PORTO SEGURO": [-16.4442, -39.0644],
-  "CAMPO FORMOSO": [-10.5100, -40.3200],
-  "LAURO DE FREITAS": [-12.8967, -38.3286],
-  "POLO DE INOVAÇÃO SALVADOR": [-12.9714, -38.5014],
-  "POLO DE INOVACAO SALVADOR": [-12.9714, -38.5014]
-};
-
-const CAMPUS_TO_CITY = {
-  "BAR": "BARREIRAS", "BRU": "BRUMADO", "CAM": "CAMAÇARI", "CFO": "CAMPO FORMOSO", 
-  "EC": "EUCLIDES DA CUNHA", "EUN": "EUNÁPOLIS", "FS": "FEIRA DE SANTANA", 
-  "ILH": "ILHÉUS", "IRE": "IRECÊ", "JAC": "JACOBINA", "JAG": "JAGUAQUARA", 
-  "JEQ": "JEQUIÉ", "LF": "LAURO DE FREITAS", "SAM": "SANTO AMARO", "SEA": "SEABRA",
-  "SF": "SIMÕES FILHO", "UBA": "UBAITABA", "VAL": "VALENÇA", "VC": "VITÓRIA DA CONQUISTA", 
-  "SAJ": "SANTO ANTÔNIO DE JESUS", "JUA": "JUAZEIRO", "PA": "PAULO AFONSO",
-  "PIS": "POLO DE INOVAÇÃO SALVADOR", "PS": "PORTO SEGURO", "SSA": "SALVADOR"
-};
-
-function lookupCoords(city) {
-  if(!city) return null;
-  const norm = city.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase();
-  return IFBA_COORDS[city] || IFBA_COORDS[norm] || null;
 }
 
 function renderGenericMap(data, mapId, color, label, pesquisadoresData = null) {

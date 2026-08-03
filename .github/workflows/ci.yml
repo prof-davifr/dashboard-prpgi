@@ -1,0 +1,56 @@
+name: CI
+
+# Valida o artefato commitado (data.json) e a lógica do dashboard.
+# O build NÃO roda aqui: dados/ é gitignored e as fontes brutas (exportações
+# do SUAP/DGP/Lattes/PNP) não existem no runner. A geração continua local,
+# via `npm run build`; o CI garante que o que foi commitado está íntegro.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  test:
+    name: Testes e validação de dados
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - name: Instalar dependências
+        run: npm ci
+
+      # Cobre, entre outros, a guarda de LGPD sobre data.json
+      # ("data.json publicado não contém dados pessoais", tests/build.test.js)
+      # e o filtro de campus E2E contra o data.json real.
+      - name: Rodar testes
+        run: npm test
+
+      - name: Validar estrutura e ausência de PII no data.json
+        run: npm run validate
+
+      - name: Guarda de tamanho dos arquivos versionados
+        run: |
+          LIMITE=$((50 * 1024 * 1024))
+          FALHOU=0
+          while IFS= read -r f; do
+            [ -f "$f" ] || continue
+            TAM=$(stat -c%s "$f")
+            if [ "$TAM" -gt "$LIMITE" ]; then
+              echo "::error file=$f::$f tem $((TAM / 1024 / 1024)) MB, acima do limite de 50 MB"
+              FALHOU=1
+            fi
+          done < <(git ls-files)
+          if [ "$FALHOU" -eq 1 ]; then
+            echo "Arquivos grandes incham o repositório e se aproximam do limite do GitHub."
+            exit 1
+          fi
+          echo "Nenhum arquivo versionado acima de 50 MB."

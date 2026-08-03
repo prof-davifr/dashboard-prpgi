@@ -42,11 +42,35 @@ Para atualizar os números do dashboard, siga o processo de *ETL* simplificado:
 2. **Processamento**: Execute o motor de unificação:
     ```bash
     npm run build
-    # ou
-    node scripts/build.js
     ```
-3. **Validação**: Verifique o tamanho e conteúdo do novo `data.json` gerado.
-4. **Deploy**: Faça o push para o repositório. O GitHub Pages atualizará a visualização automaticamente.
+3. **Validação**: Rode as verificações de integridade e a suíte de testes:
+    ```bash
+    npm run validate   # estrutura, códigos de campus e ausência de dados pessoais
+    npm test
+    ```
+4. **Deploy**: Faça o push para o repositório. O GitHub Pages atualizará a visualização automaticamente, e a Action de CI roda `npm test` + `npm run validate` a cada push.
+
+### Dados pessoais (LGPD)
+
+`data.json` é **público** (servido pelo GitHub Pages), então o build nunca escreve
+dados pessoais nele:
+
+- **Pós-graduação**: nome, matrícula e e-mails não entram no arquivo. A identidade
+  do aluno sobrevive apenas como `dedupKey` pseudonimizada, o que preserva a
+  deduplicação e a contagem de alunos únicos.
+- **IC**: `orientador` e `bolsista` são pseudônimos estáveis — o dashboard só usa
+  esses campos para contar pessoas distintas.
+- **Lattes**: `Servidor` já é a matrícula SIAPE, não o nome.
+
+A pseudonimização usa um salt em `.build-salt`, criado automaticamente no primeiro
+build e **não versionado**. Guarde-o junto dos backups: mantê-lo faz os pseudônimos
+serem estáveis entre builds (diffs pequenos no `data.json`); perdê-lo apenas troca
+todos os pseudônimos no próximo build, sem perda de dados.
+
+`data-groups.json` (~64 MB) **não é versionado**: contém nomes, contatos e
+composição das equipes de pesquisa, e não é consumido pelo dashboard. Ele é
+regenerado por `npm run build` junto com o `data.json`, e serve ao projeto
+`relatorio-grupos-pesquisa`.
 
 ---
 

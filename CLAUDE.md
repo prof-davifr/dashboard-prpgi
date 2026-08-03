@@ -16,12 +16,13 @@ Any new data source integration **must** verify the `Instituição` field contai
 
 ## Commands
 
-- `node scripts/build.js` (or `npm run build`) — process `.xlsx`/`.csv` files from `dados/` into `data.json` and `data-groups.json`
+- `npm run build` — process `.xlsx`/`.csv` files from `dados/` into `data.json` and `data-groups.json`
+- `npm run validate` — check the committed `data.json` (structure, campus codes, absence of personal data)
 - `npm start` — dev server on port 8080 (`live-server`)
 - `npm test` — run Jest unit tests
 - `npm test -- <pattern>` — run focused tests (e.g. `npm test -- parseCSV`)
 
-Always run `node scripts/build.js` and `npm test` after touching the ETL pipeline or any campus/source mapping.
+Always run `npm run build`, `npm run validate` and `npm test` after touching the ETL pipeline or any campus/source mapping. CI (`.github/workflows/ci.yml`) runs the last two on every push.
 
 ## Data pipeline (`build.js`)
 
@@ -31,33 +32,50 @@ Always run `node scripts/build.js` and `npm test` after touching the ETL pipelin
 - **`dados/scraper-DGP/`** — research groups CSV. Build auto-selects the newest file whose name starts with `coletor` and doesn't end in `_old.csv` (`selectDgpGroupsCsvFiles`); other coletor files are ignored.
 - **`dados/scraper-SUAPPos/`** — postgraduate students CSV, timestamped filename (`alunos_pos_*.csv`).
 - **`dados/ic/`** — IC/ICT projects Excel (PNP/SETEC-MEC), one sheet per cycle (`Ciclo YYYY-YYYY`), processed separately from per-campus files (fixed column indices, not headers).
-- **`data.json`** (~31 MB, tracked in git — required for GitHub Pages) — lightweight arrays consumed by the dashboard: `bibliografica`, `tecnica`, `inovacao`, `concluidas`, `andamento`, `grupos`, `posgraduacao`, `ic`, plus `meta` (campuses, year range, source file dates).
-- **`data-groups.json`** (~63 MB, tracked in git) — detailed re-processing with resolved servidor names/IDs and group memberships, used only by the separate `relatorio-grupos-pesquisa` project, not the main dashboard.
+- **`data.json`** (~32 MB, tracked in git — required for GitHub Pages) — lightweight arrays consumed by the dashboard: `bibliografica`, `tecnica`, `inovacao`, `concluidas`, `andamento`, `grupos`, `posgraduacao`, `ic`, plus `meta` (campuses, year range, source file dates). **Public — must never contain personal data** (see below).
+- **`data-groups.json`** (~64 MB, **gitignored**) — detailed re-processing with resolved servidor names/IDs and group memberships, used only by the separate `relatorio-grupos-pesquisa` project, not the main dashboard. Contains names and contacts, so it is regenerated locally with `npm run build` rather than committed.
+
+### LGPD — `data.json` is published
+
+`data.json` is served publicly by GitHub Pages, so `build.js` strips or pseudonymizes every personal field:
+
+- `posgraduacao`: `nome`, `matricula`, `email_academico`, `email_pessoal` are **not emitted**; `dedupKey` is a pseudonymized matrícula.
+- `ic`: `orientador` and `bolsista` are pseudonyms — the dashboard only uses them for distinct counts (`renderKPIsIC`).
+- Lattes datasets already carry only the SIAPE ID in `Servidor`, never a name.
+
+`pseudonymize()` (top of `scripts/build.js`) hashes with a salt kept in `.build-salt` (gitignored, auto-created). Stable salt ⇒ stable pseudonyms ⇒ small `data.json` diffs; losing it only reshuffles pseudonyms on the next build.
+
+Before adding any field to `data.json`, check it against this rule — `npm run validate` and `tests/build.test.js` will fail the build/CI if a name/matrícula/e-mail field reappears.
 
 Key mechanics to know before touching the pipeline:
 - **Servidor extraction**: the `Servidor` field is a stringified queryset (`<Vinculo: Nome (ID) (Servidor)>`); IDs (7+ digit regex) and names are extracted to support multi-author expansion (one record per author) and cross-source name resolution (Lattes ↔ DGP).
 - **Dedup key**: title normalized (NFD, lowercase, strip accents/non-alphanumeric, 150 chars) — used by the frontend's "Desduplicar" toggle to collapse multi-author records.
-- **Campus normalization** happens in three different places with different logic — see below.
-- Never commit raw `dados/` contents (gitignored); after adding files there, regenerate with `node scripts/build.js` and check the printed size/campus list/record counts.
+- **Campus normalization** — see below.
+- Never commit raw `dados/` contents (gitignored); after adding files there, regenerate with `npm run build` and check the printed size/campus list/record counts.
 
 Full pipeline documentation (data provenance, column mappings, business rules, glossary) lives in `docs/proveniencia-dados.md` — consult it before adding a new data source.
 
-## Campus code mapping — three places, must stay in sync
+## Campus code mapping — `src/shared.js` is the single source
 
-| Mapping | File | Name |
-|---|---|---|
-| Campus code → city | `src/script.js` | `CAMPUS_TO_CITY` |
-| City → coordinates | `src/script.js` | `IFBA_COORDS` |
-| City → code (IC + Pós sheets) | `build.js` | `campusMap` |
-| Test copies of the above | `tests/helpers/browserEnv.js` | own `CAMPUS_TO_CITY`/`IFBA_COORDS` |
+| Mapping | Name |
+|---|---|
+| Campus code → city | `CAMPUS_TO_CITY` |
+| City → coordinates | `IFBA_COORDS` (keys are accent-free uppercase) |
+| DGP `Unidade` → campus code | `mapUnidadeToCampus` |
+| City → coordinates lookup | `lookupCoords` |
+| Accent/case normalization | `normalizeText` |
 
-If you add/rename a campus, update all of these together. Known unresolved discrepancy: `tests/helpers/browserEnv.js` maps `UBA` → `"UBATÃ"` while `src/script.js` uses `"UBAITABA"` — reconcile if you touch either file. IC campus overrides: `REI`→`SSA` (Reitoria), `PAF`→`PA` (Paulo Afonso typo).
+`src/shared.js` is loaded as a plain global script **before** `script.js` in `index.html`, and via `require()` from Node (build scripts and tests) through a UMD footer. Adding or renaming a campus is a one-file change.
+
+The only mapping still living elsewhere is `campusMap` in `scripts/build.js` (city → code for the IC and Pós sheets), which maps Title-Case city names from those spreadsheets. IC campus overrides: `REI`→`SSA` (Reitoria), `PAF`→`PA` (Paulo Afonso typo).
+
+**Do not reintroduce local copies of these mappings.** `tests/campus-filter.test.js` used to keep its own `mapUnidadeToCampus` without accent normalization; it passed while the real implementation failed, which is what hid the "grupos sem campus" bug (ago/2026). Tests import from `src/shared.js`, and `tests/helpers/browserEnv.js` loads it into the VM context exactly like the browser does.
 
 Campus codes cover 25 IFBA campuses (BAR, BRU, CAM, CFO, EC, EUN, FS, ILH, IRE, JAC, JAG, JEQ, JUA, LF, PA, PIS, PS, SAJ, SAM, SEA, SF, SSA, UBA, VAL, VC) — see the full city table in `docs/proveniencia-dados.md` §5.
 
 ## Frontend architecture
 
-- No build step for frontend — `index.html` loads `src/script.js`, `src/style.css`, `src/posgraduacao.js`, `src/pesquisadores.js` directly, plus Chart.js/Leaflet/SheetJS via CDN.
+- No build step for frontend — `index.html` loads `src/shared.js` (first — the others depend on it), `src/script.js`, `src/style.css`, `src/posgraduacao.js`, `src/pesquisadores.js` directly, plus Chart.js/Leaflet/SheetJS via CDN.
 - Data flow: `data.json` fetched with a stale-while-revalidate Cache API pattern → `STATE.raw.*` (the 8 arrays) → `processData()` (re-run on every filter change: period, campus, dedup toggle, relative-metrics toggle) → `STATE.filtered.*` → per-tab `renderKPIs*()` / `renderCharts*()` (Chart.js) / `renderGenericMap()` (Leaflet) / table generators.
 - Tabs map to data sources roughly 1:1 (Produção Científica → `bibliografica`, Produção Técnica → `tecnica`, Inovação → `inovacao`, Grupos de Pesquisa/Pesquisadores → `grupos` + productions, Orientações → `concluidas`+`andamento`, Pós-Graduação → `posgraduacao`, IC → `ic`).
 - "p/ Servidor" (relative metrics) toggle divides KPIs/charts/map values by the count of distinct active `Servidor` IDs in the current period/campus selection.
@@ -66,8 +84,9 @@ Campus codes cover 25 IFBA campuses (BAR, BRU, CAM, CFO, EC, EUN, FS, ILH, IRE, 
 
 ## Testing
 
-- `tests/build.test.js` covers `scripts/build.js` pure functions (`findFiles`, `parseCSV`, `getSourceKey`, `registerSourceFile`, DGP CSV selection, `SHEET_MAP`, `SOURCE_LABELS`).
+- `tests/build.test.js` covers `scripts/build.js` pure functions (`findFiles`, `parseCSV`, `getSourceKey`, `registerSourceFile`, DGP CSV selection, `pseudonymize`, `SHEET_MAP`, `SOURCE_LABELS`) plus the LGPD guard asserting `data.json` carries no personal fields.
 - `tests/script.utils.test.js` / `tests/posgraduacao.test.js` cover frontend utilities using a custom VM-based browser stub (`tests/helpers/browserEnv.js`) — no real browser or jsdom.
+- `tests/campus-filter.test.js` runs the real `mapUnidadeToCampus` from `src/shared.js` against the committed `data.json`. To check the guard still bites, break accent normalization in `src/shared.js` and confirm the suite fails.
 
 ## Checklist for adding a new data source
 
@@ -80,19 +99,14 @@ Campus codes cover 25 IFBA campuses (BAR, BRU, CAM, CFO, EC, EUN, FS, ILH, IRE, 
 5. Verify the IFBA (not IFBaiano) filter is applied
 6. Add a tab in `index.html` (button + content section)
 7. Add render functions (KPIs, charts, map, table)
-8. Verify campus mapping is consistent across all three locations above
-9. Update `docs/proveniencia-dados.md`
-10. Run `node scripts/build.js` and `npm test`
+8. Verify campus mapping goes through `src/shared.js` (no new local copies)
+9. Verify no personal data reaches `data.json` — strip or `pseudonymize()` names, matrículas and e-mails
+10. Update `docs/proveniencia-dados.md`
+11. Run `npm run build`, `npm run validate` and `npm test`
 
-## Monorepo & subtree push
+## Repository layout
 
-This project lives inside a monorepo at `/home/davi/projetos/PRPGI/dashboard-PRPGI/` and is also published independently to `prof-davifr/dashboard-prpgi` via `git subtree`.
-
-Push to the standalone repo (run from the monorepo root, `/home/davi/projetos`):
-```
-git subtree push --prefix=PRPGI/dashboard-PRPGI dashboard main
-```
-Only history under `PRPGI/dashboard-PRPGI/` is pushed. Sibling projects with the same subtree setup: `PRPGI/scraper-DGP/` → `scraper-dgp` remote, `PRPGI/relatorio-grupos-pesquisa-PRPGI/` → `relatorio-grupos` remote.
+This is a **standalone repository** (`prof-davifr/dashboard-prpgi`), not a subtree of a monorepo — `git push origin main` is the whole story. Sibling projects (`scraper-DGP`, `scraper-SUAPPos`, `scraper-SUAPCNPQ`, `relatorio-grupos-pesquisa`) are independent repos alongside this one in `/home/davi/projetos/repos-independentes/`; files move between them through the filesystem (`dados/`, `data-groups.json`), not through git.
 
 ## TODO.md
 

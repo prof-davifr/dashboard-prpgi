@@ -4,31 +4,14 @@
 const fs = require('fs');
 const path = require('path');
 
-// Mirror of src/script.js CAMPUS_TO_CITY (must be kept in sync)
-const CAMPUS_TO_CITY = {
-  "BAR": "BARREIRAS", "BRU": "BRUMADO", "CAM": "CAMAÇARI", "CFO": "CAMPO FORMOSO",
-  "EC": "EUCLIDES DA CUNHA", "EUN": "EUNÁPOLIS", "FS": "FEIRA DE SANTANA",
-  "ILH": "ILHÉUS", "IRE": "IRECÊ", "JAC": "JACOBINA", "JAG": "JAGUAQUARA",
-  "JEQ": "JEQUIÉ", "LF": "LAURO DE FREITAS", "SAM": "SANTO AMARO", "SEA": "SEABRA",
-  "SF": "SIMÕES FILHO", "UBA": "UBAITABA", "VAL": "VALENÇA", "VC": "VITÓRIA DA CONQUISTA",
-  "SAJ": "SANTO ANTÔNIO DE JESUS", "JUA": "JUAZEIRO", "PA": "PAULO AFONSO",
-  "PIS": "POLO DE INOVAÇÃO SALVADOR", "PS": "PORTO SEGURO", "SSA": "SALVADOR"
-};
+// A implementação real, não uma cópia. A cópia que existia aqui não
+// normalizava acentos, então passava enquanto src/script.js falhava — foi
+// isso que escondeu o bug de grupos sem campus (ago/2026).
+const { CAMPUS_TO_CITY, mapUnidadeToCampus } = require('../src/shared');
 
 const VALID_CODES = [...Object.keys(CAMPUS_TO_CITY), 'IFBA', 'REI', 'PO'];
 // Note: IFBA (sede), REI (Reitoria), PO are legacy placeholder codes from
 // empty XLSX files. They are distinct from SSA (Salvador campus) and PIS (Polo).
-// Sorted longest-city-first for DGP Unidade disambiguation
-const SORTED_ENTRIES = Object.entries(CAMPUS_TO_CITY).sort((a, b) => b[1].length - a[1].length);
-
-function mapUnidadeToCampus(unidade) {
-  if (!unidade) return "";
-  const u = unidade.toUpperCase();
-  for (const [code, city] of SORTED_ENTRIES) {
-    if (u.includes(city)) return code;
-  }
-  return "";
-}
 
 const data = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'data.json'), 'utf-8'));
 
@@ -207,11 +190,7 @@ describe('IC campus filter', () => {
 // ─── Cross-dataset consistency ────────────────────────────────────────────────
 
 describe('Cross-dataset consistency', () => {
-  test('CAMPUS_TO_CITY in tests matches script.js', () => {
-    // Read script.js and extract CAMPUS_TO_CITY
-    const scriptPath = path.join(__dirname, '..', 'src', 'script.js');
-    const scriptContent = fs.readFileSync(scriptPath, 'utf-8');
-    // Verify key entries exist
+  test('CAMPUS_TO_CITY tem as entradas canônicas esperadas', () => {
     expect(CAMPUS_TO_CITY['PIS']).toBe('POLO DE INOVAÇÃO SALVADOR');
     expect(CAMPUS_TO_CITY['SSA']).toBe('SALVADOR');
     expect(CAMPUS_TO_CITY['VC']).toBe('VITÓRIA DA CONQUISTA');

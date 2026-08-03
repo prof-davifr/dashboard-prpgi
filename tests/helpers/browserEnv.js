@@ -8,55 +8,11 @@ const vm = require('vm');
 const fs = require('fs');
 const path = require('path');
 
-const CAMPUS_TO_CITY = {
-  BAR: 'BARREIRAS', BRU: 'BRUMADO', CAM: 'CAMAÇARI', CFO: 'CAMPO FORMOSO',
-  EC: 'EUCLIDES DA CUNHA', EUN: 'EUNÁPOLIS', FS: 'FEIRA DE SANTANA',
-  ILH: 'ILHÉUS', IRE: 'IRECÊ', JAC: 'JACOBINA', JAG: 'JAGUAQUARA',
-  JEQ: 'JEQUIÉ', LF: 'LAURO DE FREITAS', SAM: 'SANTO AMARO', SEA: 'SEABRA',
-  SF: 'SIMÕES FILHO', UBA: 'UBAITABA', VAL: 'VALENÇA', VC: 'VITÓRIA DA CONQUISTA',
-  SAJ: 'SANTO ANTÔNIO DE JESUS', JUA: 'JUAZEIRO', PA: 'PAULO AFONSO',
-  PIS: 'POLO DE INOVAÇÃO SALVADOR', PS: 'PORTO SEGURO', SSA: 'SALVADOR',
-};
-
-const IFBA_COORDS = {
-  SALVADOR: [-12.9714, -38.5014],
-  'FEIRA DE SANTANA': [-12.2666, -38.9666],
-  'VITÓRIA DA CONQUISTA': [-14.8661, -40.8394],
-  'VITORIA DA CONQUISTA': [-14.8661, -40.8394],
-  'ILHÉUS': [-14.7889, -39.0494],
-  'ILHEUS': [-14.7889, -39.0494],
-  ITABUNA: [-14.7869, -39.2800],
-  JEQUIÉ: [-13.8580, -40.0830],
-  JEQUIE: [-13.8580, -40.0830],
-  VALENÇA: [-13.3700, -39.0730],
-  VALENCA: [-13.3700, -39.0730],
-  'SANTO AMARO': [-12.5445, -38.7135],
-  CAMAÇARI: [-12.6975, -38.3241],
-  CAMACARI: [-12.6975, -38.3241],
-  'SIMÕES FILHO': [-12.7844, -38.4025],
-  'SIMOES FILHO': [-12.7844, -38.4025],
-  IRECÊ: [-11.3040, -41.8557],
-  IRECE: [-11.3040, -41.8557],
-  BARREIRAS: [-12.1528, -44.9900],
-  BRUMADO: [-14.2045, -41.6663],
-  EUNÁPOLIS: [-16.3720, -39.5815],
-  EUNAPOLIS: [-16.3720, -39.5815],
-  JACOBINA: [-11.1818, -40.5181],
-  JUAZEIRO: [-9.4124, -40.5055],
-  'PAULO AFONSO': [-9.4005, -38.2163],
-  'SANTO ANTÔNIO DE JESUS': [-12.9680, -39.2618],
-  'SANTO ANTONIO DE JESUS': [-12.9680, -39.2618],
-  SEABRA: [-12.4187, -41.7702],
-  'EUCLIDES DA CUNHA': [-10.5085, -39.0150],
-  UBAITABA: [-14.2255, -39.3245],
-  UBABAITABA: [-14.2255, -39.3245],
-  JAGUAQUARA: [-13.5283, -39.9713],
-  'PORTO SEGURO': [-16.4442, -39.0644],
-  'CAMPO FORMOSO': [-10.5100, -40.3200],
-  'LAURO DE FREITAS': [-12.8967, -38.3286],
-  'POLO DE INOVAÇÃO SALVADOR': [-12.9714, -38.5014],
-  'POLO DE INOVACAO SALVADOR': [-12.9714, -38.5014],
-};
+// Sem cópias locais: os mapeamentos vêm de src/shared.js, a mesma fonte que o
+// browser carrega. Manter cópias aqui foi o que deixou o helper dessincronizado
+// de script.js (UBA→UBATÃ, LF/PIS ausentes) por vários meses.
+const SHARED_PATH = path.join(__dirname, '..', '..', 'src', 'shared.js');
+const { CAMPUS_TO_CITY, IFBA_COORDS } = require(SHARED_PATH);
 
 /**
  * Build a minimal mock document suitable for script initialisation.
@@ -150,6 +106,12 @@ function createBrowserContext(overrides = {}) {
   };
 
   vm.createContext(sandbox);
+
+  // shared.js entra no contexto antes de qualquer outro script, exatamente como
+  // no index.html — é ele que define CAMPUS_TO_CITY, IFBA_COORDS,
+  // normalizeText, mapUnidadeToCampus e lookupCoords como globais.
+  loadScript(sandbox, SHARED_PATH);
+
   return sandbox;
 }
 
