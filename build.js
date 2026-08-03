@@ -213,7 +213,10 @@ function selectDgpGroupsCsvFiles(csvFiles) {
 function main() {
   console.log(' Scanning dados/ for .xlsx and .csv files recursively...');
 
-  const xlsFiles = findFiles(DADOS_DIR, '.xlsx').filter(f => getSourceKey(f.filePath) !== 'ic');
+  const xlsFiles = [
+    ...findFiles(DADOS_DIR, '.xlsx'),
+    ...findFiles(DADOS_DIR, '.xls')
+  ].filter(f => getSourceKey(f.filePath) !== 'ic');
   const csvFiles = findFiles(DADOS_DIR, '.csv');
   const dgpCsvSelection = selectDgpGroupsCsvFiles(csvFiles);
 
@@ -254,7 +257,9 @@ function main() {
   for (const { fileName, filePath } of xlsFiles) {
     registerSourceFile(result.meta, filePath, fileName);
     // Campus code is the filename without extension, normalized (e.g. VDC.xlsx → VC)
-    const campusCode = normalizeCampusCode(path.basename(fileName, path.extname(fileName)));
+    // For old format CAMPUS-YYYY-YYYY.xls, take only the code before first dash
+    const rawName = path.basename(fileName, path.extname(fileName));
+    const campusCode = normalizeCampusCode(rawName.split('-')[0]);
 
     if (!result.meta.campuses.includes(campusCode)) {
       result.meta.campuses.push(campusCode);
@@ -587,7 +592,8 @@ function main() {
   };
 
   for (const { fileName, filePath } of xlsFiles) {
-    const campusCode = path.basename(fileName, path.extname(fileName));
+    const rawName = path.basename(fileName, path.extname(fileName));
+    const campusCode = normalizeCampusCode(rawName.split('-')[0]);
     try {
       const workbook = XLSX.readFile(filePath);
       for (const sheetName of workbook.SheetNames) {
