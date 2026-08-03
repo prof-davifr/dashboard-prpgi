@@ -12,6 +12,7 @@ const {
   isDgpGroupsCsv,
   selectDgpGroupsCsvFiles,
   pseudonymize,
+  shortHash,
   SHEET_MAP,
   SOURCE_LABELS
 } = require('../scripts/build');
@@ -481,5 +482,86 @@ describe('data.json publicado não contém dados pessoais', () => {
     const u = f => new Set(data.ic.map(r => r[f]).filter(Boolean)).size;
     expect(u('orientador')).toBeGreaterThan(400);
     expect(u('bolsista')).toBeGreaterThan(1000);
+  });
+});
+
+// ─── shortHash (encurtamento das chaves de deduplicação) ──────────────────────
+
+describe('shortHash', () => {
+  test('é determinístico e não depende de salt', () => {
+    expect(shortHash('um titulo qualquer')).toBe(shortHash('um titulo qualquer'));
+  });
+
+  test('produz 16 hex', () => {
+    expect(shortHash('titulo')).toMatch(/^[0-9a-f]{16}$/);
+  });
+
+  test('distingue títulos diferentes', () => {
+    expect(shortHash('titulo a')).not.toBe(shortHash('titulo b'));
+  });
+
+  test('preserva vazio', () => {
+    expect(shortHash('')).toBe('');
+    expect(shortHash(null)).toBe('');
+    expect(shortHash(undefined)).toBe('');
+  });
+
+  test('é sensível à caixa — a normalização é responsabilidade de normalizeKey', () => {
+    expect(shortHash('Titulo')).not.toBe(shortHash('titulo'));
+  });
+});
+
+// ─── Seleção de CSVs por fonte conhecida ─────────────────────────────────────
+
+describe('seleção de CSV por fonte (regressão)', () => {
+  // Um .csv que não é do DGP nem da pós-graduação (ex.: a planilha da DINOV em
+  // dados/validacao/) era processado como arquivo de grupos por eliminação,
+  // inflando `grupos` de 197 para 494.
+  const DADOS = path.join(__dirname, '..', 'dados');
+
+  test('CSV fora das fontes conhecidas não é tratado como DGP nem como pós', () => {
+    const alheio = {
+      filePath: path.join(DADOS, 'validacao', 'Controle propriedade intelectual DINOV.csv'),
+      fileName: 'Controle propriedade intelectual DINOV.csv'
+    };
+    expect(isDgpGroupsCsv(alheio.filePath, alheio.fileName)).toBe(false);
+    expect(isPostGraduationCsv(alheio.fileName)).toBe(false);
+  });
+
+  test('os CSVs das fontes conhecidas continuam reconhecidos', () => {
+    const dgp = {
+      filePath: path.join(DADOS, 'scraper-DGP', 'coletor_dgp_2026-07-21.csv'),
+      fileName: 'coletor_dgp_2026-07-21.csv'
+    };
+    expect(isDgpGroupsCsv(dgp.filePath, dgp.fileName)).toBe(true);
+    expect(isPostGraduationCsv('alunos_pos_20260721_111724.csv')).toBe(true);
+  });
+});
+
+// ─── data.json: efeito do encurtamento das chaves ────────────────────────────
+
+describe('dedupKey no data.json', () => {
+  const data = JSON.parse(
+    fs.readFileSync(path.join(__dirname, '..', 'data.json'), 'utf-8')
+  );
+
+  test.each(['bibliografica', 'tecnica', 'concluidas', 'andamento'])(
+    '%s usa chaves curtas',
+    (ds) => {
+      const chaves = data[ds].map(r => r.dedupKey).filter(Boolean);
+      expect(chaves.length).toBeGreaterThan(0);
+      chaves.forEach(k => expect(k).toMatch(/^[0-9a-f]{16}$/));
+    }
+  );
+
+  test('inovacao mantém a chave longa — comparar_pi.js extrai o nº do INPI dela', () => {
+    const comRegistro = data.inovacao
+      .map(r => r.dedupKey)
+      .filter(k => k && k.includes('numerodoregistro'));
+    expect(comRegistro.length).toBeGreaterThan(0);
+  });
+
+  test('grupos tem o tamanho esperado (regressão do CSV alheio)', () => {
+    expect(data.grupos.length).toBeLessThan(300);
   });
 });
