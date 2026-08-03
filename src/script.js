@@ -188,6 +188,20 @@ function createChart(ctxId, type, data, options = {}) {
   });
 }
 
+function mapUnidadeToCampus(unidade) {
+  if (!unidade) return "";
+  const u = unidade.toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  // Handle generic IFBA headquarters references
+  if (u.includes('INSTITUTO FEDERAL') && !u.includes('CAMPUS') && !u.includes('POLO')) {
+    return "SSA";
+  }
+  const sorted = Object.entries(CAMPUS_TO_CITY).sort((a, b) => b[1].length - a[1].length);
+  for (const [code, city] of sorted) {
+    if (u.includes(city)) return code;
+  }
+  return "SSA"; // Fallback: treat unidentifiable as Salvador
+}
+
 function processData() {
   const filterVal = $('period-filter').value;
   const uniqueOnly = $('unique-toggle') ? $('unique-toggle').checked : false;
@@ -245,26 +259,14 @@ function processData() {
     // For Lattes data (Excel) tagged with campus
     if (r.campus) return r.campus === campusVal;
 
-    // For DGP data (CSV) - map Unidade to campus code
-    let rCampus = "";
-    if (r["Unidade"]) {
-      const u = r["Unidade"].toUpperCase();
-      Object.entries(CAMPUS_TO_CITY).forEach(([code, city]) => {
-        if (u.includes(city)) rCampus = code;
-      });
-    }
+    // For DGP data (CSV) - map Unidade to campus code (longest-city-first)
+    let rCampus = mapUnidadeToCampus(r["Unidade"]);
     return rCampus === campusVal;
   });
 
   const filterGroupsCampus = arr => arr.filter(r => {
     if (campusVal === 'all') return true;
-    let rCampus = "";
-    if (r["Unidade"]) {
-      const u = r["Unidade"].toUpperCase();
-      Object.entries(CAMPUS_TO_CITY).forEach(([code, city]) => {
-         if (u.includes(city)) rCampus = code;
-      });
-    }
+    let rCampus = mapUnidadeToCampus(r["Unidade"]);
     return rCampus === campusVal;
   });
 

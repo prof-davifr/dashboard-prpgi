@@ -9,6 +9,19 @@ const path = require('path');
 const DADOS_DIR = path.join(__dirname, 'dados');
 const OUTPUT_FILE = path.join(__dirname, 'data.json');
 const OUTPUT_GROUPS = path.join(__dirname, 'data-groups.json');
+
+// Normalize non-standard campus codes that appear in filenames or raw data
+const CAMPUS_CODE_FIX = {
+  'VDC': 'VC',   // Vitória da Conquista (common typo)
+  'FSA': 'FS',   // Feira de Santana (typo)
+  'PAF': 'PA',   // Paulo Afonso (typo)
+};
+
+function normalizeCampusCode(raw) {
+  const upper = (raw || '').toString().trim().toUpperCase();
+  return CAMPUS_CODE_FIX[upper] || upper;
+}
+
 const SOURCE_LABELS = {
   'scraper-SUAPCNPQ': 'SUAP CNPq (Lattes)',
   'scraper-DGP': 'DGP',
@@ -240,8 +253,8 @@ function main() {
   // Process XLS files
   for (const { fileName, filePath } of xlsFiles) {
     registerSourceFile(result.meta, filePath, fileName);
-    // Campus code is the filename without extension (e.g. SSA.xlsx → SSA)
-    const campusCode = path.basename(fileName, path.extname(fileName));
+    // Campus code is the filename without extension, normalized (e.g. VDC.xlsx → VC)
+    const campusCode = normalizeCampusCode(path.basename(fileName, path.extname(fileName)));
 
     if (!result.meta.campuses.includes(campusCode)) {
       result.meta.campuses.push(campusCode);
@@ -395,6 +408,9 @@ function main() {
              campus = campusMap[campus];
            }
            
+           // Normalize non-standard codes (VDC→VC, etc.)
+           campus = normalizeCampusCode(campus);
+           
            // Only add standard campus codes (2-3 letters)
            if (campus && /^[A-Z]{2,3}$/.test(campus) && !result.meta.campuses.includes(campus)) {
              result.meta.campuses.push(campus);
@@ -435,8 +451,8 @@ function main() {
          const mapped = rows.map(r => {
            let unidade = (r["Unidade"] || "").trim();
            if (!unidade ||
-               unidade.toLowerCase().startsWith("instituto federal da bahia") ||
-               unidade.toLowerCase().startsWith("instituto federal de educao")) {
+               unidade.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').startsWith("instituto federal da bahia") ||
+               unidade.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').startsWith("instituto federal de educacao")) {
              unidade = "Salvador";
            }
 
@@ -639,8 +655,8 @@ function main() {
       const mapped = rows.map(r => {
         let unidade = (r["Unidade"] || "").trim();
         if (!unidade ||
-            unidade.toLowerCase().startsWith("instituto federal da bahia") ||
-            unidade.toLowerCase().startsWith("instituto federal de educao")) {
+            unidade.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').startsWith("instituto federal da bahia") ||
+            unidade.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').startsWith("instituto federal de educacao")) {
           unidade = "Salvador";
         }
         const pesquisadoresNomes = r["Pesquisadores(Nomes)"] || "";
