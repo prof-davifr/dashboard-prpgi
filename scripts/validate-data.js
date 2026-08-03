@@ -5,9 +5,11 @@
 
 const fs = require('fs');
 const path = require('path');
+const { execFileSync } = require('child_process');
 const { CAMPUS_TO_CITY } = require('../src/shared');
 
-const DATA_PATH = path.join(__dirname, '..', 'data.json');
+const RAIZ = path.join(__dirname, '..');
+const DATA_PATH = path.join(RAIZ, 'data.json');
 
 const ARRAYS = [
   'bibliografica', 'tecnica', 'inovacao', 'concluidas',
@@ -66,6 +68,62 @@ function validate(data) {
   return erros;
 }
 
+// ─── Guarda de PII nos arquivos versionados ──────────────────────────────────
+// O data.json não é o único caminho para o GitHub Pages: a planilha da DINOV
+// chegou a ser versionada em docs/validacao/ com inventores, e-mails e
+// telefones. Esta varredura cobre qualquer texto versionado.
+
+const EXT_TEXTO = /\.(md|csv|json|html|txt|js|yml|yaml)$/i;
+
+// TLD alfabético: evita casar especificadores de CDN como `xlsx@0.18.5`.
+const EMAIL = /[\w.+-]+@[\w-]+(?:\.[\w-]+)*\.[a-zA-Z]{2,}/g;
+
+// Exige DDD entre parênteses ou celular com o 9 inicial. O caso solto
+// NNNN-NNNN é ambíguo demais: colide com números de registro do INPI
+// (`BR 102015033175-4`) e com intervalos de ano (`2000-2026`), que aparecem
+// legitimamente na documentação. A guarda de e-mail é a rede principal.
+const TELEFONE = /\(\d{2}\)\s?9?\d{4}-?\d{4}\b|\b9\d{4}-\d{4}\b/g;
+
+// data.json é validado campo a campo acima; package-lock e afins têm "e-mails"
+// de mantenedores de pacote, que não são dados pessoais sob nossa guarda.
+const ISENTOS = new Set(['data.json', 'package-lock.json', 'package.json']);
+
+function arquivosVersionados() {
+  try {
+    return execFileSync('git', ['ls-files', '-z'], { cwd: RAIZ, maxBuffer: 1e8 })
+      .toString().split('\0').filter(Boolean);
+  } catch {
+    return null; // fora de um repositório git: guarda não se aplica
+  }
+}
+
+function verificarPiiVersionada() {
+  const erros = [];
+  const arquivos = arquivosVersionados();
+  if (!arquivos) return erros;
+
+  for (const rel of arquivos) {
+    if (ISENTOS.has(rel) || !EXT_TEXTO.test(rel)) continue;
+
+    const abs = path.join(RAIZ, rel);
+    if (!fs.existsSync(abs)) continue;
+
+    const texto = fs.readFileSync(abs, 'utf-8');
+    const emails = [...new Set(texto.match(EMAIL) || [])]
+      // e-mails institucionais genéricos do projeto não são dado pessoal
+      .filter(e => !/^(prpgi|dinov|contato|noreply)@/i.test(e));
+    const telefones = [...new Set(texto.match(TELEFONE) || [])];
+
+    if (emails.length) {
+      erros.push(`${rel}: ${emails.length} e-mail(s) em arquivo versionado -> ${emails.slice(0, 3).join(', ')}${emails.length > 3 ? ' …' : ''} (LGPD)`);
+    }
+    if (telefones.length) {
+      erros.push(`${rel}: ${telefones.length} telefone(s) em arquivo versionado -> ${telefones.slice(0, 3).join(', ')}${telefones.length > 3 ? ' …' : ''} (LGPD)`);
+    }
+  }
+  return erros;
+}
+
 function main() {
   const erros = [];
 
@@ -76,6 +134,7 @@ function main() {
 
   const data = JSON.parse(fs.readFileSync(DATA_PATH, 'utf-8'));
   erros.push(...validate(data));
+  erros.push(...verificarPiiVersionada());
 
   if (erros.length) {
     console.error('data.json inválido:');
@@ -92,4 +151,4 @@ if (require.main === module) {
   main();
 }
 
-module.exports = { validate, ARRAYS, CODIGOS_VALIDOS, CAMPO_PII };
+module.exports = { validate, verificarPiiVersionada, ARRAYS, CODIGOS_VALIDOS, CAMPO_PII };

@@ -59,7 +59,7 @@ dashboard-PRPGI/
     "PesquisadoresNomes": "João Silva; Maria Santos; ...",
     "Lider": "João Silva",
     "ViceLider": "Maria Santos",
-    "Contato": "joao@ifba.edu.br",
+    "Contato": "contato@exemplo.invalid",
     "Tecnicos": "1",
     "Estudantes": "2",
     "Area": "Ciência da Computação",

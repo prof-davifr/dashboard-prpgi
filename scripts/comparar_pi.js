@@ -6,9 +6,21 @@ const fs = require('fs');
 const path = require('path');
 
 // ─── Config ───────────────────────────────────────────────────────────────
-const CSV_PATH = path.join(__dirname, '..', 'docs', 'validacao', 'Controle propriedade intelectual DINOV 2026 - CONCEDIDOS.csv');
+//
+// LGPD: a planilha da DINOV traz colunas INVENTORES, COTITULAR NOME, CONTATO e
+// Whatsapp. Ela mora em dados/ (gitignored), nunca em docs/, e o relatório sai
+// em duas versões:
+//
+//   - pública  (docs/validacao/, versionada)  — sem nomes e sem contatos
+//   - interna  (dados/validacao/, gitignored) — completa, para a PRPGI acionar
+//     os inventores
+//
+// São dois arquivos em vez de uma flag para que o caminho público não dependa
+// de alguém lembrar de passar o parâmetro certo.
+const CSV_PATH = path.join(__dirname, '..', 'dados', 'validacao', 'Controle propriedade intelectual DINOV 2026 - CONCEDIDOS.csv');
 const DATA_PATH = path.join(__dirname, '..', 'data.json');
 const REPORT_PATH = path.join(__dirname, '..', 'docs', 'validacao', 'relatorio-comparacao-PI.md');
+const REPORT_INTERNO_PATH = path.join(__dirname, '..', 'dados', 'validacao', 'relatorio-comparacao-PI-interno.md');
 
 // Fonte única (src/shared.js). As cidades vêm em maiúsculas, mas CITY_TO_CAMPUS
 // abaixo normaliza para minúsculas sem acento — a caixa é indiferente aqui.
@@ -303,8 +315,14 @@ function main() {
   }
 
   // --- Generate Report ---
-  const report = [];
-  const emit = (line = '') => report.push(line);
+  // Dois acumuladores: `emit` escreve nos dois relatórios, `emitInterno` só no
+  // interno. Assim a versão pública é, por construção, um subconjunto — não há
+  // como vazar PII esquecendo de filtrar alguma seção.
+  const report = [];          // interno: completo
+  const reportPublico = [];   // público: sem nomes nem contatos
+  const emit = (line = '') => { report.push(line); reportPublico.push(line); };
+  const emitInterno = (line = '') => report.push(line);
+  const emitPublico = (line = '') => reportPublico.push(line);
 
   emit('# Relatório de Comparação: DINOV vs Dashboard PRPGI');
   emit();
@@ -342,17 +360,28 @@ function main() {
   emit();
   emit(`Total: **${onlyDinovRecords.length}** registros presentes no CSV DINOV mas **não encontrados** no Dashboard.`);
   emit();
-  emit('> 💡 **Por que isso importa?** São concessões já formalizadas no INPI que os inventores podem não ter cadastrado em seus Currículos Lattes. A coluna `CONTATO` traz os meios de contato informados pela própria DINOV.');
+  emit('> 💡 **Por que isso importa?** São concessões já formalizadas no INPI que os inventores podem não ter cadastrado em seus Currículos Lattes.');
   emit();
+  emitInterno('> ⚠️ **Versão interna** — a tabela abaixo inclui inventores e contatos extraídos do CSV da DINOV. Não publicar: a versão em `docs/validacao/` traz as mesmas linhas sem esses campos.');
+  emitInterno();
+  emitPublico('> Os nomes e contatos dos inventores ficam apenas na versão interna do relatório (`dados/validacao/`, não versionada), conforme a LGPD.');
+  emitPublico();
+
   if (onlyDinovRecords.length > 0) {
-    emit('| INPI | Obj | Conc. | Inventores | Contato |');
-    emit('|------|-----|-------|------------|---------|');
+    emitInterno('| INPI | Obj | Conc. | Inventores | Contato |');
+    emitInterno('|------|-----|-------|------------|---------|');
+    emitPublico('| INPI | Obj | Conc. | Campus |');
+    emitPublico('|------|-----|-------|--------|');
+
     for (const r of onlyDinovRecords) {
       const inpi = r.rawINPI.length > 20 ? r.rawINPI.substring(0, 20) + '…' : r.rawINPI;
+
       const inventores = r.inventores.length > 45 ? r.inventores.substring(0, 45) + '…' : r.inventores;
       const contato = r.contato.replace(/\s*\n\s*/g, '; ').replace(/\s{2,}/g, ' ');
       const contatoShort = contato.length > 40 ? contato.substring(0, 40) + '…' : contato;
-      emit(`| ${inpi} | ${r.objeto} | ${r.anoConcessao || '-'} | ${inventores} | ${contatoShort} |`);
+      emitInterno(`| ${inpi} | ${r.objeto} | ${r.anoConcessao || '-'} | ${inventores} | ${contatoShort} |`);
+
+      emitPublico(`| ${inpi} | ${r.objeto} | ${r.anoConcessao || '-'} | ${r.campus || '-'} |`);
     }
     emit();
   }
@@ -369,12 +398,16 @@ function main() {
   emit('4. **Registro estrangeiro** — patentes depositadas no exterior (USPTO, EPO, WIPO) que podem não constar na base da DINOV.');
   emit();
   if (onlyDashRecords.length > 0) {
-    emit('| Tipo | Campus | Ano | Pesquisador | Nº Registro |');
-    emit('|------|--------|-----|-------------|-------------|');
+    emitInterno('| Tipo | Campus | Ano | Pesquisador | Nº Registro |');
+    emitInterno('|------|--------|-----|-------------|-------------|');
+    emitPublico('| Tipo | Campus | Ano | Nº Registro |');
+    emitPublico('|------|--------|-----|-------------|');
+
     for (const r of onlyDashRecords) {
       const nome = servidorNome[r.servidor] || `ID ${r.servidor} (não mapeado)`;
       const registro = r.normalized.join(', ');
-      emit(`| ${r.tipo} | ${r.campus} | ${r.ano} | ${nome} | ${registro} |`);
+      emitInterno(`| ${r.tipo} | ${r.campus} | ${r.ano} | ${nome} | ${registro} |`);
+      emitPublico(`| ${r.tipo} | ${r.campus} | ${r.ano} | ${registro} |`);
     }
     emit();
   }
@@ -521,7 +554,8 @@ function main() {
   emit('### Registros apenas na DINOV — sugestões');
   emit();
   emit(`Os **${onlyDinovRecords.length} registros** que estão no CSV da DINOV mas não aparecem no Dashboard são concessões já formalizadas no INPI cujos inventores talvez ainda não tenham incluído o registro em seus Currículos Lattes.`);
-  emit('A tabela da seção **Registros Só DINOV** inclui os contatos extraídos do próprio CSV da DINOV. Uma sugestão é que o setor responsável utilize esses contatos para dialogar com os inventores e, se for o caso, solicitar a atualização dos Lattes com o número do registro concedido.');
+  emitInterno('A tabela da seção **Registros Só DINOV** desta versão interna inclui os contatos extraídos do próprio CSV da DINOV. Uma sugestão é que o setor responsável utilize esses contatos para dialogar com os inventores e, se for o caso, solicitar a atualização dos Lattes com o número do registro concedido.');
+  emitPublico('A versão interna deste relatório (`dados/validacao/relatorio-comparacao-PI-interno.md`) lista os inventores e seus contatos, para que o setor responsável possa dialogar com eles e solicitar a atualização dos Lattes com o número do registro concedido.');
   emit();
   emit('### Registros apenas no Dashboard — sugestões');
   emit();
@@ -533,7 +567,7 @@ function main() {
   emit();
   const semNome = onlyDashRecords.filter(r => !servidorNome[r.servidor]);
   if (semNome.length > 0) {
-    emit(`> 💡 **Nota:** ${semNome.length} registros exibem apenas o ID numérico do servidor, pois o nome não foi encontrado no mapa de servidores. O ID pode ser cruzado com a base do SUAP/DP-PRPGI para obter nome completo e e-mail.`);
+    emitInterno(`> 💡 **Nota:** ${semNome.length} registros exibem apenas o ID numérico do servidor, pois o nome não foi encontrado no mapa de servidores. O ID pode ser cruzado com a base do SUAP/DP-PRPGI para obter nome completo e e-mail.`);
   }
   emit();
   emit('---');
@@ -543,9 +577,29 @@ function main() {
   emit('*Prof. Dr. Davi Franco Rêgo*');
   emit();
 
-  // Write report
-  fs.writeFileSync(REPORT_PATH, report.join('\n'), 'utf-8');
-  console.log(`\nRelatório gerado: ${REPORT_PATH}`);
+  // Write reports
+  const publico = reportPublico.join('\n');
+
+  // Rede de segurança: o relatório público é versionado, então um e-mail ou um
+  // nome que escape para ele iria parar no GitHub. Melhor abortar do que
+  // publicar.
+  const vazamentos = [
+    ...new Set([
+      ...(publico.match(/[\w.+-]+@[\w-]+\.[\w.]+/g) || []),
+      ...Object.values(servidorNome).filter(n => n && publico.includes(n))
+    ])
+  ];
+  if (vazamentos.length > 0) {
+    console.error('\nERRO: dado pessoal no relatório público — nada foi escrito.');
+    vazamentos.slice(0, 10).forEach(v => console.error('  - ' + v));
+    process.exit(1);
+  }
+
+  fs.mkdirSync(path.dirname(REPORT_INTERNO_PATH), { recursive: true });
+  fs.writeFileSync(REPORT_INTERNO_PATH, report.join('\n'), 'utf-8');
+  fs.writeFileSync(REPORT_PATH, publico, 'utf-8');
+  console.log(`\nRelatório público (versionado): ${REPORT_PATH}`);
+  console.log(`Relatório interno (não versionado, com inventores/contatos): ${REPORT_INTERNO_PATH}`);
   console.log(`  Casados: ${matchedKeys.length}`);
   console.log(`  Só DINOV: ${onlyDinovRecords.length}`);
   console.log(`  Só Dashboard: ${onlyDashRecords.length}`);
