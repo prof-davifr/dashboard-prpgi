@@ -185,13 +185,20 @@ Registros de alunos de pós-graduação (stricto e lato sensu) do IFBA, extraíd
 
 #### Categorias inferidas
 A `categoria` (Mestrado/Doutorado/Especialização/Outro) é determinada por:
-1. Campo `modalidade`
-2. Fallback: análise do nome do `curso` (contém "doutorado", "mestrado", "especialização"?)
+1. Campo `modalidade` (normalizado para UTF-8: `Especialização`)
+2. Fallback: análise do nome do `curso` (normalizado NFD — ignora acentos)
 3. Se indefinido: `Outro`
 
+#### Seleção de snapshot (importante)
+As exportações do SUAP são **snapshots cumulativos**: cada novo CSV contém TODOS os
+alunos (o de jul/2026 contém os de abr/2026). O build usa **apenas o arquivo mais
+recente** (`selectPosGraduacaoCsvFiles`, timestamp do nome `alunos_pos_YYYYMMDD_HHMMSS.csv`;
+fallback para mtime). Concatenar vários snapshots sem deduplicar por matrícula
+inflaria os totais em ~3x (bug corrigido em ago/2026: 7.477 → 2.521 registros).
+
 #### Período e volume
-- **Registros**: ~2.450
-- **Período**: Conforme `ano/periodo_letivo` (tipicamente 2010–2026)
+- **Registros**: ~2.5 mil (snapshot mais recente)
+- **Período**: Conforme `ano/periodo_letivo` (2016.1–2026.1 no snapshot atual)
 
 #### Frequência de atualização
 Manual, conforme exportação do SUAP.
@@ -491,14 +498,21 @@ Toggle "p/ Servidor" que divide as métricas pelo número de pesquisadores ativo
 
 ### 6.4 Coortes Maduras (Pós-Graduação)
 
-Regra que define se uma coorte (ano de ingresso) já atingiu maturidade para avaliação de desfecho:
+Regra que define se uma coorte (período de ingresso) já atingiu maturidade para avaliação de desfecho.
+A referência "hoje" é o **período (ano+semestre) mais recente presente nos dados** (ex.: 2026.1).
+A comparação é feita em **meses**, com granularidade de semestre (`ano*12 + (semestre-1)*6`):
 
 | Categoria | Prazo esperado | Coorte madura se |
 |---|---|---|
-| Mestrado | 2 anos | `ano_atual - ano_ingresso >= 2` |
-| Doutorado | 4 anos | `ano_atual - ano_ingresso >= 4` |
-| Especialização | 2 anos | `ano_atual - ano_ingresso >= 2` |
-| Outros | 2 anos | `ano_atual - ano_ingresso >= 2` |
+| Mestrado | 24 meses | `referência − ingresso >= 24 meses` |
+| Doutorado | 48 meses | `referência − ingresso >= 48 meses` |
+| Especialização | **18 meses** (Resolução CNE/CES nº 1/2018 — prazo padrão lato sensu) | `referência − ingresso >= 18 meses` |
+| Outros | 24 meses | `referência − ingresso >= 24 meses` |
+
+Observações:
+- Antes de ago/2026 a maturidade era calculada por ano inteiro (`ano_atual - ano`),
+  o que não distinguia 18 meses de 24 meses.
+- Registro sem `semestre` assume semestre 1.
 
 Ativo por padrão. Quando desativado, todas as coortes são exibidas.
 

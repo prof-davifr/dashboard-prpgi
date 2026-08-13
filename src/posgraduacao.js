@@ -3,6 +3,7 @@ function getPosGraduacaoCategoryColor(category) {
     "Mestrado": "#4D90FE",
     "Doutorado": "#F44336",
     "Especialização": "#4CAF50",
+    "Especializao": "#4CAF50", // alias p/ dados antigos (pré-normalização)
     "Outro": "#FFC107"
   };
   return colors[category] || "#607D8B";
@@ -17,20 +18,46 @@ function normalizePosGraduacaoStatus(status) {
   return (status || "").trim() || "Não informado";
 }
 
-function getPosGraduacaoDurationYears(category) {
+// Duração padrão do curso, em MESES, para classificação de coorte madura.
+// Especializações (lato sensu) seguem o prazo padrão de 18 meses
+// (Resolução CNE/CES nº 1/2018, art. 1º); Mestrado/Doutorado seguem os prazos
+// típicos de 24/48 meses.
+function getPosGraduacaoDurationMonths(category) {
   const durations = {
-    "Mestrado": 2,
-    "Doutorado": 4,
-    "Especialização": 2
+    "Mestrado": 24,
+    "Doutorado": 48,
+    "Especialização": 18,
+    "Especializao": 18 // alias p/ dados antigos (pré-normalização do build)
   };
-  return durations[category] || 2;
+  return durations[category] || 24;
+}
+
+// Referência "hoje" para maturidade: período (ano+semestre) mais recente
+// presente nos dados. Cacheado. Em testes (sem STATE.raw.posgraduacao) cai
+// para o 2º semestre de STATE.maxYear.
+let _posgradRefMonths = null;
+function getPosGraduacaoRefMonths() {
+  if (_posgradRefMonths !== null) return _posgradRefMonths;
+  const raw = (STATE.raw && STATE.raw.posgraduacao) || [];
+  let ref = null;
+  raw.forEach(r => {
+    const y = parseInt(r.ano, 10);
+    if (Number.isNaN(y)) return;
+    const s = parseInt(r.semestre, 10);
+    const m = y * 12 + (Number.isNaN(s) ? 0 : (s - 1) * 6);
+    if (ref === null || m > ref) ref = m;
+  });
+  if (ref === null) ref = STATE.maxYear * 12 + 6; // fallback: 2º semestre
+  _posgradRefMonths = ref;
+  return ref;
 }
 
 function isPosGraduacaoMature(record) {
   const year = parseInt(record.ano, 10);
   if (Number.isNaN(year)) return false;
-  const category = record.categoria || "Outro";
-  return (STATE.maxYear - year) >= getPosGraduacaoDurationYears(category);
+  const semestre = parseInt(record.semestre, 10);
+  const entryMonths = year * 12 + (Number.isNaN(semestre) ? 0 : (semestre - 1) * 6);
+  return (getPosGraduacaoRefMonths() - entryMonths) >= getPosGraduacaoDurationMonths(record.categoria);
 }
 
 function isPosGraduacaoAttritionStatus(status) {
@@ -237,7 +264,7 @@ function renderKPIsPosGraduacaoOverview(data) {
     ${buildPosGraduacaoKpi('Alunos Ativos Hoje', active, '', 'Alunos com status Matriculado no recorte atual.')}
     ${buildPosGraduacaoKpi('Em Fluxo Regular', regularFlow, '', 'Alunos Matriculados ainda dentro do prazo esperado de conclusão.')}
     ${buildPosGraduacaoKpi('Pendência Ativa', pendingActive, '', 'Alunos Matriculados além do prazo esperado de conclusão.')}
-    ${buildPosGraduacaoKpi('Coortes Maduras', matured.length, 'Base apta para avaliar desfecho', 'Turmas cujo prazo esperado já foi atingido: Mestrado>=2 anos, Doutorado>=4 anos, Especialização>=2 anos.')}
+    ${buildPosGraduacaoKpi('Coortes Maduras', matured.length, 'Base apta para avaliar desfecho', 'Turmas cujo prazo esperado já foi atingido: Mestrado>=24 meses, Doutorado>=48 meses, Especialização>=18 meses (lato sensu).')}
     ${buildPosGraduacaoKpi('Conclusão (Maduras)', formatPercent(completionRate), '', 'Concluídos dividido pelo total de coortes maduras.')}
     ${buildPosGraduacaoKpi('Evasão/Desligamento (Maduras)', formatPercent(attritionRate), '', 'Cancelado/Desligado/Evasão/Abandono/Falecido dividido pelo total de coortes maduras.')}
     ${buildPosGraduacaoKpi('Pendência Ativa (Maduras)', formatPercent(pendingActiveRate), '', 'Alunos ainda Matriculados mesmo após o prazo esperado, dividido pelas coortes maduras.')}

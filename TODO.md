@@ -26,6 +26,9 @@ Frontend estático (Chart.js + Leaflet + SheetJS) + pipeline ETL em `scripts/bui
 - [x] Responsivo (desktop/tablet/mobile)
 
 ### Correções (ago/2026)
+- [x] **Pós-graduação: apenas o snapshot SUAP mais recente** — as exportações `alunos_pos_*.csv` são cumulativas (abr ⊆ jul/11 ⊆ jul/21) e o build concatenava as três sem deduplicar por matrícula, inflando os totais ~3x (7.477 registros → 2.521; Ativos Hoje 3.352 → 1.141; VC 213 → 71). Novo `selectPosGraduacaoCsvFiles()` fica com o CSV de timestamp mais recente no nome (fallback mtime)
+- [x] **Especialização: prazo de 18 meses (lato sensu)** — maturidade passou de ano inteiro para **meses com granularidade de semestre** (`ano*12 + (semestre-1)*6`, referência = período mais recente nos dados). Especialização usa 18 meses (Resolução CNE/CES nº 1/2018); Mestrado 24; Doutorado 48. Com ref = 2026.1 o resultado coincide com a regra antiga, mas diverge a partir de 2026.2 (2025.1 de especialização ficará madura)
+- [x] **Categoria `Especialização` em UTF-8** — o build emitia `Especializao` (ASCII), que não casava com o filtro da UI nem com os mapas de cor/duração do frontend (filtro por Especialização não retornava nada); modalidade normalizada e inferência por nome de curso agora ignora acentos (NFD)
 - [x] **Grupos de pesquisa sem campus** — `mapUnidadeToCampus` normaliza acentos nos dois lados da comparação (antes: entrada normalizada × valores acentuados → campi como VC/EUN/ILH caiam em SSA)
 - [x] **Mapa de grupos invisível** — `renderGenericMap` resolve `Unidade` DGP ("IFBA - Campus X") → código → cidade canônica antes do `lookupCoords` (antes: 154/197 grupos sem marcador)
 - [x] `renderTableGrupos` usa `mapUnidadeToCampus` em vez do loop "última correspondência ganha"
@@ -38,9 +41,10 @@ Frontend estático (Chart.js + Leaflet + SheetJS) + pipeline ETL em `scripts/bui
 - [x] Logo oficial IFBA (marca vertical 2015, versão branca) na capa — `docs/assets/ifba-logo-branco.svg`
 
 ### Testes
-- [x] Jest: 261 testes em 6 suítes (build, campus-filter, posgraduacao, script.utils, comparar-pi, acessibilidade)
+- [x] Jest: 276 testes em 6 suítes (build, campus-filter, posgraduacao, script.utils, comparar-pi, acessibilidade)
 - [x] Testes VM-based sem browser/jsdom (`tests/helpers/browserEnv.js`)
 - [x] Cobertura E2E de filtro de campus contra `data.json` real (26 testes)
+- [x] **Playwright E2E (smoke, navegador real)** — `e2e/dashboard.smoke.spec.js` com 9 testes: carga real do `data.json`, mapas Leaflet com circle markers + modal ampliado, Chart.js em todas as 8 abas, troca de abas, filtros (campus e pós-graduação com subtabs), tabela expande/exporta `.xlsx`, modal de metodologia, zero erros de console. Config: `playwright.config.js` (sobe `live-server:8080`, reusa se já rodando). Comandos: `npm run test:e2e` / `test:e2e:headed` / `test:e2e:report`. Jest ignora `e2e/` via `testPathIgnorePatterns`
 
 ### LGPD e fundação técnica (ago/2026)
 - [x] **`data.json` público anonimizado** — `posgraduacao` não emite mais `nome`/`matricula`/`email_academico`/`email_pessoal`; `dedupKey` e os campos `orientador`/`bolsista` de IC viram pseudônimos estáveis (`pseudonymize()` em `scripts/build.js`, salt em `.build-salt` gitignored). Nenhuma feature mudou: o frontend só usava esses campos em `new Set(...).size`
@@ -67,12 +71,7 @@ Frontend estático (Chart.js + Leaflet + SheetJS) + pipeline ETL em `scripts/bui
 
 ### 🔴 Crítico
 
-- [ ] **`git push --force` pendente** — a reescrita de histórico que removeu `data-groups.json` está feita **só localmente**. Enquanto não for publicada, os nomes e contatos seguem acessíveis no GitHub. Rodar:
-  ```
-  git push --force origin main
-  git push --force origin copilot/organize-campi-dropdown-alphabetically
-  ```
-  Depois: mesmo com o force-push, os objetos antigos continuam alcançáveis por SHA no GitHub até a coleta de lixo deles — para remoção efetiva, abrir chamado no GitHub Support pedindo a purga, e tratar os dados como já expostos
+- [x] **`git push --force`** — verificado em 05/08/2026: `origin/main` == `main` local (bbd138b), histórico remoto de `main`, branch copilot e PR #1 sem `data-groups.json` em nenhum commit alcançável; rewrite já publicada. Objetos antigos ainda podem ficar alcançáveis por SHA até o GC do GitHub — para remoção efetiva, abrir chamado no GitHub Support pedindo a purga, e tratar os dados como já expostos
 - [ ] **Confirmar com a PRPGI o que pode ser público** — a régua atual foi definida tecnicamente (nada de nome, matrícula, e-mail ou telefone no que é versionado). Falta o aval formal sobre granularidade por aba e sobre o tratamento dos dados já expostos no histórico do GitHub
 - [ ] **`docs/validacao/relatorio-comparacao-PI.pdf` e `.html`** — foram removidos por vazarem inventores e contatos. Se ainda forem entregáveis, regerar a partir do `.md` público
 
@@ -95,6 +94,17 @@ Frontend estático (Chart.js + Leaflet + SheetJS) + pipeline ETL em `scripts/bui
 - [ ] **Integração com API do Lattes** em substituição às exportações manuais
 - [ ] **Dashboard de programas de pós-graduação individuais** (citado no slide 11)
 - [ ] **Nova fonte de dados** — verificar sempre `Instituição` contém "IFBA" antes de processar (regra do AGENTS.md)
+- [ ] **Scraper SISPROC (processos da pós-graduação)** — ver seção "SISPROC" abaixo para o plano de download
+
+### 🆕 SISPROC — plano de download (proposta)
+
+O SISPROC (sistema de processos eletrônicos do IFBA) registra os processos da pós-graduação (matrícula, trancamento, defesa, conclusão) que o SUAP não expõe no CSV de alunos. Plano:
+
+1. **Verificar acesso** — `sisproc.ifba.edu.br` resolve para `qualidadeapp02.ifba.edu.br`, mas não respondeu HTTP/HTTPS desta máquina (provavelmente rede interna/VPN do IFBA). Primeiro passo: testar de dentro da rede institucional
+2. **Descobrir a API/rotas** — o SISPROC costuma ter área autenticada (Django/Java?) com exportação por filtro (tipo de processo, período, campus). Procurar por endpoints de exportação (CSV/XLSX) ou tabelas paginadas antes de pensar em scraping de HTML
+3. **Campos de interesse** — nº do processo, tipo (matrícula/defesa/conclusão/trancamento), interessado (aluno), curso/programa, campus, data de abertura, andamento/situação, data de despacho/conclusão
+4. **Implementar seguindo o padrão `scraper-SUAPPos`** (Selenium + login + exportação): novo repo `scraper-SISPROC` com `src/{config,login,scraper,exporter}.py`, saída `alunos_pos_sisproc_YYYYMMDD_HHMMSS.csv` em `dados/scraper-SISPROC/`, guarda `Instituição === IFBA` e LGPD (sem nomes/matrículas no `data.json` público)
+5. **Integrar no `build.js`** como fonte reconhecida (mesmo padrão do `scraper-SUAPPos`), com validação de datas de conclusão para refinar "Conclusão (Maduras)" (hoje o corte é só a coorte, pois o SUAP não informa data de conclusão)
 
 ---
 

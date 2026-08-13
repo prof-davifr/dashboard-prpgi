@@ -311,15 +311,15 @@
                 <select id="posgrad-curso-filter" style="min-width: 180px; font-size: 0.85rem; padding: 0.35rem 0.6rem;" title="Filtra por programa/curso específico.">
                     <option value="all">Todos os Programas</option>
                 </select>
-                <label style="display:flex;align-items:center;gap:0.4rem;color:#444;font-weight:600;font-size:0.85rem;" title="Mantém apenas coortes maduras. Regra: Mestrado >= 2 anos, Doutorado >= 4 anos, Especialização >= 2 anos.">
+                <label style="display:flex;align-items:center;gap:0.4rem;color:#444;font-weight:600;font-size:0.85rem;" title="Mantém apenas coortes maduras. Regra: Mestrado ≥ 24 meses, Doutorado ≥ 48 meses, Especialização ≥ 18 meses (lato sensu).">
                     <input type="checkbox" id="posgrad-matured-only-toggle" checked style="width: 14px; height: 14px;">
                     Coortes Maduras
                     <span class="tip-dot" title="Coorte madura = turma de ingresso cujo prazo esperado já foi atingido.">?</span>
                 </label>
             </div>
             <div class="inline-help">
-                <strong>O que é Coorte Madura:</strong> turma de ingresso (ano de entrada) com tempo esperado já transcorrido.
-                Regra usada: Mestrado ≥ 2 anos, Doutorado ≥ 4 anos, Especialização ≥ 2 anos.
+                <strong>O que é Coorte Madura:</strong> turma de ingresso (ano+semestre de entrada) com tempo esperado já transcorrido.
+                Regra usada: Mestrado ≥ 24 meses, Doutorado ≥ 48 meses, Especialização ≥ 18 meses (prazo padrão lato sensu).
                 Esse recorte evita comparar turmas muito recentes com turmas que já deveriam ter desfecho.
             </div>
         </div>
@@ -520,7 +520,7 @@
                         <li><strong>Evasão/Desligamento:</strong> consolida status como Cancelado, Desligado, Evasão, Abandono e Falecido.</li>
                     </ul>
                     <div class="methodology-note">
-                        <strong>Regra de prazo esperado para Coorte Madura:</strong> Mestrado ≥ 2 anos, Doutorado ≥ 4 anos, Especialização ≥ 2 anos.
+                        <strong>Regra de prazo esperado para Coorte Madura:</strong> Mestrado ≥ 24 meses, Doutorado ≥ 48 meses, Especialização ≥ 18 meses (lato sensu). Comparação em meses com granularidade de semestre, referência = período mais recente nos dados.
                     </div>
                 </div>
 

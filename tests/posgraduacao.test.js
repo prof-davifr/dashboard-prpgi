@@ -97,25 +97,29 @@ describe('normalizePosGraduacaoStatus', () => {
   });
 });
 
-// ─── getPosGraduacaoDurationYears ─────────────────────────────────────────────
+// ─── getPosGraduacaoDurationMonths ────────────────────────────────────────────
 
-describe('getPosGraduacaoDurationYears', () => {
-  test('returns 2 for Mestrado', () => {
-    expect(ctx.getPosGraduacaoDurationYears('Mestrado')).toBe(2);
+describe('getPosGraduacaoDurationMonths', () => {
+  test('returns 24 for Mestrado', () => {
+    expect(ctx.getPosGraduacaoDurationMonths('Mestrado')).toBe(24);
   });
 
-  test('returns 4 for Doutorado', () => {
-    expect(ctx.getPosGraduacaoDurationYears('Doutorado')).toBe(4);
+  test('returns 48 for Doutorado', () => {
+    expect(ctx.getPosGraduacaoDurationMonths('Doutorado')).toBe(48);
   });
 
-  test('returns 2 for Especialização', () => {
-    expect(ctx.getPosGraduacaoDurationYears('Especialização')).toBe(2);
+  test('returns 18 for Especialização (prazo padrão lato sensu)', () => {
+    expect(ctx.getPosGraduacaoDurationMonths('Especialização')).toBe(18);
   });
 
-  test('returns 2 as default for unknown category', () => {
-    expect(ctx.getPosGraduacaoDurationYears('Outro')).toBe(2);
-    expect(ctx.getPosGraduacaoDurationYears('')).toBe(2);
-    expect(ctx.getPosGraduacaoDurationYears(undefined)).toBe(2);
+  test('returns 18 for the legacy "Especializao" alias', () => {
+    expect(ctx.getPosGraduacaoDurationMonths('Especializao')).toBe(18);
+  });
+
+  test('returns 24 as default for unknown category', () => {
+    expect(ctx.getPosGraduacaoDurationMonths('Outro')).toBe(24);
+    expect(ctx.getPosGraduacaoDurationMonths('')).toBe(24);
+    expect(ctx.getPosGraduacaoDurationMonths(undefined)).toBe(24);
   });
 });
 
@@ -155,6 +159,28 @@ describe('isPosGraduacaoMature', () => {
   test('uses default duration of 2 for unknown category', () => {
     expect(ctx.isPosGraduacaoMature({ ano: 2022, categoria: 'Outro' })).toBe(true);
     expect(ctx.isPosGraduacaoMature({ ano: 2023, categoria: 'Outro' })).toBe(false);
+  });
+
+  test('returns true for Especialização entered exactly 18 months ago (2023.1 vs ref 2024.2)', () => {
+    expect(ctx.isPosGraduacaoMature({ ano: 2023, semestre: 1, categoria: 'Especialização' })).toBe(true);
+  });
+
+  test('returns false for Especialização entered less than 18 months ago (2023.2 vs ref 2024.2)', () => {
+    expect(ctx.isPosGraduacaoMature({ ano: 2023, semestre: 2, categoria: 'Especialização' })).toBe(false);
+  });
+
+  test('uses the most recent period in the data as reference (semester granularity)', () => {
+    // STATE.raw.posgraduacao com período máximo 2024.1 → referência = 2024.1
+    const ctxRef = createBrowserContext({
+      STATE: { maxYear: 2024, raw: { posgraduacao: [{ ano: '2024', semestre: '1' }] }, filtered: {} }
+    });
+    loadScript(ctxRef, POSGRAD_PATH);
+    // Mestrado 2022.2 → 18 meses decorridos → NÃO maduro (precisa 24)
+    expect(ctxRef.isPosGraduacaoMature({ ano: 2022, semestre: 2, categoria: 'Mestrado' })).toBe(false);
+    // Mestrado 2022.1 → 24 meses → maduro
+    expect(ctxRef.isPosGraduacaoMature({ ano: 2022, semestre: 1, categoria: 'Mestrado' })).toBe(true);
+    // Especialização 2023.1 → 12 meses → NÃO maduro (precisa 18)
+    expect(ctxRef.isPosGraduacaoMature({ ano: 2023, semestre: 1, categoria: 'Especialização' })).toBe(false);
   });
 
   test('returns false when ano is not a number', () => {

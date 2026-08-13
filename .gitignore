@@ -34,3 +34,9 @@ Mockup do Dashboard.pdf
 # Lider, Contato, membrosMap) e não é consumido pelo dashboard.
 # Regenerar localmente com `npm run build`; consumidor: relatorio-grupos-pesquisa.
 data-groups.json
+
+# Playwright
+node_modules/.cache/
+test-results/
+playwright-report/
+blob-report/

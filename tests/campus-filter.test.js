@@ -146,9 +146,11 @@ describe('Pós-Graduação campus filter', () => {
     }
   });
 
-  test('VC (Vitória da Conquista) has all 213 records (71 original + 142 ex-VDC)', () => {
+  test('VC (Vitória da Conquista) tem 71 registros (snapshot único mais recente)', () => {
+    // Os CSVs do SUAPPos são snapshots cumulativos; o build usa apenas o mais
+    // recente (antes concatenava 3 e inflava para 213).
     const vc = data.posgraduacao.filter(r => r.campus === 'VC');
-    expect(vc.length).toBe(213);
+    expect(vc.length).toBe(71);
   });
 
   test('campus filter works for all posgraduacao campuses', () => {

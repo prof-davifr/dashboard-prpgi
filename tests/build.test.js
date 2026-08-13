@@ -11,6 +11,7 @@ const {
   isPostGraduationCsv,
   isDgpGroupsCsv,
   selectDgpGroupsCsvFiles,
+  selectPosGraduacaoCsvFiles,
   pseudonymize,
   shortHash,
   loadOrCreateSalt,
@@ -401,6 +402,61 @@ describe('selectDgpGroupsCsvFiles', () => {
     const out = selectDgpGroupsCsvFiles([collector, alunos]);
     expect(out.selected.filePath).toBe(collector.filePath);
     expect(out.ignored.map(f => f.filePath)).not.toContain(alunos.filePath);
+  });
+});
+
+describe('selectPosGraduacaoCsvFiles', () => {
+  const posDir = path.join(__dirname, '..', 'dados', 'scraper-SUAPPos');
+  const createdDirs = [];
+
+  beforeEach(() => {
+    fs.mkdirSync(posDir, { recursive: true });
+  });
+
+  afterEach(() => {
+    createdDirs.forEach(dir => {
+      if (fs.existsSync(dir)) fs.rmSync(dir, { recursive: true });
+    });
+    createdDirs.length = 0;
+  });
+
+  function makeCsv(name, ageMs = 0) {
+    const uniqueDir = path.join(posDir, `${Date.now()}-${Math.random().toString(36).slice(2)}`);
+    fs.mkdirSync(uniqueDir, { recursive: true });
+    const filePath = path.join(uniqueDir, name);
+    fs.writeFileSync(filePath, 'h1\nh2');
+    createdDirs.push(uniqueDir);
+    if (ageMs > 0) {
+      const time = new Date(Date.now() - ageMs);
+      fs.utimesSync(filePath, time, time);
+    }
+    return { filePath, fileName: name };
+  }
+
+  test('selects the snapshot with the newest timestamp in the filename', () => {
+    const older = makeCsv('alunos_pos_20260415_165049.csv', 60 * 60 * 1000);
+    const middle = makeCsv('alunos_pos_20260711_181029.csv', 60 * 60 * 1000);
+    const newest = makeCsv('alunos_pos_20260721_111724.csv', 0);
+
+    const out = selectPosGraduacaoCsvFiles([older, middle, newest]);
+    expect(out.selected.fileName).toBe('alunos_pos_20260721_111724.csv');
+    expect(out.ignored.map(f => f.fileName)).toEqual(
+      expect.arrayContaining(['alunos_pos_20260415_165049.csv', 'alunos_pos_20260711_181029.csv'])
+    );
+  });
+
+  test('falls back to mtime when the filename has no timestamp', () => {
+    const recent = makeCsv('alunos_pos.csv', 0);
+    const old = makeCsv('alunos_pos.csv', 60 * 60 * 1000);
+
+    const out = selectPosGraduacaoCsvFiles([recent, old]);
+    expect(out.selected.filePath).toBe(recent.filePath);
+  });
+
+  test('returns null when there are no alunos_pos files', () => {
+    expect(selectPosGraduacaoCsvFiles([]).selected).toBeNull();
+    const dgp = makeCsv('coletor_dgp_ifba.csv');
+    expect(selectPosGraduacaoCsvFiles([dgp]).selected).toBeNull();
   });
 });
 

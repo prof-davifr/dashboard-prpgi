@@ -6,13 +6,23 @@
     "build": "node scripts/build.js",
     "validate": "node scripts/validate-data.js",
     "start": "npx live-server --port=8080",
-    "test": "jest"
+    "test": "jest",
+    "test:e2e": "playwright test",
+    "test:e2e:headed": "playwright test --headed",
+    "test:e2e:report": "playwright show-report"
   },
   "devDependencies": {
+    "@playwright/test": "^1.62.1",
     "jest": "^30.3.0",
     "live-server": "^1.2.2"
   },
   "dependencies": {
     "xlsx": "^0.18.5"
+  },
+  "jest": {
+    "testPathIgnorePatterns": [
+      "/node_modules/",
+      "/e2e/"
+    ]
   }
 }
