@@ -18,7 +18,10 @@ const {
   SALT_FILE,
   SALT_BACKUP_FILE,
   SHEET_MAP,
-  SOURCE_LABELS
+  SOURCE_LABELS,
+  extrairVinculos,
+  nomeNaCitacao,
+  filtrarPorAutoria
 } = require('../scripts/build');
 
 // ─── findFiles ────────────────────────────────────────────────────────────────
@@ -718,5 +721,96 @@ describe('loadOrCreateSalt', () => {
   test('o backup fica fora da árvore do projeto', () => {
     expect(SALT_BACKUP_FILE.startsWith(path.join(__dirname, '..'))).toBe(false);
     expect(SALT_FILE.startsWith(path.join(__dirname, '..'))).toBe(true);
+  });
+});
+
+// ─── atribuição de produção ao servidor ──────────────────────────────────────
+
+const QS = (...pares) =>
+  '<VinculoQueryset [' + pares.map(([n, i]) => `<Vinculo: ${n} (${i}) (Servidor)>`).join(', ') + ']>';
+
+describe('extrairVinculos', () => {
+  test('lê nome e id de cada vínculo do QuerySet', () => {
+    expect(extrairVinculos(QS(['Ana Maria Costa', '1234567'], ['Joao Silva', '7654321'])))
+      .toEqual([
+        { id: '1234567', nome: 'Ana Maria Costa' },
+        { id: '7654321', nome: 'Joao Silva' }
+      ]);
+  });
+
+  test('sem nome legível, cai para os ids entre parênteses', () => {
+    expect(extrairVinculos('<VinculoQueryset [(1234567) (Servidor)]>'))
+      .toEqual([{ id: '1234567', nome: '' }]);
+  });
+
+  test('valor vazio devolve lista vazia', () => {
+    expect(extrairVinculos('')).toEqual([]);
+    expect(extrairVinculos(null)).toEqual([]);
+  });
+});
+
+describe('nomeNaCitacao', () => {
+  test('casa sobrenome com a inicial do prenome', () => {
+    expect(nomeNaCitacao('Alexandre de Oliveira Fernandes', 'FERNANDES, A. O.; Semana Nacional. 2020.')).toBe(true);
+  });
+
+  test('sobrenome igual e inicial diferente é outra pessoa', () => {
+    expect(nomeNaCitacao('Alexandre de Oliveira Fernandes', 'OLIVEIRA, J. R. S.; Semana Nacional. 2013.')).toBe(false);
+    expect(nomeNaCitacao('Ademildes Romana Santos', 'SANTOS, J. N. S. C.; Semana Nacional. 2025.')).toBe(false);
+  });
+
+  test('a inicial vale só se vier de um nome anterior ao sobrenome citado', () => {
+    // o F de "Fernandes" não pode servir de prenome em "OLIVEIRA, F. J. R."
+    expect(nomeNaCitacao('Alexandre de Oliveira Fernandes', 'OLIVEIRA, F. J. R.; Semana Nacional. 2018.')).toBe(false);
+    expect(nomeNaCitacao('Maria Jose da Silva', 'SILVA, M. J. ; OUTRO, A. . Artigo. 2020.')).toBe(true);
+  });
+
+  test('aceita autor por extenso, sem vírgula', () => {
+    expect(nomeNaCitacao('Marcelo Nava', 'Marcelo Nava ; LIMA, E. P. R. . Recrystallization Kinetics.')).toBe(true);
+    expect(nomeNaCitacao('Pedro Cunha de Lima', 'Nicole Araujo ; Pedro Lima ; Marcelo Nava . Effect of Titanium.')).toBe(true);
+  });
+
+  test('citação sem lista de autores não permite julgar', () => {
+    expect(nomeNaCitacao('Alexandre de Oliveira Fernandes', 'Sistema de gestao XPTO')).toBe(true);
+    expect(nomeNaCitacao('Alexandre de Oliveira Fernandes', 'Sistema web para controle de uma maquete. 2010.')).toBe(true);
+    expect(nomeNaCitacao('Alexandre de Oliveira Fernandes', 'Registros ou Patente: Software. Numero: BR512024003978-3.')).toBe(true);
+  });
+
+  test('organizador único sem vírgula responde pelo sobrenome', () => {
+    const cit = 'BARRIOS BARRIOS BARTOLO E.; Semana Nacional de Ciencia e Tecnologia. 2012.';
+    expect(nomeNaCitacao('Bartolo Elias Barrios Barrios', cit)).toBe(true);
+    expect(nomeNaCitacao('Alexandre de Oliveira Fernandes', cit)).toBe(false);
+    expect(nomeNaCitacao('Leandro Rafael Prado', 'Leandro Rafael Prado; I Seminario de Meio Ambiente. 2018.')).toBe(true);
+  });
+});
+
+describe('filtrarPorAutoria', () => {
+  const vinculos = [
+    { id: '1', nome: 'Alexandre de Oliveira Fernandes' },
+    { id: '2', nome: 'Ademildes Romana Santos' }
+  ];
+
+  test('mantém só quem a citação nomeia', () => {
+    expect(filtrarPorAutoria(vinculos, 'FERNANDES, A. O.; Semana Nacional. 2020.', 'tecnica'))
+      .toEqual([vinculos[0]]);
+  });
+
+  test('descarta a linha quando a citação não nomeia nenhum deles', () => {
+    // QuerySet cortado no 20º vínculo: o organizador real ficou de fora.
+    expect(filtrarPorAutoria(vinculos, 'RIBEIRO, L. R.; Semana Nacional. 2014.', 'tecnica')).toEqual([]);
+  });
+
+  test('não toca em orientações — lá a citação nomeia o aluno', () => {
+    expect(filtrarPorAutoria(vinculos, 'Cecilia Alves Guimaraes. Aguas que conectam. Inicio: 2026.', 'concluidas'))
+      .toEqual(vinculos);
+  });
+
+  test('vínculo único passa sem conferência', () => {
+    expect(filtrarPorAutoria([vinculos[0]], 'RIBEIRO, L. R.; Semana Nacional. 2014.', 'tecnica'))
+      .toEqual([vinculos[0]]);
+  });
+
+  test('citação sem autores mantém a linha inteira', () => {
+    expect(filtrarPorAutoria(vinculos, 'Sistema de gestao XPTO', 'tecnica')).toEqual(vinculos);
   });
 });

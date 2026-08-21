@@ -18,10 +18,15 @@ function normalizePosGraduacaoStatus(status) {
   return (status || "").trim() || "Não informado";
 }
 
-// Duração padrão do curso, em MESES, para classificação de coorte madura.
-// Especializações (lato sensu) seguem o prazo padrão de 18 meses
-// (Resolução CNE/CES nº 1/2018, art. 1º); Mestrado/Doutorado seguem os prazos
-// típicos de 24/48 meses.
+// Duração padrão do curso, em MESES, para o prazo de integralização do ciclo
+// (Plataforma Nilo Peçanha — PNP). Mestrado/Doutorado: prazos máximos de bolsa da
+// CAPES (Portaria CAPES nº 76/2010, art. 10 — 24/48 meses). Especialização
+// (lato sensu): Resolução CNE/CES nº 1/2018 (carga mínima de 360 h, art. 7º, I),
+// operacionalizada em 18 meses.
+//
+// PNP "retenção crítica" (GRM PNP 2020): o ciclo de matrícula só é analisado
+// 1 ano após o término previsto (prazo de integralização + 12 meses de graça).
+const PNP_RETENCAO_CRITICA_MESES = 12;
 function getPosGraduacaoDurationMonths(category) {
   const durations = {
     "Mestrado": 24,
@@ -57,7 +62,8 @@ function isPosGraduacaoMature(record) {
   if (Number.isNaN(year)) return false;
   const semestre = parseInt(record.semestre, 10);
   const entryMonths = year * 12 + (Number.isNaN(semestre) ? 0 : (semestre - 1) * 6);
-  return (getPosGraduacaoRefMonths() - entryMonths) >= getPosGraduacaoDurationMonths(record.categoria);
+  return (getPosGraduacaoRefMonths() - entryMonths) >=
+    (getPosGraduacaoDurationMonths(record.categoria) + PNP_RETENCAO_CRITICA_MESES);
 }
 
 function isPosGraduacaoAttritionStatus(status) {
@@ -65,18 +71,18 @@ function isPosGraduacaoAttritionStatus(status) {
 }
 
 function normalizePosGraduacaoOutcome(status) {
-  if (status === 'Concluído') return 'Concluído';
-  if (status === 'Matriculado') return 'Ativo';
-  if (isPosGraduacaoAttritionStatus(status)) return 'Evasão/Desligamento';
+  if (status === 'Concluído') return 'Concluinte';
+  if (status === 'Matriculado') return 'Em curso';
+  if (isPosGraduacaoAttritionStatus(status)) return 'Evadido';
   return 'Outros';
 }
 
 function getPosGraduacaoSituationBucket(record) {
   const status = normalizePosGraduacaoStatus(record.situacao);
-  if (status === 'Concluído') return 'Concluído';
-  if (isPosGraduacaoAttritionStatus(status)) return 'Evasão/Desligamento';
+  if (status === 'Concluído') return 'Concluinte';
+  if (isPosGraduacaoAttritionStatus(status)) return 'Evadido';
   if (status === 'Matriculado') {
-    return isPosGraduacaoMature(record) ? 'Pendência Ativa' : 'Em Fluxo Regular';
+    return isPosGraduacaoMature(record) ? 'Retido' : 'Em curso';
   }
   return 'Outros';
 }
@@ -95,13 +101,13 @@ function renderPosGraduacaoTraceability(data) {
   area.innerHTML = `
     <details open>
       <summary><strong>Como os indicadores são calculados</strong></summary>
-      <p><strong>Base atual:</strong> ${data.length} registros no recorte; ${matured} em coortes maduras.</p>
-      <p><strong>Filtros ativos:</strong> Categoria=${selectedCategoria}; Status=${selectedStatus}; Campus=${selectedCampus}; Programa=${selectedCurso}; Somente coortes maduras=${maturedOnly ? 'sim' : 'não'}.</p>
+      <p><strong>Base atual:</strong> ${data.length} registros no recorte; ${matured} em ciclos de matrícula encerrados.</p>
+      <p><strong>Filtros ativos:</strong> Categoria=${selectedCategoria}; Status=${selectedStatus}; Campus=${selectedCampus}; Programa=${selectedCurso}; Somente ciclos encerrados=${maturedOnly ? 'sim' : 'não'}.</p>
       <ul>
-        <li><strong>Taxa de Conclusão:</strong> Concluídos (coortes maduras) / Total de coortes maduras.</li>
-        <li><strong>Taxa de Evasão/Desligamento:</strong> Evasão/Desligamento (coortes maduras) / Total de coortes maduras.</li>
-        <li><strong>Pendência Ativa:</strong> Matriculados além do prazo esperado da coorte.</li>
-        <li><strong>Em Fluxo Regular:</strong> Matriculados dentro do prazo esperado da coorte.</li>
+        <li><strong>Conclusão Ciclo (CCiclo):</strong> Concluintes / matrículas do ciclo.</li>
+        <li><strong>Evasão Ciclo (EvCiclo):</strong> Evadidos / matrículas do ciclo.</li>
+        <li><strong>Retenção Ciclo (RCiclo):</strong> Retidos / matrículas do ciclo.</li>
+        <li><strong>Índice de Eficiência Acadêmica (IEA):</strong> CCiclo + (CCiclo ÷ (CCiclo + EvCiclo)) × RCiclo.</li>
       </ul>
     </details>
   `;
@@ -227,6 +233,19 @@ function calculateCompletionRates(data) {
   return { completion, attrition, overdue };
 }
 
+// Índice de Eficiência Acadêmica (IEA) — GRM PNP 2020:
+// IEA = Conclusão Ciclo + (Conclusão Ciclo / (Conclusão Ciclo + Evasão Ciclo)) × Retenção Ciclo.
+// A parcela adicional projeta quantos retidos provavelmente concluirão, usando a
+// razão de concluintes sobre os não retidos (concluintes + evadidos).
+function calculateIEAciclo(cciclo, evciclo, rciclo) {
+  const c = Number.isFinite(cciclo) ? cciclo : 0;
+  const e = Number.isFinite(evciclo) ? evciclo : 0;
+  const r = Number.isFinite(rciclo) ? rciclo : 0;
+  const resolved = c + e;
+  if (resolved <= 0) return c;
+  return c + (c / resolved) * r;
+}
+
 function ensureCanvasElements(ids) {
   const missing = ids.filter(id => !$(id));
   if (missing.length > 0) {
@@ -260,14 +279,16 @@ function renderKPIsPosGraduacaoOverview(data) {
   const attritionRate = matured.length > 0 ? (maturedLost / matured.length) * 100 : 0;
   const pendingActiveRate = matured.length > 0 ? (pendingActive / matured.length) * 100 : 0;
 
+  const iea = calculateIEAciclo(completionRate, attritionRate, pendingActiveRate);
   $('kpi-posgraduacao-overview').innerHTML = `
-    ${buildPosGraduacaoKpi('Alunos Ativos Hoje', active, '', 'Alunos com status Matriculado no recorte atual.')}
-    ${buildPosGraduacaoKpi('Em Fluxo Regular', regularFlow, '', 'Alunos Matriculados ainda dentro do prazo esperado de conclusão.')}
-    ${buildPosGraduacaoKpi('Pendência Ativa', pendingActive, '', 'Alunos Matriculados além do prazo esperado de conclusão.')}
-    ${buildPosGraduacaoKpi('Coortes Maduras', matured.length, 'Base apta para avaliar desfecho', 'Turmas cujo prazo esperado já foi atingido: Mestrado>=24 meses, Doutorado>=48 meses, Especialização>=18 meses (lato sensu).')}
-    ${buildPosGraduacaoKpi('Conclusão (Maduras)', formatPercent(completionRate), '', 'Concluídos dividido pelo total de coortes maduras.')}
-    ${buildPosGraduacaoKpi('Evasão/Desligamento (Maduras)', formatPercent(attritionRate), '', 'Cancelado/Desligado/Evasão/Abandono/Falecido dividido pelo total de coortes maduras.')}
-    ${buildPosGraduacaoKpi('Pendência Ativa (Maduras)', formatPercent(pendingActiveRate), '', 'Alunos ainda Matriculados mesmo após o prazo esperado, dividido pelas coortes maduras.')}
+    ${buildPosGraduacaoKpi('Matriculados (M)', active, '', 'Alunos com status Matriculado no recorte atual.')}
+    ${buildPosGraduacaoKpi('Em curso', regularFlow, '', 'Alunos matriculados dentro do prazo de integralização do ciclo (ainda não retidos).')}
+    ${buildPosGraduacaoKpi('Retidos', pendingActive, '', 'Alunos matriculados além do prazo de integralização + 1 ano (retenção crítica, PNP).')}
+    ${buildPosGraduacaoKpi('Ciclos encerrados', matured.length, 'Base dos indicadores por ciclo (PNP)', 'Ciclos de matrícula com término previsto há 1 ano ou mais: Mestrado>=24+12, Doutorado>=48+12, Especialização>=18+12 meses.')}
+    ${buildPosGraduacaoKpi('Conclusão Ciclo (CCiclo)', formatPercent(completionRate), '', 'Concluintes / matrículas do ciclo (PNP).')}
+    ${buildPosGraduacaoKpi('Evasão Ciclo (EvCiclo)', formatPercent(attritionRate), '', 'Evadidos / matrículas do ciclo (PNP).')}
+    ${buildPosGraduacaoKpi('Retenção Ciclo (RCiclo)', formatPercent(pendingActiveRate), '', 'Retidos / matrículas do ciclo (PNP).')}
+    ${buildPosGraduacaoKpi('Índice de Eficiência Acadêmica (IEA)', formatPercent(iea), '', 'CCiclo + projeção dos retidos que concluirão (PNP).')}
     ${buildPosGraduacaoKpi('Programas no Recorte', programs, '', 'Quantidade de programas após aplicação dos filtros.')}
   `;
 }
@@ -284,10 +305,10 @@ function renderKPIsPosGraduacaoByCourse(data, selectedCourse) {
 
   $('kpi-posgraduacao-curso').innerHTML = `
     ${buildPosGraduacaoKpi(`Alunos no Recorte`, total, '', 'Total de alunos do programa selecionado após filtros.')}
-    ${buildPosGraduacaoKpi(`Coortes Maduras`, matured.length, '', 'Turmas do programa com prazo esperado já atingido.')}
-    ${buildPosGraduacaoKpi(`Conclusão`, formatPercent(completionRate), '', 'Concluídos em coortes maduras / total de coortes maduras.')}
-    ${buildPosGraduacaoKpi(`Evasão/Desligamento`, formatPercent(attritionRate), '', 'Evasão e desligamentos em coortes maduras / total de coortes maduras.')}
-    ${buildPosGraduacaoKpi(`Pendência Ativa`, active, '', 'Alunos ainda Matriculados em coortes maduras do programa.')}
+    ${buildPosGraduacaoKpi(`Ciclos encerrados`, matured.length, '', 'Ciclos de matrícula do programa com término previsto há 1 ano ou mais.')}
+    ${buildPosGraduacaoKpi(`Conclusão Ciclo (CCiclo)`, formatPercent(completionRate), '', 'Concluintes / matrículas dos ciclos encerrados do programa.')}
+    ${buildPosGraduacaoKpi(`Evasão Ciclo (EvCiclo)`, formatPercent(attritionRate), '', 'Evadidos / matrículas dos ciclos encerrados do programa.')}
+    ${buildPosGraduacaoKpi(`Retidos`, active, '', 'Alunos ainda matriculados em ciclos encerrados (retenção crítica) do programa.')}
   `;
 }
 
@@ -306,10 +327,10 @@ function renderKPIsPosGraduacaoByCampus(data, selectedCampus) {
   $('kpi-posgraduacao-campus').innerHTML = `
     ${buildPosGraduacaoKpi(`Total em ${campusLabel}`, total, '', 'Total de alunos do campus no recorte atual.')}
     ${buildPosGraduacaoKpi(`Programas`, uniqueCourses, '', 'Quantidade de programas no campus após filtros.')}
-    ${buildPosGraduacaoKpi(`Conclusão (Maduras)`, formatPercent(completionRate), '', 'Concluídos em coortes maduras do campus / total de coortes maduras do campus.')}
-    ${buildPosGraduacaoKpi(`Evasão (Maduras)`, formatPercent(attritionRate), '', 'Evasão/desligamento em coortes maduras do campus / total de coortes maduras do campus.')}
-    ${buildPosGraduacaoKpi(`Pendência Ativa (Maduras)`, backlog, '', 'Alunos Matriculados em coortes maduras no campus.')}
-    ${buildPosGraduacaoKpi(`Ativos Hoje`, active, '', 'Alunos Matriculados no campus no recorte atual.')}
+    ${buildPosGraduacaoKpi(`Conclusão Ciclo (CCiclo)`, formatPercent(completionRate), '', 'Concluintes / matrículas dos ciclos encerrados do campus.')}
+    ${buildPosGraduacaoKpi(`Evasão Ciclo (EvCiclo)`, formatPercent(attritionRate), '', 'Evadidos / matrículas dos ciclos encerrados do campus.')}
+    ${buildPosGraduacaoKpi(`Retidos`, backlog, '', 'Alunos ainda matriculados em ciclos encerrados no campus (retenção crítica).')}
+    ${buildPosGraduacaoKpi(`Matriculados Hoje`, active, '', 'Alunos Matriculados no campus no recorte atual.')}
   `;
 }
 
@@ -345,7 +366,7 @@ function renderPosGraduacaoEvolution(data) {
 
 function renderPosGraduacaoDistributions(data) {
   const statusCounts = countBy(data, getPosGraduacaoSituationBucket);
-  const statusLabels = ['Concluído', 'Em Fluxo Regular', 'Pendência Ativa', 'Evasão/Desligamento', 'Outros']
+  const statusLabels = ['Concluinte', 'Em curso', 'Retido', 'Evadido', 'Outros']
     .filter(label => (statusCounts[label] || 0) > 0);
   const categoryRows = ['Mestrado', 'Doutorado', 'Especialização'].map(category => {
     const rows = data.filter(r => (r.categoria || 'Outro') === category && isPosGraduacaoMature(r));
@@ -366,17 +387,17 @@ function renderPosGraduacaoDistributions(data) {
     datasets: [{
       data: statusLabels.map(label => statusCounts[label]),
       backgroundColor: statusLabels.map(label => ({
-        'Concluído': '#4D90FE',
-        'Em Fluxo Regular': '#4CAF50',
-        'Pendência Ativa': '#FF9800',
-        'Evasão/Desligamento': '#F44336',
+        'Concluinte': '#4D90FE',
+        'Em curso': '#4CAF50',
+        'Retido': '#FF9800',
+        'Evadido': '#F44336',
         'Outros': '#607D8B'
       }[label] || '#607D8B'))
     }]
   });
 
   createChart('chart-posgraduacao-categoria', 'bar', {
-    labels: ['Conclusão', 'Evasão', 'Pendência Ativa'],
+    labels: ['Conclusão Ciclo', 'Evasão Ciclo', 'Retenção Ciclo'],
     datasets: categoryRows.map(row => ({
       label: row.category,
       data: [row.completionRate, row.attritionRate, row.pendingActiveRate],
@@ -407,15 +428,15 @@ function renderPosGraduacaoTopCoursesAndMap(data) {
   createChart('chart-posgraduacao-topcursos', 'bar', {
     labels: programRiskRows.map(row => truncateText(row.course, 40)),
     datasets: [{
-      label: 'Em Fluxo Regular',
+      label: 'Em curso',
       data: programRiskRows.map(row => row.regular),
       backgroundColor: '#4CAF50'
     }, {
-      label: 'Pendência Ativa',
+      label: 'Retido',
       data: programRiskRows.map(row => row.pending),
       backgroundColor: '#FF9800'
     }, {
-      label: 'Evasão/Desligamento',
+      label: 'Evadido',
       data: programRiskRows.map(row => row.lost),
       backgroundColor: '#F44336'
     }]
@@ -448,15 +469,15 @@ function renderPosGraduacaoTopCoursesAndMap(data) {
   createChart('chart-posgraduacao-campusrisk', 'bar', {
     labels: campusRows.map(r => `${CAMPUS_TO_CITY[r.campus] || r.campus} (${r.campus})`),
     datasets: [{
-      label: 'Fluxo Regular (%)',
+      label: 'Em curso (%)',
       data: campusRows.map(r => r.regularRate),
       backgroundColor: '#4CAF50'
     }, {
-      label: 'Pendência Ativa (%)',
+      label: 'Retenção (%)',
       data: campusRows.map(r => r.pendingRate),
       backgroundColor: '#FF9800'
     }, {
-      label: 'Evasão/Desligamento (%)',
+      label: 'Evasão (%)',
       data: campusRows.map(r => r.attritionRate),
       backgroundColor: '#F44336'
     }]
@@ -476,7 +497,7 @@ function renderPosGraduacaoCompletionRate(data) {
     labels: years,
     datasets: [
       {
-        label: 'Taxa de Conclusão',
+        label: 'Conclusão Ciclo (CCiclo)',
         data: years.map(year => rates.completion[year] || 0),
         borderColor: '#4D90FE',
         backgroundColor: 'rgba(77, 144, 254, 0.12)',
@@ -484,7 +505,7 @@ function renderPosGraduacaoCompletionRate(data) {
         fill: false
       },
       {
-        label: 'Taxa de Evasão/Desligamento',
+        label: 'Evasão Ciclo (EvCiclo)',
         data: years.map(year => rates.attrition[year] || 0),
         borderColor: '#F44336',
         backgroundColor: 'rgba(76, 175, 80, 0.12)',
@@ -492,7 +513,7 @@ function renderPosGraduacaoCompletionRate(data) {
         fill: false
       },
       {
-        label: 'Taxa de Pendência Ativa',
+        label: 'Retenção Ciclo (RCiclo)',
         data: years.map(year => rates.overdue[year] || 0),
         borderColor: '#FF9800',
         backgroundColor: 'rgba(244, 67, 54, 0.12)',
@@ -528,15 +549,15 @@ function renderPosGraduacaoCourseCharts(data, selectedCourse) {
 
   createChart('chart-posgraduacao-curso-evolucao', 'bar', {
     labels: years,
-    datasets: ['Em Fluxo Regular', 'Pendência Ativa', 'Concluído', 'Evasão/Desligamento']
+    datasets: ['Em curso', 'Retido', 'Concluinte', 'Evadido']
       .map(bucket => ({
         label: bucket,
         data: years.map(year => evolutionBuckets[year]?.[bucket] || 0),
         backgroundColor: ({
-          'Em Fluxo Regular': '#4CAF50',
-          'Pendência Ativa': '#FF9800',
-          'Concluído': '#4D90FE',
-          'Evasão/Desligamento': '#F44336'
+          'Em curso': '#4CAF50',
+          'Retido': '#FF9800',
+          'Concluinte': '#4D90FE',
+          'Evadido': '#F44336'
         })[bucket]
       }))
   }, {
@@ -559,17 +580,17 @@ function renderPosGraduacaoCourseCharts(data, selectedCourse) {
   createChart('chart-posgraduacao-curso-campus', 'line', {
     labels: years,
     datasets: [{
-      label: 'Conclusão (%)',
+      label: 'Conclusão Ciclo (CCiclo)',
       data: years.map(y => rates.completion[y] || 0),
       borderColor: '#4D90FE',
       tension: 0.25
     }, {
-      label: 'Evasão (%)',
+      label: 'Evasão Ciclo (EvCiclo)',
       data: years.map(y => rates.attrition[y] || 0),
       borderColor: '#F44336',
       tension: 0.25
     }, {
-      label: 'Pendência Ativa (%)',
+      label: 'Retenção Ciclo (RCiclo)',
       data: years.map(y => rates.overdue[y] || 0),
       borderColor: '#FF9800',
       tension: 0.25
@@ -599,7 +620,7 @@ function renderPosGraduacaoCampusCharts(data, selectedCampus) {
   createChart('chart-posgraduacao-campus-evolucao', 'bar', {
     labels: programRows.map(r => truncateText(r.course, 35)),
     datasets: [{
-      label: 'Pendência Ativa',
+      label: 'Retidos',
       data: programRows.map(r => r.backlog),
       backgroundColor: '#FF9800'
     }, {
@@ -630,15 +651,15 @@ function renderPosGraduacaoCampusCharts(data, selectedCampus) {
   createChart('chart-posgraduacao-campus-cursos', 'bar', {
     labels: campusRows.map(r => `${CAMPUS_TO_CITY[r.campus] || r.campus} (${r.campus})`),
     datasets: [{
-      label: 'Conclusão (%)',
+      label: 'Conclusão Ciclo (%)',
       data: campusRows.map(r => r.doneRate),
       backgroundColor: '#4D90FE'
     }, {
-      label: 'Evasão (%)',
+      label: 'Evasão Ciclo (%)',
       data: campusRows.map(r => r.lostRate),
       backgroundColor: '#F44336'
     }, {
-      label: 'Pendência (%)',
+      label: 'Retenção Ciclo (%)',
       data: campusRows.map(r => r.backlogRate),
       backgroundColor: '#FF9800'
     }]

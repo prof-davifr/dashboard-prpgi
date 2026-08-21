@@ -128,45 +128,50 @@ describe('getPosGraduacaoDurationMonths', () => {
 describe('isPosGraduacaoMature', () => {
   // STATE.maxYear = 2024
 
-  test('returns true for a Mestrado record entered 2 or more years ago', () => {
-    // 2024 - 2022 = 2 >= 2 → mature
-    expect(ctx.isPosGraduacaoMature({ ano: 2022, categoria: 'Mestrado' })).toBe(true);
-    // 2024 - 2020 = 4 >= 2 → mature
+  test('returns true for a Mestrado record entered 3 or more years ago', () => {
+    // 2024 - 2021 = 3 anos (42 meses) >= 36 → maduro
+    expect(ctx.isPosGraduacaoMature({ ano: 2021, categoria: 'Mestrado' })).toBe(true);
+    // 2024 - 2020 = 4 anos (54 meses) >= 36 → maduro
     expect(ctx.isPosGraduacaoMature({ ano: 2020, categoria: 'Mestrado' })).toBe(true);
   });
 
-  test('returns false for a Mestrado record entered less than 2 years ago', () => {
-    // 2024 - 2023 = 1 < 2 → not mature
+  test('returns false for a Mestrado record entered less than 3 years ago', () => {
+    // 2024 - 2022 = 2 anos (30 meses) < 36 → não maduro
+    expect(ctx.isPosGraduacaoMature({ ano: 2022, categoria: 'Mestrado' })).toBe(false);
+    // 2024 - 2023 = 1 ano (18 meses) < 36 → não maduro
     expect(ctx.isPosGraduacaoMature({ ano: 2023, categoria: 'Mestrado' })).toBe(false);
-    // 2024 - 2024 = 0 < 2 → not mature
+    // 2024 - 2024 = 0 < 36 → não maduro
     expect(ctx.isPosGraduacaoMature({ ano: 2024, categoria: 'Mestrado' })).toBe(false);
   });
 
-  test('returns true for a Doutorado record entered 4 or more years ago', () => {
-    expect(ctx.isPosGraduacaoMature({ ano: 2020, categoria: 'Doutorado' })).toBe(true);
+  test('returns true for a Doutorado record entered 5 or more years ago', () => {
+    // 2024 - 2019 = 5 anos (66 meses) >= 60 → maduro
+    expect(ctx.isPosGraduacaoMature({ ano: 2019, categoria: 'Doutorado' })).toBe(true);
     expect(ctx.isPosGraduacaoMature({ ano: 2018, categoria: 'Doutorado' })).toBe(true);
   });
 
-  test('returns false for a Doutorado record entered fewer than 4 years ago', () => {
-    // 2024 - 2021 = 3 < 4 → not mature
-    expect(ctx.isPosGraduacaoMature({ ano: 2021, categoria: 'Doutorado' })).toBe(false);
+  test('returns false for a Doutorado record entered fewer than 5 years ago', () => {
+    // 2024 - 2020 = 4 anos (54 meses) < 60 → não maduro
+    expect(ctx.isPosGraduacaoMature({ ano: 2020, categoria: 'Doutorado' })).toBe(false);
   });
 
-  test('returns true for Especialização entered 2 or more years ago', () => {
+  test('returns true for Especialização entered 2.5 or more years ago', () => {
+    // 2024 - 2022 = 2.5 anos (30 meses) >= 30 → maduro
     expect(ctx.isPosGraduacaoMature({ ano: 2022, categoria: 'Especialização' })).toBe(true);
   });
 
   test('uses default duration of 2 for unknown category', () => {
-    expect(ctx.isPosGraduacaoMature({ ano: 2022, categoria: 'Outro' })).toBe(true);
-    expect(ctx.isPosGraduacaoMature({ ano: 2023, categoria: 'Outro' })).toBe(false);
+    // Outro: 24 + 12 = 36 meses
+    expect(ctx.isPosGraduacaoMature({ ano: 2021, categoria: 'Outro' })).toBe(true);
+    expect(ctx.isPosGraduacaoMature({ ano: 2022, categoria: 'Outro' })).toBe(false);
   });
 
-  test('returns true for Especialização entered exactly 18 months ago (2023.1 vs ref 2024.2)', () => {
-    expect(ctx.isPosGraduacaoMature({ ano: 2023, semestre: 1, categoria: 'Especialização' })).toBe(true);
+  test('returns true for Especialização entered 30 months ago (2022.1 vs ref 2024.2)', () => {
+    expect(ctx.isPosGraduacaoMature({ ano: 2022, semestre: 1, categoria: 'Especialização' })).toBe(true);
   });
 
-  test('returns false for Especialização entered less than 18 months ago (2023.2 vs ref 2024.2)', () => {
-    expect(ctx.isPosGraduacaoMature({ ano: 2023, semestre: 2, categoria: 'Especialização' })).toBe(false);
+  test('returns false for Especialização entered less than 30 months ago (2022.2 vs ref 2024.2)', () => {
+    expect(ctx.isPosGraduacaoMature({ ano: 2022, semestre: 2, categoria: 'Especialização' })).toBe(false);
   });
 
   test('uses the most recent period in the data as reference (semester granularity)', () => {
@@ -175,12 +180,12 @@ describe('isPosGraduacaoMature', () => {
       STATE: { maxYear: 2024, raw: { posgraduacao: [{ ano: '2024', semestre: '1' }] }, filtered: {} }
     });
     loadScript(ctxRef, POSGRAD_PATH);
-    // Mestrado 2022.2 → 18 meses decorridos → NÃO maduro (precisa 24)
-    expect(ctxRef.isPosGraduacaoMature({ ano: 2022, semestre: 2, categoria: 'Mestrado' })).toBe(false);
-    // Mestrado 2022.1 → 24 meses → maduro
-    expect(ctxRef.isPosGraduacaoMature({ ano: 2022, semestre: 1, categoria: 'Mestrado' })).toBe(true);
-    // Especialização 2023.1 → 12 meses → NÃO maduro (precisa 18)
-    expect(ctxRef.isPosGraduacaoMature({ ano: 2023, semestre: 1, categoria: 'Especialização' })).toBe(false);
+    // Mestrado 2021.2 → 30 meses decorridos → NÃO maduro (precisa 36)
+    expect(ctxRef.isPosGraduacaoMature({ ano: 2021, semestre: 2, categoria: 'Mestrado' })).toBe(false);
+    // Mestrado 2021.1 → 36 meses → maduro
+    expect(ctxRef.isPosGraduacaoMature({ ano: 2021, semestre: 1, categoria: 'Mestrado' })).toBe(true);
+    // Especialização 2022.1 → 24 meses → NÃO maduro (precisa 30)
+    expect(ctxRef.isPosGraduacaoMature({ ano: 2022, semestre: 1, categoria: 'Especialização' })).toBe(false);
   });
 
   test('returns false when ano is not a number', () => {
@@ -210,18 +215,18 @@ describe('isPosGraduacaoAttritionStatus', () => {
 // ─── normalizePosGraduacaoOutcome ─────────────────────────────────────────────
 
 describe('normalizePosGraduacaoOutcome', () => {
-  test('returns "Concluído" for "Concluído"', () => {
-    expect(ctx.normalizePosGraduacaoOutcome('Concluído')).toBe('Concluído');
+  test('returns "Concluinte" for "Concluído"', () => {
+    expect(ctx.normalizePosGraduacaoOutcome('Concluído')).toBe('Concluinte');
   });
 
-  test('returns "Ativo" for "Matriculado"', () => {
-    expect(ctx.normalizePosGraduacaoOutcome('Matriculado')).toBe('Ativo');
+  test('returns "Em curso" for "Matriculado"', () => {
+    expect(ctx.normalizePosGraduacaoOutcome('Matriculado')).toBe('Em curso');
   });
 
   test.each(['Cancelado', 'Desligado', 'Evasão', 'Abandono', 'Falecido'])(
-    'returns "Evasão/Desligamento" for attrition status "%s"',
+    'returns "Evadido" for attrition status "%s"',
     (status) => {
-      expect(ctx.normalizePosGraduacaoOutcome(status)).toBe('Evasão/Desligamento');
+      expect(ctx.normalizePosGraduacaoOutcome(status)).toBe('Evadido');
     }
   );
 
@@ -235,28 +240,28 @@ describe('normalizePosGraduacaoOutcome', () => {
 // ─── getPosGraduacaoSituationBucket ───────────────────────────────────────────
 
 describe('getPosGraduacaoSituationBucket', () => {
-  // STATE.maxYear = 2024, so 2022 is mature (2 yrs), 2023 is not (1 yr)
+  // STATE.maxYear = 2024. Regra PNP: maduro = duração + 12 meses.
 
-  test('returns "Concluído" for concluded record', () => {
+  test('returns "Concluinte" for concluded record', () => {
     const record = { situacao: 'Concluído', ano: 2020, categoria: 'Mestrado' };
-    expect(ctx.getPosGraduacaoSituationBucket(record)).toBe('Concluído');
+    expect(ctx.getPosGraduacaoSituationBucket(record)).toBe('Concluinte');
   });
 
-  test('returns "Evasão/Desligamento" for attrition record', () => {
+  test('returns "Evadido" for attrition record', () => {
     const record = { situacao: 'Cancelado', ano: 2020, categoria: 'Mestrado' };
-    expect(ctx.getPosGraduacaoSituationBucket(record)).toBe('Evasão/Desligamento');
+    expect(ctx.getPosGraduacaoSituationBucket(record)).toBe('Evadido');
   });
 
-  test('returns "Pendência Ativa" for Matriculado in a mature cohort', () => {
-    // 2024 - 2022 = 2 >= 2 → mature
-    const record = { situacao: 'Matriculado', ano: 2022, categoria: 'Mestrado' };
-    expect(ctx.getPosGraduacaoSituationBucket(record)).toBe('Pendência Ativa');
+  test('returns "Retido" for Matriculado in a mature cohort', () => {
+    // 2024 - 2021 = 3 anos (42 meses) >= 24+12 → maduro
+    const record = { situacao: 'Matriculado', ano: 2021, categoria: 'Mestrado' };
+    expect(ctx.getPosGraduacaoSituationBucket(record)).toBe('Retido');
   });
 
-  test('returns "Em Fluxo Regular" for Matriculado in an immature cohort', () => {
-    // 2024 - 2023 = 1 < 2 → not mature
+  test('returns "Em curso" for Matriculado in an immature cohort', () => {
+    // 2024 - 2023 = 1 ano (18 meses) < 24+12 → não maduro
     const record = { situacao: 'Matriculado', ano: 2023, categoria: 'Mestrado' };
-    expect(ctx.getPosGraduacaoSituationBucket(record)).toBe('Em Fluxo Regular');
+    expect(ctx.getPosGraduacaoSituationBucket(record)).toBe('Em curso');
   });
 
   test('returns "Outros" for unrecognised status', () => {
@@ -372,9 +377,8 @@ describe('countBy', () => {
 // ─── calculateCompletionRates ─────────────────────────────────────────────────
 
 describe('calculateCompletionRates', () => {
-  // STATE.maxYear = 2024.
-  // Mature = year <= 2022 (Mestrado default 2 yr).
-  // For Doutorado mature = year <= 2020.
+  // STATE.maxYear = 2024. Regra PNP (retenção crítica):
+  // Mestrado maduro = ano <= 2021 (24+12=36 meses); Doutorado = ano <= 2019 (48+12=60).
 
   test('returns completion, attrition and overdue rates per cohort year', () => {
     const data = [
@@ -392,7 +396,7 @@ describe('calculateCompletionRates', () => {
   });
 
   test('returns zero rates for cohorts with no mature records', () => {
-    // 2023 Mestrado: 2024 - 2023 = 1 < 2 → not mature
+    // 2023 Mestrado: 2024 - 2023 = 1 ano (18 meses) < 36 → não maduro
     const data = [
       { ano: 2023, categoria: 'Mestrado', situacao: 'Matriculado' },
       { ano: 2023, categoria: 'Mestrado', situacao: 'Concluído' },
@@ -426,5 +430,28 @@ describe('calculateCompletionRates', () => {
 
     expect(completion[2021]).toBeCloseTo(50);
     expect(attrition[2021]).toBeCloseTo(50);
+  });
+});
+
+// ─── calculateIEAciclo (Índice de Eficiência Acadêmica — PNP) ────────────────
+
+describe('calculateIEAciclo', () => {
+  test('returns CCiclo when there are no evadidos or retidos', () => {
+    expect(ctx.calculateIEAciclo(50, 0, 0)).toBeCloseTo(50);
+  });
+
+  test('projects retained students proportionally (GRM PNP example)', () => {
+    // CCiclo=50, EvCiclo=20, RCiclo=30 →
+    // ponderador = 50/(50+20) = 0.7143 → IEA = 50 + 0.7143*30 = 71.43
+    expect(ctx.calculateIEAciclo(50, 20, 30)).toBeCloseTo(71.43, 1);
+  });
+
+  test('returns CCiclo when resolved (CCiclo+EvCiclo) is zero', () => {
+    expect(ctx.calculateIEAciclo(0, 0, 30)).toBe(0);
+  });
+
+  test('handles non-finite inputs as zero', () => {
+    expect(ctx.calculateIEAciclo(50, null, undefined)).toBeCloseTo(50);
+    expect(ctx.calculateIEAciclo(NaN, 20, 30)).toBeCloseTo(0);
   });
 });
