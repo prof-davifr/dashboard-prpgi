@@ -64,6 +64,14 @@ Frontend estático (Chart.js + Leaflet + SheetJS) + pipeline ETL em `scripts/bui
 - [x] **`src/script.js` (1.618 linhas) dividido** em `core`/`filters`/`charts`/`maps`/`tables`/`cache`; `loadDashboard()` no helper de teste
 - [x] **Acessibilidade** — padrão ARIA de abas com navegação por setas, `aria-label` nos 32 gráficos, diálogos com trap e devolução de foco, `caption`/`scope` nas tabelas, `--accent-text` para contraste AA, `:focus-visible` global, skip link
 - [x] Verificação no Chrome via DevTools Protocol contra o `data.json` real: 31 KPIs, 14 gráficos, 151 marcadores, zero erros de console
+- [x] **Indicadores de pós-graduação alinhados à Plataforma Nilo Peçanha (PNP)** — termos e fórmulas do Guia de Referência Metodológica PNP 2020: ciclo de matrícula, ciclo encerrado, concluinte, evadido, retido, em curso; Conclusão Ciclo (CCiclo), Evasão Ciclo (EvCiclo), Retenção Ciclo (RCiclo) e Índice de Eficiência Acadêmica (IEA = CCiclo + (CCiclo/(CCiclo+EvCiclo))×RCiclo). Maturidade adota a "retenção crítica" PNP (prazo + 12 meses: Mestrado 24+12, Doutorado 48+12, Especialização 18+12). Novos `calculateIEAciclo()` + 4 testes. Modal de metodologia reescrito (Dicionário/Regras/Referências). Prazos-base: Portaria CAPES nº 76/2010 (24/48) e Resolução CNE/CES nº 1/2018 (360 h)
+
+### Apresentação — ajustes de rótulo e layout (ago/2026)
+- [x] **Gráfico "Distribuição Qualis" removido** — quase todo o volume caía em "Sem Estrato". O campo `Estrato` continua no `data.json` e na exportação; só o gráfico saiu (`index.html`, `src/charts.js`). Limite de canvas em `tests/acessibilidade.test.js` foi de 32 → 31 e `e2e/dashboard.smoke.spec.js` não espera mais `chart-cientifica-pie`
+- [x] **Os sete mapas em linha inteira** — cada mapa saiu da linha dividida; `.map-container.tall` (480 px) em `src/style.css`. O gráfico que sobra sozinho fica com meia largura, centrado (`.chart-row-solo`): a largura vai na linha, não no card, porque dentro do grid a porcentagem é cíclica com o `1fr` e vira `max-content`. Corrige de quebra o mapa da IC, que tinha 400 px dentro de um container de 350 px com `overflow: hidden`. Verificado no Chrome: 910×480 nas 7 abas
+- [x] **Rótulos da aba de IC corrigidos** — "Distribuição por Modalidade" → "Distribuição por Modalidade de Bolsa" (valores: PIBIC, PIBITI, PIBIC-EM…) e "Distribuição por Fomento" → "Distribuição por Fonte de Fomento" (valores: FAPESB, CNPq, IFBA-Reitoria, IFBA-Campus — as duas últimas não são agências)
+- [x] **Revisão de português** — "Todas Categorias" → "Todas as Categorias"; dois "Periodo" → "Período"; `aria-label` "Desfecho das Coortes" alinhado ao título "Desfecho dos Ciclos"; "Total Produções"/"Total Ativos" → "Total de …"; "Média Pesquisadores/Grupo" → "Média de Pesquisadores/Grupo"; `indísponivel` → `indisponível` em `src/cache.js`
+- [x] **"Desenho Insdustrial" corrigido na origem** — o tipo vinha grafado errado da exportação do Lattes e aparecia nos gráficos da aba de Inovação. `TIPO_FIX` em `scripts/build.js` normaliza no build (5 registros); `scripts/comparar_pi.js` continua aceitando a grafia antiga da planilha DINOV
 
 ---
 
@@ -79,6 +87,32 @@ Frontend estático (Chart.js + Leaflet + SheetJS) + pipeline ETL em `scripts/bui
 
 - [ ] **Automação dos scrapers** — Lattes/SUAP/DGP/IC ainda exigem exportação manual por campus (citado no slide 11 da apresentação). Pipeline CI/CD completo com os scrapers, agora que o CI base existe
 - [ ] **Deploy no CI** — a Action atual só valida; o GitHub Pages continua servindo `main` direto. Avaliar job de deploy explícito (`actions/deploy-pages`) para desacoplar publicação de push
+
+### 🟡 Alta — Automação da lista de grupos de pesquisa (SUAP → DGP)
+
+**Problema**: `scraper-DGP/lista de grupos de pesquisa.txt` é exportada manualmente do SUAP. Hoje o SUAP tem **210 grupos** e a lista antiga tem **197** — **13 grupos novos** ficariam de fora da varredura do DGP (ex.: Coletivo Tereza de Benguela, S3Lab, AfroITEC, GEPAH, NCTI, Casa de Memória Kijemi-Pataxó…). Nenhuma remoção.
+
+**Descobertas (inspeção de `https://suap.ifba.edu.br/admin/cnpq/grupopesquisa/?instituicao=IFBA`)**:
+- Django admin changelist, **uma página só** (210 linhas, sem paginação) — "Mostrando 210 Grupos de Pesquisa"
+- Tabela `#result_list tbody tr`: `td.field-get_url_grupo_pesquisa a` → ID DGP de 16 dígitos (link `dgp.cnpq.br/.../espelhogrupo/{ID}`); `td.field-descricao` → nome
+- Existe também `Exportar para XLS` (`?instituicao=IFBA&export_to_xls=1`), mesmo sistema de tarefas (`djtools`) do `scraper-SUAPPos`
+- Login SUAP: campos `#id_username`/`#id_password` + submit via JS (`document.querySelector('form').submit()`) — o clique no botão é interceptado por um overlay `<ul class="_main_menu">`
+- Formato de saída esperado pelo Coletor DGP (`parseTXT`): `ID\tNome` com ID de 16 dígitos (header `#\tNome` é ignorado)
+
+**Fase 1 — lista do SUAP** ✅
+- [x] `suap/listar_grupos.py` (Selenium) no repo `scraper-DGP`: login (submit via JS — o botão "Acessar" é interceptado por overlay) → GET do changelist → extrai ID+nome das 210 linhas → escreve `lista de grupos de pesquisa.txt` (`#\tNome` + `ID\tNome`)
+- [x] `.env` gitignored (`chmod 600`) com `SUAP_USER`/`SUAP_PASS` (senha atualizada em 21/08/2026 nos 3 `.env`: `scraper-DGP`, `scraper-SUAPCNPQ`, `scraper-SUAPPos`)
+- [x] Saída determinística: compara com a lista anterior e loga **13 novos** / **0 removidos**
+- [x] Alternativa ao HTML-scrape (`export_to_xls=1`) documentada como plano B — não foi necessária (HTML estável)
+
+**Fase 2 — Coletor DGP headless** ✅
+- [x] `cli/coletar.js` + `cli/parser.js` (Node + jsdom): port fiel do parser de `assets/app.js`; **sem proxy CORS** (fetch nativo acessa `dgp.cnpq.br` direto); concorrência/retry/timeout; gera `coletor_dgp_YYYY-MM-DD.csv` (19 colunas, mesmo formato). 1ª rodada: **210/210, 0 erros, ~165 s**
+
+**Fase 3 — encadear no pipeline** ✅
+- [x] `pipeline.sh` no `scraper-DGP` encadeia SUAP → DGP → copia CSV para `dashboard-prpgi/dados/scraper-DGP/` → `npm run build` + `validate` + `test`; flags `--skip-suap`/`--dashboard DIR`/`--commit`
+- [x] CI no `scraper-DGP` (`.github/workflows/ci.yml`): smoke do parser (fixture + lista versionada) + varredura real de 3 grupos (público, sem PII). O pipeline **completo** (SUAP + CSV com PII) roda localmente — GitHub Actions público não tem credenciais nem pode versionar o CSV
+- [x] `lista de grupos de pesquisa.txt` **versionada** (só ID + nome, sem PII); CSV continua gitignored (PII)
+- [x] Resultado: `data.json` regenerado com **`grupos=210`** (era 197), `validate` OK, **294 testes passando**
 
 ### 🟢 Média
 
