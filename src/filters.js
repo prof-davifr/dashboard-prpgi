@@ -75,8 +75,12 @@ function processData() {
     return rCampus === campusVal;
   });
 
-  // Post-graduation filter function
-  const filterPosGraduacao = arr => arr.filter(r => {
+  // Post-graduation filter function.
+  // `applyMaturedOnly = false` devolve o mesmo recorte sem o filtro de ciclo
+  // encerrado. Os KPIs de gestão (Matriculados, Em curso, Retidos) contam sobre
+  // toda a população do recorte: "Em curso" é, por definição, quem ainda não
+  // está em ciclo encerrado, então sobre o recorte filtrado daria sempre zero.
+  const filterPosGraduacao = (arr, applyMaturedOnly = true) => arr.filter(r => {
     const status = normalizePosGraduacaoStatus(r.situacao);
     const cohortYear = parseInt(r.ano, 10);
     const isMature = isPosGraduacaoMature(r);
@@ -95,7 +99,7 @@ function processData() {
     if (statusVal !== 'all' && status !== statusVal) return false;
 
     // Only cohorts mature enough to expect an outcome (default on)
-    if (maturedOnly && !isMature) return false;
+    if (applyMaturedOnly && maturedOnly && !isMature) return false;
 
     // Guard against invalid cohort year
     if (Number.isNaN(cohortYear)) return false;
@@ -132,6 +136,7 @@ function processData() {
     andamento: filterUnique(filterPeriodAndCampus(STATE.raw.andamento)),
     grupos: filterGroupsCampus(STATE.raw.grupos),
     posgraduacao: filterPosGraduacao(STATE.raw.posgraduacao),
+    posgraduacaoTodosCiclos: filterPosGraduacao(STATE.raw.posgraduacao, false),
     ic: filterPeriodAndCampus(STATE.raw.ic)
   };
 

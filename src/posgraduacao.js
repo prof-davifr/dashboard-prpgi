@@ -268,12 +268,17 @@ function ensureCanvasElements(ids) {
 
 function renderKPIsPosGraduacaoOverview(data) {
   const total = data.length;
-  const active = data.filter(r => normalizePosGraduacaoStatus(r.situacao) === 'Matriculado').length;
+  // Os KPIs de gestão contam sobre o recorte inteiro, sem o filtro de ciclo
+  // encerrado: "Em curso" é quem ainda não chegou ao ciclo encerrado, então
+  // sobre `data` filtrado daria sempre zero, e "Matriculados" repetiria
+  // "Retidos". Os indicadores por ciclo continuam sobre `matured`.
+  const todos = STATE.filtered.posgraduacaoTodosCiclos || data;
+  const active = todos.filter(r => normalizePosGraduacaoStatus(r.situacao) === 'Matriculado').length;
   const matured = data.filter(isPosGraduacaoMature);
   const maturedDone = matured.filter(r => normalizePosGraduacaoStatus(r.situacao) === 'Concluído').length;
   const maturedLost = matured.filter(r => isPosGraduacaoAttritionStatus(normalizePosGraduacaoStatus(r.situacao))).length;
   const pendingActive = matured.filter(r => normalizePosGraduacaoStatus(r.situacao) === 'Matriculado').length;
-  const regularFlow = data.filter(r => normalizePosGraduacaoStatus(r.situacao) === 'Matriculado' && !isPosGraduacaoMature(r)).length;
+  const regularFlow = todos.filter(r => normalizePosGraduacaoStatus(r.situacao) === 'Matriculado' && !isPosGraduacaoMature(r)).length;
   const programs = new Set(data.map(r => (r.curso || '').trim()).filter(Boolean)).size;
   const completionRate = matured.length > 0 ? (maturedDone / matured.length) * 100 : 0;
   const attritionRate = matured.length > 0 ? (maturedLost / matured.length) * 100 : 0;
@@ -281,7 +286,7 @@ function renderKPIsPosGraduacaoOverview(data) {
 
   const iea = calculateIEAciclo(completionRate, attritionRate, pendingActiveRate);
   $('kpi-posgraduacao-overview').innerHTML = `
-    ${buildPosGraduacaoKpi('Matriculados (M)', active, '', 'Alunos com status Matriculado no recorte atual.')}
+    ${buildPosGraduacaoKpi('Matriculados (M)', active, '', 'Alunos com status Matriculado no recorte atual. Igual a Em curso + Retidos; o filtro de ciclos encerrados não se aplica a este KPI.')}
     ${buildPosGraduacaoKpi('Em curso', regularFlow, '', 'Alunos matriculados dentro do prazo de integralização do ciclo (ainda não retidos).')}
     ${buildPosGraduacaoKpi('Retidos', pendingActive, '', 'Alunos matriculados além do prazo de integralização + 1 ano (retenção crítica, PNP).')}
     ${buildPosGraduacaoKpi('Ciclos encerrados', matured.length, 'Base dos indicadores por ciclo (PNP)', 'Ciclos de matrícula com término previsto há 1 ano ou mais: Mestrado>=24+12, Doutorado>=48+12, Especialização>=18+12 meses.')}
