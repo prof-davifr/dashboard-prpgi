@@ -197,6 +197,8 @@ describe('Cross-dataset consistency', () => {
     expect(CAMPUS_TO_CITY['SSA']).toBe('SALVADOR');
     expect(CAMPUS_TO_CITY['VC']).toBe('VITÓRIA DA CONQUISTA');
     expect(CAMPUS_TO_CITY['UBA']).toBe('UBAITABA');
-    expect(Object.keys(CAMPUS_TO_CITY).length).toBe(25);
+    // ITA entrou em ago/2026: o SUAP passou a listar Itabuna como campus.
+    expect(CAMPUS_TO_CITY['ITA']).toBe('ITABUNA');
+    expect(Object.keys(CAMPUS_TO_CITY).length).toBe(26);
   });
 });

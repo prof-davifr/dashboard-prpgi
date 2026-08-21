@@ -26,7 +26,7 @@ function normalizeText(s) {
 const CAMPUS_TO_CITY = {
   "BAR": "BARREIRAS", "BRU": "BRUMADO", "CAM": "CAMAÇARI", "CFO": "CAMPO FORMOSO",
   "EC": "EUCLIDES DA CUNHA", "EUN": "EUNÁPOLIS", "FS": "FEIRA DE SANTANA",
-  "ILH": "ILHÉUS", "IRE": "IRECÊ", "JAC": "JACOBINA", "JAG": "JAGUAQUARA",
+  "ILH": "ILHÉUS", "IRE": "IRECÊ", "ITA": "ITABUNA", "JAC": "JACOBINA", "JAG": "JAGUAQUARA",
   "JEQ": "JEQUIÉ", "LF": "LAURO DE FREITAS", "SAM": "SANTO AMARO", "SEA": "SEABRA",
   "SF": "SIMÕES FILHO", "UBA": "UBAITABA", "VAL": "VALENÇA", "VC": "VITÓRIA DA CONQUISTA",
   "SAJ": "SANTO ANTÔNIO DE JESUS", "JUA": "JUAZEIRO", "PA": "PAULO AFONSO",
@@ -36,7 +36,6 @@ const CAMPUS_TO_CITY = {
 // Coordenadas precisas das cidades do IFBA. As chaves são normalizadas
 // (maiúsculas sem acento) — lookupCoords normaliza a entrada antes da busca,
 // então não é preciso manter variantes acentuadas.
-// ITABUNA não é campus, mas aparece como Unidade em registros do DGP.
 const IFBA_COORDS = {
   "SALVADOR": [-12.9714, -38.5014],
   "FEIRA DE SANTANA": [-12.2666, -38.9666],
