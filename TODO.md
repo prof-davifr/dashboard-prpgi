@@ -73,6 +73,10 @@ Frontend estático (Chart.js + Leaflet + SheetJS) + pipeline ETL em `scripts/bui
 - [x] **Revisão de português** — "Todas Categorias" → "Todas as Categorias"; dois "Periodo" → "Período"; `aria-label` "Desfecho das Coortes" alinhado ao título "Desfecho dos Ciclos"; "Total Produções"/"Total Ativos" → "Total de …"; "Média Pesquisadores/Grupo" → "Média de Pesquisadores/Grupo"; `indísponivel` → `indisponível` em `src/cache.js`
 - [x] **"Desenho Insdustrial" corrigido na origem** — o tipo vinha grafado errado da exportação do Lattes e aparecia nos gráficos da aba de Inovação. `TIPO_FIX` em `scripts/build.js` normaliza no build (5 registros); `scripts/comparar_pi.js` continua aceitando a grafia antiga da planilha DINOV
 
+### Pós-graduação — KPI "Em curso" e teste E2E (ago/2026)
+- [x] **KPI "Em curso" ficava sempre em zero** — `regularFlow` contava `Matriculado && !isPosGraduacaoMature(r)` sobre `STATE.filtered.posgraduacao`, que o filtro "Ciclos encerrados" (ligado por padrão) já tinha reduzido só a registros maduros. A condição nunca era verdadeira. "Matriculados (M)" também repetia "Retidos" pelo mesmo motivo (395 = 395). Novo `STATE.filtered.posgraduacaoTodosCiclos` em `src/filters.js` aplica o mesmo recorte sem o filtro de ciclo; os três KPIs de gestão passam a contar sobre ele e a identidade M = Em curso + Retidos vale com o filtro ligado ou desligado (1141 = 746 + 395)
+- [x] **Teste E2E de pós-graduação corrigido** — falhava desde o commit ab5e215: exigia o primeiro KPI > 0 para VC, mas o campus só tem matrículas em Especialização 2024.2 e 2026.1, e nenhuma delas fecha pela regra de 18+12 meses. Novo helper `kpiValueByLabel` lê o KPI pelo rótulo, não pela posição, e o teste checa a identidade entre os três KPIs de gestão, o que independe da distribuição dos dados. 9/9 testes E2E passam
+
 ---
 
 ## 📋 Backlog

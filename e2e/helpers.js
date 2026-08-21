@@ -41,6 +41,24 @@ async function firstKpiValue(page, gridId) {
   return digits ? Number(digits) : 0;
 }
 
+/**
+ * Lê um KPI pelo rótulo visível, como número puro. Mais estável que a posição:
+ * a ordem dos cards muda quando um KPI entra ou sai.
+ */
+async function kpiValueByLabel(page, gridId, label) {
+  return page.evaluate(
+    ({ gridId, label }) => {
+      const card = [...document.querySelectorAll(`#${gridId} .kpi-card`)].find(
+        (c) => c.querySelector('.kpi-label') && c.querySelector('.kpi-label').textContent.trim() === label,
+      );
+      if (!card) return null;
+      const digits = card.querySelector('.kpi-value').textContent.replace(/[^\d]/g, '');
+      return digits ? Number(digits) : 0;
+    },
+    { gridId, label },
+  );
+}
+
 /** Conta circle markers (SVG paths) renderizados por um mapa Leaflet. */
 const mapCircles = (page, mapId) =>
   page.locator(`#${mapId} path.leaflet-interactive`).count();
@@ -55,4 +73,4 @@ async function chartHasData(page, canvasId) {
   }, canvasId);
 }
 
-module.exports = { gotoDashboard, collectJsErrors, firstKpiValue, mapCircles, chartHasData };
+module.exports = { gotoDashboard, collectJsErrors, firstKpiValue, kpiValueByLabel, mapCircles, chartHasData };

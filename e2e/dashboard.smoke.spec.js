@@ -6,7 +6,7 @@
  * e ausência de erros JS. Dados numéricos exatos ficam no Jest.
  */
 const { test, expect } = require('@playwright/test');
-const { gotoDashboard, collectJsErrors, firstKpiValue, mapCircles, chartHasData } = require('./helpers');
+const { gotoDashboard, collectJsErrors, firstKpiValue, kpiValueByLabel, mapCircles, chartHasData } = require('./helpers');
 
 const TABS = [
   { btn: '#aba-cientifica', panel: '#tab-cientifica', canvases: ['chart-cientifica-evolucao'] },
@@ -103,12 +103,21 @@ test('pós-graduação: filtros de gestão e subtabs funcionam', async ({ page }
   // Filtro de campus da pós populado com opções reais
   await expect(page.locator('#posgrad-campus-filter option')).not.toHaveCount(1);
 
-  const total = await firstKpiValue(page, 'kpi-posgraduacao-overview');
+  // Os KPIs de gestão (Matriculados = Em curso + Retidos) contam sobre o
+  // recorte inteiro: o filtro "Ciclos encerrados", ligado por padrão, não se
+  // aplica a eles. Ler por rótulo, e não por posição, e checar a identidade
+  // entre os três, deixa o teste independente da distribuição dos dados —
+  // um campus pode ter zero retidos sem que isso seja falha.
+  const kpi = (label) => kpiValueByLabel(page, 'kpi-posgraduacao-overview', label);
+
+  const total = await kpi('Matriculados (M)');
+  expect(total).toBeGreaterThan(0);
 
   await page.selectOption('#posgrad-campus-filter', 'VC');
-  const vc = await firstKpiValue(page, 'kpi-posgraduacao-overview');
+  const vc = await kpi('Matriculados (M)');
   expect(vc).toBeGreaterThan(0);
   expect(vc).toBeLessThanOrEqual(total);
+  expect(vc).toBe((await kpi('Em curso')) + (await kpi('Retidos')));
 
   // Subtabs
   await page.click('[data-subtarget="subtab-cursos"]');
