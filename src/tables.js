@@ -215,7 +215,7 @@ function exportTableToExcel(tableContainerId, filename) {
   if (!container) return;
   const table = container.querySelector('table');
   if (!table) {
-    alert("Tabela ainda não foi renderizada.");
+    alert("A tabela ainda não foi renderizada.");
     return;
   }
   

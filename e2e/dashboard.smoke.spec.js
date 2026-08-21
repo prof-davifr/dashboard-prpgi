@@ -9,7 +9,7 @@ const { test, expect } = require('@playwright/test');
 const { gotoDashboard, collectJsErrors, firstKpiValue, mapCircles, chartHasData } = require('./helpers');
 
 const TABS = [
-  { btn: '#aba-cientifica', panel: '#tab-cientifica', canvases: ['chart-cientifica-evolucao', 'chart-cientifica-pie'] },
+  { btn: '#aba-cientifica', panel: '#tab-cientifica', canvases: ['chart-cientifica-evolucao'] },
   { btn: '#aba-tecnica', panel: '#tab-tecnica', canvases: ['chart-tecnica-evolucao', 'chart-tecnica-pie'] },
   { btn: '#aba-inovacao', panel: '#tab-inovacao', canvases: ['chart-inovacao-evo-1', 'chart-inovacao-pie'] },
   { btn: '#aba-grupos', panel: '#tab-grupos', canvases: ['chart-grupos-evo-combined', 'chart-grupos-pie'] },

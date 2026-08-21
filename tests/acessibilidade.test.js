@@ -128,7 +128,7 @@ describe('gráficos', () => {
   const canvases = [...html.matchAll(/<canvas[^>]*>/g)].map(m => m[0]);
 
   test('todo canvas tem nome acessível — o Chart.js desenha em pixels', () => {
-    expect(canvases.length).toBeGreaterThanOrEqual(32);
+    expect(canvases.length).toBeGreaterThanOrEqual(31);
     canvases.forEach(c => {
       expect(c).toMatch(/role="img"/);
       expect(c).toMatch(/aria-label="Gráfico: .+"/);

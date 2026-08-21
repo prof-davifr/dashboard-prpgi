@@ -38,7 +38,7 @@ async function initDashboard() {
       }
     } catch (e) {
       // Fallback
-      console.warn('Cache API indísponivel, fallback para fetch tradicional', e);
+      console.warn('Cache API indisponível, fallback para fetch tradicional', e);
       const resp = await fetch(jsonUrl);
       if (!resp.ok) {
         $('loading-text').innerText = "Erro: data.json não encontrado. Execute 'npm run build' primeiro.";

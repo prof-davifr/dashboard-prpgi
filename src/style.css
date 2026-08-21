@@ -112,6 +112,12 @@ select:focus { border-color: var(--accent); white-space: nowrap;}
 .charts-container { display: flex; flex-direction: column; gap: 1.5rem; }
 .chart-row-full { width: 100%; }
 .chart-row-split { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; }
+/* Linha com um único gráfico: mantém a meia largura, centrada, em vez de
+   esticar o gráfico pela largura toda. A largura vai na linha, não no card:
+   dentro do grid a porcentagem é cíclica com o `1fr` e vira `max-content`. */
+@media (min-width: 767px) {
+  .chart-row-solo { width: calc(50% - 0.75rem); margin-left: auto; margin-right: auto; }
+}
 
 .chart-card { background: var(--card-bg); border-radius: var(--border-radius); padding: 1.25rem; border: 1px solid var(--border-color); box-shadow: var(--shadow); }
 .chart-title { font-size: 1rem; font-weight: 600; margin-bottom: 0.75rem; color: #444; text-align: center; }
@@ -130,6 +136,8 @@ select:focus { border-color: var(--accent); white-space: nowrap;}
 
 /* Leaflet Maps */
 .map-container { position: relative; height: 350px; width: 100%; border-radius: 8px; z-index: 0; border: 1px solid var(--border-color); overflow: hidden; }
+/* Mapa que ocupa a linha inteira: mais alto para acompanhar a largura. */
+.map-container.tall { height: 480px; }
 .map-expand-btn { position: absolute; top: 8px; right: 10px; z-index: 1000; width: 32px; height: 32px; border: none; background: rgba(255,255,255,0.9); border-radius: 6px; font-size: 1.2rem; color: #555; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(0,0,0,0.15); transition: all 0.2s; }
 .map-expand-btn:hover { background: var(--accent); color: white; transform: scale(1.1); }
 #map-grupos { height: 100%; width: 100%; }

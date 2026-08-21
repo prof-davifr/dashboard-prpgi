@@ -181,21 +181,6 @@ function renderChartsCientifica() {
   // Evolução Temporal (Todas as Categorias)
   processEvolucao(data, "chart-cientifica-evolucao");
   
-  // Pie: Qualis
-  const qualisMap = {};
-  data.forEach(r => {
-    let q = (r["Estrato"]||"").trim();
-    if(!q || q==="-" || q==="Não informado") q = "Sem Estrato";
-    qualisMap[q] = (qualisMap[q]||0)+1;
-  });
-  createChart("chart-cientifica-pie", "doughnut", {
-    labels: Object.keys(qualisMap),
-    datasets: [{
-      data: Object.values(qualisMap),
-      backgroundColor: ["#1B5E20","#4CAF50","#81C784","#C8E6C9","#FFCDD2","#EF9A9A","#F44336","#D32F2F","#263238","#B0BEC5"]
-    }]
-  });
-
   // Map - show relative values using total active researchers per campus
   const cientificaPesquisadores = getServidoresPerCampus(STATE.filtered.bibliografica);
   renderGenericMap(data, 'map-cientifica', "#4CAF50", "Produções Científicas", cientificaPesquisadores);
@@ -243,7 +228,7 @@ function renderKPIsTecnica() {
   }
 
   $('kpi-tecnica').innerHTML = `
-    <div class="kpi-card"><div class="kpi-label">Total Produções${labelSuffix}</div><div class="kpi-value">${totalDisplay}</div></div>
+    <div class="kpi-card"><div class="kpi-label">Total de Produções${labelSuffix}</div><div class="kpi-value">${totalDisplay}</div></div>
     <div class="kpi-card"><div class="kpi-label">Apresentações${labelSuffix}</div><div class="kpi-value">${apresentacoesDisplay}</div></div>
     <div class="kpi-card"><div class="kpi-label">Cursos/Eventos${labelSuffix}</div><div class="kpi-value">${cursosDisplay}</div></div>
   `;
@@ -348,7 +333,7 @@ function renderChartsGrupos() {
         order: 3
       },
       {
-        label: "Total Ativos (Acumulado)",
+        label: "Total de Ativos (Acumulado)",
         data: cumulativeData,
         type: "line",
         borderColor: "#2196F3",
@@ -382,7 +367,7 @@ function renderChartsGrupos() {
         position: 'right',
         title: {
           display: true,
-          text: 'Total Ativos Acumulado',
+          text: 'Total de Ativos Acumulado',
           color: '#555'
         },
         ticks: { color: '#555', beginAtZero: true },
@@ -431,8 +416,8 @@ function renderKPIsGrupos() {
     <div class="kpi-card"><div class="kpi-label">Em Preenchimento</div><div class="kpi-value">${emPreenchimento}</div></div>
     <div class="kpi-card"><div class="kpi-label">Não Atualizados (>12m)</div><div class="kpi-value">${naoAtualizado}</div></div>
     <div class="kpi-card"><div class="kpi-label">Aguardando Certificação</div><div class="kpi-value">${aguardandoCert}</div></div>
-    <div class="kpi-card"><div class="kpi-label">Média Pesquisadores/Grupo</div><div class="kpi-value">${avgPesq}</div></div>
-    <div class="kpi-card"><div class="kpi-label">Média Estudantes/Grupo</div><div class="kpi-value">${avgEst}</div></div>
+    <div class="kpi-card"><div class="kpi-label">Média de Pesquisadores/Grupo</div><div class="kpi-value">${avgPesq}</div></div>
+    <div class="kpi-card"><div class="kpi-label">Média de Estudantes/Grupo</div><div class="kpi-value">${avgEst}</div></div>
   `;
 }
 
