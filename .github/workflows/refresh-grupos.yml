@@ -1,0 +1,62 @@
+name: Atualizar grupos de pesquisa (DGP)
+
+on:
+  schedule:
+    # Semanalmente (segunda, 06:00 UTC) — grupos mudam devagar
+    - cron: '0 6 * * 1'
+  workflow_dispatch: {}  # botão "Run workflow" manual
+
+permissions:
+  contents: write  # para commitar data.json e dar push
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout do dashboard
+        uses: actions/checkout@v4
+
+      - name: Checkout do scraper-DGP (lista + CLI, público)
+        uses: actions/checkout@v4
+        with:
+          repository: prof-davifr/scraper-DGP
+          path: scraper-DGP
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Instalar dependências (dashboard)
+        run: npm ci
+
+      - name: Instalar dependências (scraper-DGP)
+        working-directory: scraper-DGP
+        run: npm ci
+
+      # 1. Varre o DGP/CNPq (público) a partir da lista versionada
+      - name: Coletar dados do DGP
+        working-directory: scraper-DGP
+        run: node cli/coletar.js --out /tmp/coletor.csv
+
+      # 2. Atualiza só o array `grupos` (e o meta DGP) do data.json.
+      #    Não toca nos demais datasets nem precisa dos arquivos brutos de dados/
+      - name: Atualizar data.json (grupos)
+        run: node scripts/refresh-grupos.js /tmp/coletor.csv
+
+      # 3. Testes (o refresh-grupos.js já valida a estrutura antes de escrever)
+      - name: Testes
+        run: npm test
+
+      # 4. Commita somente se o data.json realmente mudou
+      - name: Commit e push (se houver mudança)
+        run: |
+          if git diff --quiet data.json; then
+            echo "Sem mudanças nos grupos — nada a commitar."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data.json
+          git commit -m "chore(data): atualiza grupos de pesquisa (DGP) [auto]"
+          git push

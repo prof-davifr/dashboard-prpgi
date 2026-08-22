@@ -125,6 +125,11 @@ Frontend estático (Chart.js + Leaflet + SheetJS) + pipeline ETL em `scripts/bui
 - [x] `lista de grupos de pesquisa.txt` **versionada** (só ID + nome, sem PII); CSV continua gitignored (PII)
 - [x] Resultado: `data.json` regenerado com **`grupos=210`** (era 197), `validate` OK, **294 testes passando**
 
+**Automação contínua (GitHub Actions)** ✅
+- [x] `.github/workflows/refresh-grupos.yml` — roda **semanal** (seg 06:00 UTC) ou manual (`workflow_dispatch`): clona o `scraper-DGP` (lista + CLI públicos), varre o DGP, atualiza **só o array `grupos`** do `data.json` via `scripts/refresh-grupos.js` e commita/push (mesmo repo, sem PAT). Não precisa de credenciais nem expõe PII (só o `data.json` anonimizado vai ao git)
+- [x] `scripts/refresh-grupos.js` — reusa `parseCSV` do `build.js` + `validate` do `validate-data.js`; **não reescreve o arquivo se os grupos não mudaram** (evita diff espúrio)
+- [ ] **SUAP (lista de grupos) ainda é local** — login institucional + rede IFBA não cabem em runner público. Opções documentadas no README do `scraper-DGP`: **cron local** (`./pipeline.sh --commit`) ou **self-hosted runner** com o `.env`
+
 ### 🟢 Média
 
 - [ ] **Pré-agregação por campus/ano/área no build** — **medir antes de fazer.** Números de ago/2026 (desktop): `data.json` são 21 MB, mas o GitHub Pages já serve gzipado, então o download real é **2,2 MB**. O custo dominante é `JSON.parse` (346 ms), seguido do dedup (194 ms) e do filtro (63 ms) sobre 163 mil registros. Num celular mediano isso é ~1–1,7 s de parse, uma vez só (a Cache API evita repetir). A pré-agregação ataca CPU, não bytes — só compensa se o parse virar queixa real de usuário
