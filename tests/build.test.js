@@ -526,6 +526,19 @@ describe('data.json publicado não contém dados pessoais', () => {
     expect(vazando).toEqual([]);
   });
 
+  // A guarda acima só olha o nome do campo. O vazamento de ago/2026 veio pelo
+  // valor: `extrairVinculos` não casava SIAPE curto, e o QuerySet cru — com o
+  // nome completo dentro — ia para `Servidor`.
+  test.each(['bibliografica', 'tecnica', 'inovacao', 'concluidas', 'andamento'])(
+    '%s traz só a matrícula em Servidor, nunca o QuerySet cru',
+    (ds) => {
+      const sujos = data[ds]
+        .map(r => r.Servidor)
+        .filter(v => v !== null && v !== undefined && v !== '' && !/^\d+$/.test(String(v)));
+      expect(sujos.slice(0, 3)).toEqual([]);
+    }
+  );
+
   test('posgraduacao mantém dedupKey pseudonimizado (não a matrícula)', () => {
     const chaves = data.posgraduacao.map(r => r.dedupKey).filter(Boolean);
     expect(chaves.length).toBeGreaterThan(0);
@@ -741,6 +754,16 @@ describe('extrairVinculos', () => {
   test('sem nome legível, cai para os ids entre parênteses', () => {
     expect(extrairVinculos('<VinculoQueryset [(1234567) (Servidor)]>'))
       .toEqual([{ id: '1234567', nome: '' }]);
+  });
+
+  test('aceita SIAPE de 5 e 6 dígitos dos servidores antigos', () => {
+    expect(extrairVinculos(QS(['Davi Kiermes Tavares', '383087'], ['Elias Ramos', '26861'])))
+      .toEqual([
+        { id: '383087', nome: 'Davi Kiermes Tavares' },
+        { id: '26861', nome: 'Elias Ramos' }
+      ]);
+    expect(extrairVinculos('<VinculoQueryset [(383087) (Servidor)]>'))
+      .toEqual([{ id: '383087', nome: '' }]);
   });
 
   test('valor vazio devolve lista vazia', () => {

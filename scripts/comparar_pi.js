@@ -42,7 +42,7 @@ function buildServidorNameMap() {
         const rows = XLSX.utils.sheet_to_json(wb.Sheets[sheetName], { raw: false, defval: null });
         for (const row of rows) {
           if (row['Servidor']) {
-            const matches = [...row['Servidor'].matchAll(/Vinculo: (.+?) \((\d{7,})\)/g)];
+            const matches = [...row['Servidor'].matchAll(/Vinculo: (.+?) \((\d{5,})\)/g)];
             for (const m of matches) {
               const name = m[1].trim();
               const id = m[2];

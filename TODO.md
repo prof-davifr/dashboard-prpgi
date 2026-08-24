@@ -53,6 +53,7 @@ Frontend estático (Chart.js + Leaflet + SheetJS) + pipeline ETL em `scripts/bui
 - [x] **`npm run build` / `npm run validate`** — scripts criados e README/CLAUDE.md reconciliados
 - [x] **CI** — `.github/workflows/ci.yml` roda `npm test`, `npm run validate` (estrutura, códigos de campus, ausência de PII) e guarda de 50 MB por arquivo versionado
 - [x] Seção obsoleta de monorepo/subtree removida do `CLAUDE.md` (o repositório é independente)
+- [x] **Nomes de servidores vazavam no `data.json` público** — `extrairVinculos` exigia SIAPE de 7+ dígitos, e as linhas de matrícula curta (5 ou 6 dígitos, servidores antigos) caíam no fallback que copiava o `VinculoQueryset` cru para `Servidor`: 3.385 registros com o nome completo de 70 pessoas. Regex para `\d{5,}` em `build.js` e `comparar_pi.js`. Como efeito colateral, o fan-out de coautoria voltou a valer nessas linhas (+484 bibliográfica, +68 técnica, +14 inovação). A guarda LGPD de `tests/build.test.js` só olhava o nome do campo; agora também valida o valor de `Servidor`
 
 ### Fase 3 — dados, performance, estrutura e acessibilidade (ago/2026)
 - [x] **`docs/validacao/` não versiona mais dados pessoais** — a planilha da DINOV (com `INVENTORES`, `CONTATO`, `Whatsapp`) foi para `dados/validacao/`; `comparar_pi.js` gera relatório público (sem nomes) e interno (completo, não versionado), abortando se PII escapar para o público. `.md`/`.html`/`.pdf` antigos purgados do histórico
