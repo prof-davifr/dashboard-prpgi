@@ -29,11 +29,20 @@ jobs:
       - name: Checkout do dashboard
         uses: actions/checkout@v4
 
-      - name: Checkout do scraper-INPI
+      # O scraper-INPI é privado, e este repositório é público: o GITHUB_TOKEN
+      # padrão não alcança outro repositório. É preciso um Personal Access Token
+      # com escopo de leitura em `prof-davifr/scraper-INPI`, guardado no segredo
+      # SCRAPER_INPI_TOKEN deste repositório.
+      #
+      # Sem o segredo, este passo falha com "Repository not found" — e é só isso
+      # que quebra. O robô continua rodando na máquina local, e o CSV vale o
+      # mesmo nos dois caminhos.
+      - name: Checkout do scraper-INPI (privado)
         uses: actions/checkout@v4
         with:
           repository: prof-davifr/scraper-INPI
           path: scraper-INPI
+          token: ${{ secrets.SCRAPER_INPI_TOKEN }}
 
       - uses: actions/setup-node@v4
         with:

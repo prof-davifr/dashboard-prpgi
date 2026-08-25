@@ -387,6 +387,13 @@ Mensal, pelo workflow `.github/workflows/refresh-inovacao.yml` (dia 1, 07:00
 UTC), ou à mão por `workflow_dispatch`. O robô roda igual na máquina local, e o
 CSV vale o mesmo nos dois caminhos.
 
+**O workflow depende do segredo `SCRAPER_INPI_TOKEN`.** O `scraper-INPI` é um
+repositório privado e este é público, então o `GITHUB_TOKEN` padrão não alcança
+o checkout. É preciso um Personal Access Token com leitura em
+`prof-davifr/scraper-INPI`, guardado nos segredos deste repositório. Sem ele o
+passo de checkout falha com "Repository not found" — e é só isso que quebra: a
+coleta local continua valendo.
+
 ---
 
 ## 3. Pipeline de Build (`scripts/build.js`)

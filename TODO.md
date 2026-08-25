@@ -76,6 +76,7 @@ Frontend estático (Chart.js + Leaflet + SheetJS) + pipeline ETL em `scripts/bui
 - [x] **`SHEET_MAP` sem `registros e patentes`** — o `npm run build` passa a emitir `inovacao: []`. `SHEET_MAP_DETALHADO` mantém a aba para o `data-groups.json`. Ordem obrigatória documentada no README e no CLAUDE.md
 - [x] **Frontend** — KPI "Sem Campus Atribuído"; gráfico "Marcas e Outros" renomeado para "Marcas e Desenhos Industriais" (estava vazio, porque o Lattes não trazia marca); modal de metodologia com a fonte INPI e a explicação da queda dos números
 - [x] **Workflow `refresh-inovacao.yml`** — mensal (dia 1, 07:00 UTC) mais `workflow_dispatch`, no padrão do `refresh-grupos.yml`
+- [ ] **Segredo `SCRAPER_INPI_TOKEN`** — o `scraper-INPI` é privado e o dashboard é público, então o `actions/checkout` do `refresh-inovacao.yml` precisa de um PAT com leitura naquele repositório. Sem o segredo, só o workflow quebra; a coleta local continua valendo
 - [ ] **Bases que o INPI não permite consultar** — topografia de circuitos integrados ("no momento não há Consulta", diz o próprio INPI) e contratos de transferência de tecnologia (exige login com usuário e senha). Nenhuma tinha registro no dashboard. Reavaliar se a PRPGI obtiver credencial do pePI
 
 ### Apresentação — ajustes de rótulo e layout (ago/2026)
