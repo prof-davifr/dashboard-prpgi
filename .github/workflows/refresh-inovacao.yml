@@ -1,0 +1,92 @@
+name: Atualizar propriedade intelectual (INPI)
+
+# Coleta as quatro bases do INPI (patentes, programas de computador, desenhos
+# industriais e marcas) pelo CNPJ do IFBA e do CEFET-BA, e substitui o array
+# `inovacao` do data.json.
+#
+# Diferente do refresh-grupos.yml, este workflow não é indispensável: o robô
+# roda igual na máquina local, e o CSV vale o mesmo nos dois caminhos. Se o
+# pePI bloquear as faixas de IP do GitHub Actions, é só rodar
+# `node cli/coletar.js` local e chamar o refresh à mão.
+
+on:
+  schedule:
+    # Mensal (dia 1, 07:00 UTC) — a base do INPI muda devagar, e a coleta faz
+    # cerca de 170 requisições ao pePI, uma a cada 1,5 s.
+    - cron: '0 7 1 * *'
+  workflow_dispatch: {}
+
+permissions:
+  contents: write  # para commitar data.json e dar push
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    # A coleta leva ~7 min em condição normal. O teto evita que uma sessão
+    # pendurada no pePI segure o runner por horas.
+    timeout-minutes: 30
+    steps:
+      - name: Checkout do dashboard
+        uses: actions/checkout@v4
+
+      - name: Checkout do scraper-INPI
+        uses: actions/checkout@v4
+        with:
+          repository: prof-davifr/scraper-INPI
+          path: scraper-INPI
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Instalar dependências (dashboard)
+        run: npm ci
+
+      - name: Instalar dependências (scraper-INPI)
+        working-directory: scraper-INPI
+        run: npm ci
+
+      # Testes do robô contra as amostras de HTML versionadas. Não tocam a rede.
+      - name: Testes do scraper-INPI
+        working-directory: scraper-INPI
+        run: npm test
+
+      # 1. Coleta. O coletor aborta se alguma base vier abaixo do piso conhecido
+      #    — layout novo, sessão quebrada ou bloqueio de IP. Sem isso, uma coleta
+      #    vazia esvaziaria a aba Inovação em produção.
+      - name: Coletar as bases do INPI
+        working-directory: scraper-INPI
+        run: node cli/coletar.js --out /tmp/inpi.csv
+
+      # 2. Substitui só o array `inovacao` e o meta do INPI. Não toca nos demais
+      #    datasets nem precisa dos arquivos brutos de dados/, que são gitignored.
+      #    Sem dados/, a atribuição de campus vem do inpi-campus.json versionado.
+      - name: Atualizar data.json (inovacao)
+        run: node scripts/refresh-inovacao.js /tmp/inpi.csv
+
+      # 3. O refresh-inovacao.js já validou a estrutura antes de escrever.
+      - name: Testes do dashboard
+        run: npm test
+
+      - name: Validar estrutura e ausência de PII no data.json
+        run: npm run validate
+
+      # 4. Commita somente se o data.json realmente mudou.
+      - name: Commit e push (se houver mudança)
+        run: |
+          if git diff --quiet data.json inpi-campus.json; then
+            echo "Sem mudanças na propriedade intelectual — nada a commitar."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data.json inpi-campus.json
+          git commit -m "chore(data): atualiza propriedade intelectual (INPI) [auto]"
+          git push
+
+      # O CSV traz nomes de autores por extenso. Ele não é versionado e não pode
+      # sobrar como artefato do runner.
+      - name: Apagar o CSV com nomes
+        if: always()
+        run: rm -f /tmp/inpi.csv

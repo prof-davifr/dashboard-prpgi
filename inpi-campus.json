@@ -1,0 +1,1344 @@
+{
+ "_leia_me": "Gerado por scripts/refresh-inovacao.js. Liga o número INPI ao servidor e ao campus, para que o GitHub Actions atribua campus sem os arquivos brutos de dados/, que são gitignored.",
+ "geradoEm": "2026-08-25T01:18:25.785Z",
+ "vinculos": {
+  "117812": [
+   {
+    "Servidor": "3303591",
+    "campus": "SSA"
+   }
+  ],
+  "133456": [
+   {
+    "Servidor": "1178075",
+    "campus": "SSA"
+   }
+  ],
+  "11015861": [
+   {
+    "Servidor": "268627",
+    "campus": "SSA"
+   },
+   {
+    "Servidor": "1174014",
+    "campus": "SSA"
+   },
+   {
+    "Servidor": "282497",
+    "campus": "SSA"
+   }
+  ],
+  "11066121": [
+   {
+    "Servidor": "1141354",
+    "campus": "SSA"
+   }
+  ],
+  "1020240100972": [
+   {
+    "Servidor": "1495536",
+    "campus": "SSA"
+   }
+  ],
+  "1020220244669": [
+   {
+    "Servidor": "1802713",
+    "campus": "SSA"
+   }
+  ],
+  "1020220133204": [
+   {
+    "Servidor": "2164135",
+    "campus": "SF"
+   }
+  ],
+  "1020200155067": [
+   {
+    "Servidor": "1929527",
+    "campus": "IRE"
+   }
+  ],
+  "1020200139959": [
+   {
+    "Servidor": "1189954",
+    "campus": "CAM"
+   },
+   {
+    "Servidor": "1194508",
+    "campus": "SSA"
+   }
+  ],
+  "2020190141129": [
+   {
+    "Servidor": "1098511",
+    "campus": "LF"
+   },
+   {
+    "Servidor": "1189954",
+    "campus": "CAM"
+   },
+   {
+    "Servidor": "268627",
+    "campus": "SSA"
+   }
+  ],
+  "1020190001399": [
+   {
+    "Servidor": "1929527",
+    "campus": "SSA"
+   }
+  ],
+  "1020160124727": [
+   {
+    "Servidor": "282497",
+    "campus": "LF"
+   }
+  ],
+  "1020150331754": [
+   {
+    "Servidor": "1881227",
+    "campus": "BRU"
+   }
+  ],
+  "1020150262019": [
+   {
+    "Servidor": "1189954",
+    "campus": "SSA"
+   },
+   {
+    "Servidor": "1174014",
+    "campus": "SSA"
+   }
+  ],
+  "1020150197748": [
+   {
+    "Servidor": "1174014",
+    "campus": "SSA"
+   }
+  ],
+  "1020140193898": [
+   {
+    "Servidor": "1881227",
+    "campus": "SF"
+   },
+   {
+    "Servidor": "2739316",
+    "campus": "SF"
+   }
+  ],
+  "1020140185003": [
+   {
+    "Servidor": "1881227",
+    "campus": "SF"
+   }
+  ],
+  "1020130288519": [
+   {
+    "Servidor": "1768397",
+    "campus": "SSA"
+   }
+  ],
+  "1020120192306": [
+   {
+    "Servidor": "1174014",
+    "campus": "SSA"
+   },
+   {
+    "Servidor": "1189954",
+    "campus": "SSA"
+   },
+   {
+    "Servidor": "268627",
+    "campus": "SSA"
+   },
+   {
+    "Servidor": "1098511",
+    "campus": "SSA"
+   }
+  ],
+  "1020120077639": [
+   {
+    "Servidor": "1189954",
+    "campus": "SSA"
+   },
+   {
+    "Servidor": "1174014",
+    "campus": "SSA"
+   }
+  ],
+  "09254234": [
+   {
+    "Servidor": "1301620",
+    "campus": "EUN"
+   }
+  ],
+  "08057230": [
+   {
+    "Servidor": "1098511",
+    "campus": "LF"
+   },
+   {
+    "Servidor": "1189954",
+    "campus": "CAM"
+   }
+  ],
+  "5120260065976": [
+   {
+    "Servidor": "1529222",
+    "campus": "FS"
+   }
+  ],
+  "5120260065364": [
+   {
+    "Servidor": "1529222",
+    "campus": "FS"
+   }
+  ],
+  "5120260057558": [
+   {
+    "Servidor": "1283953",
+    "campus": "VAL"
+   }
+  ],
+  "5120260057418": [
+   {
+    "Servidor": "1966100",
+    "campus": "IRE"
+   }
+  ],
+  "5120260049610": [
+   {
+    "Servidor": "1529222",
+    "campus": "FS"
+   }
+  ],
+  "5120260046530": [
+   {
+    "Servidor": "1334407",
+    "campus": "SSA"
+   }
+  ],
+  "5120260046513": [
+   {
+    "Servidor": "1309193",
+    "campus": "SSA"
+   }
+  ],
+  "5120260046505": [
+   {
+    "Servidor": "2419000",
+    "campus": "SSA"
+   }
+  ],
+  "5120260035252": [
+   {
+    "Servidor": "2419000",
+    "campus": "SSA"
+   }
+  ],
+  "5120260035090": [
+   {
+    "Servidor": "1737324",
+    "campus": "CAM"
+   },
+   {
+    "Servidor": "2148475",
+    "campus": "BAR"
+   },
+   {
+    "Servidor": "2023444",
+    "campus": "CAM"
+   }
+  ],
+  "5120260021383": [
+   {
+    "Servidor": "2148475",
+    "campus": "LF"
+   }
+  ],
+  "5120250070950": [
+   {
+    "Servidor": "3074421",
+    "campus": "SEA"
+   }
+  ],
+  "5120250070098": [
+   {
+    "Servidor": "2188317",
+    "campus": "CAM"
+   },
+   {
+    "Servidor": "2148475",
+    "campus": "CAM"
+   },
+   {
+    "Servidor": "1737324",
+    "campus": "CAM"
+   }
+  ],
+  "5120250070047": [
+   {
+    "Servidor": "1246368",
+    "campus": "LF"
+   }
+  ],
+  "5120250070039": [
+   {
+    "Servidor": "1309694",
+    "campus": "VAL"
+   },
+   {
+    "Servidor": "2129026",
+    "campus": "LF"
+   },
+   {
+    "Servidor": "2785081",
+    "campus": "SSA"
+   },
+   {
+    "Servidor": "2221655",
+    "campus": "FS"
+   },
+   {
+    "Servidor": "3272198",
+    "campus": "BAR"
+   }
+  ],
+  "5120250070012": [
+   {
+    "Servidor": "1309694",
+    "campus": "VAL"
+   },
+   {
+    "Servidor": "2129026",
+    "campus": "LF"
+   },
+   {
+    "Servidor": "2785081",
+    "campus": "SSA"
+   },
+   {
+    "Servidor": "2221655",
+    "campus": "FS"
+   },
+   {
+    "Servidor": "3272198",
+    "campus": "BAR"
+   }
+  ],
+  "5120250066490": [
+   {
+    "Servidor": "1309694",
+    "campus": "VAL"
+   },
+   {
+    "Servidor": "2129026",
+    "campus": "LF"
+   },
+   {
+    "Servidor": "2221655",
+    "campus": "FS"
+   },
+   {
+    "Servidor": "3272198",
+    "campus": "BAR"
+   }
+  ],
+  "5120250065566": [
+   {
+    "Servidor": "1529222",
+    "campus": "FS"
+   }
+  ],
+  "5120250065558": [
+   {
+    "Servidor": "1529222",
+    "campus": "FS"
+   }
+  ],
+  "5120250065507": [
+   {
+    "Servidor": "1966100",
+    "campus": "VC"
+   }
+  ],
+  "5120250058438": [
+   {
+    "Servidor": "1309694",
+    "campus": "VAL"
+   },
+   {
+    "Servidor": "2129026",
+    "campus": "LF"
+   },
+   {
+    "Servidor": "2221655",
+    "campus": "FS"
+   },
+   {
+    "Servidor": "3272198",
+    "campus": "BAR"
+   }
+  ],
+  "5120250058420": [
+   {
+    "Servidor": "2129026",
+    "campus": "VAL"
+   }
+  ],
+  "5120250058381": [
+   {
+    "Servidor": "1309694",
+    "campus": "VAL"
+   },
+   {
+    "Servidor": "2129026",
+    "campus": "LF"
+   },
+   {
+    "Servidor": "2785081",
+    "campus": "SSA"
+   },
+   {
+    "Servidor": "2221655",
+    "campus": "FS"
+   },
+   {
+    "Servidor": "3272198",
+    "campus": "BAR"
+   }
+  ],
+  "5120250058365": [
+   {
+    "Servidor": "2129026",
+    "campus": "VAL"
+   }
+  ],
+  "5120250054661": [
+   {
+    "Servidor": "1246368",
+    "campus": "LF"
+   },
+   {
+    "Servidor": "2148475",
+    "campus": "LF"
+   }
+  ],
+  "5120250051352": [
+   {
+    "Servidor": "2129026",
+    "campus": "VAL"
+   }
+  ],
+  "5120250051310": [
+   {
+    "Servidor": "1367321",
+    "campus": "SSA"
+   }
+  ],
+  "5120250049820": [
+   {
+    "Servidor": "1584863",
+    "campus": "SAM"
+   },
+   {
+    "Servidor": "1802713",
+    "campus": "SAM"
+   }
+  ],
+  "5120250049803": [
+   {
+    "Servidor": "2129026",
+    "campus": "VAL"
+   }
+  ],
+  "5120250049790": [
+   {
+    "Servidor": "2129026",
+    "campus": "VAL"
+   }
+  ],
+  "5120250048912": [
+   {
+    "Servidor": "2129026",
+    "campus": "VAL"
+   }
+  ],
+  "5120250047436": [
+   {
+    "Servidor": "2129026",
+    "campus": "VAL"
+   }
+  ],
+  "5120250047410": [
+   {
+    "Servidor": "2129026",
+    "campus": "VAL"
+   }
+  ],
+  "5120250047363": [
+   {
+    "Servidor": "2129026",
+    "campus": "VAL"
+   }
+  ],
+  "5120250047347": [
+   {
+    "Servidor": "2129026",
+    "campus": "VAL"
+   }
+  ],
+  "5120250045204": [
+   {
+    "Servidor": "1618687",
+    "campus": "ILH"
+   }
+  ],
+  "5120250044755": [
+   {
+    "Servidor": "1983112",
+    "campus": "FS"
+   },
+   {
+    "Servidor": "2419000",
+    "campus": "FS"
+   },
+   {
+    "Servidor": "2865952",
+    "campus": "FS"
+   }
+  ],
+  "5120250044739": [
+   {
+    "Servidor": "2584698",
+    "campus": "SSA"
+   }
+  ],
+  "5120250041381": [
+   {
+    "Servidor": "1836152",
+    "campus": "ILH"
+   },
+   {
+    "Servidor": "1618687",
+    "campus": "ILH"
+   }
+  ],
+  "5120250039727": [
+   {
+    "Servidor": "1246368",
+    "campus": "LF"
+   },
+   {
+    "Servidor": "2148475",
+    "campus": "LF"
+   }
+  ],
+  "5120250030363": [
+   {
+    "Servidor": "1965941",
+    "campus": "VC"
+   }
+  ],
+  "5120250030053": [
+   {
+    "Servidor": "1433732",
+    "campus": "SSA"
+   }
+  ],
+  "5120250023634": [
+   {
+    "Servidor": "1877826",
+    "campus": "JAC"
+   },
+   {
+    "Servidor": "2877826",
+    "campus": "JAC"
+   },
+   {
+    "Servidor": "1174014",
+    "campus": "SSA"
+   }
+  ],
+  "5120250021542": [
+   {
+    "Servidor": "1246368",
+    "campus": "LF"
+   }
+  ],
+  "5120250017570": [
+   {
+    "Servidor": "1877826",
+    "campus": "JAC"
+   },
+   {
+    "Servidor": "1762481",
+    "campus": "JAC"
+   },
+   {
+    "Servidor": "2877826",
+    "campus": "JAC"
+   }
+  ],
+  "5120240051384": [
+   {
+    "Servidor": "365793",
+    "campus": "SSA"
+   }
+  ],
+  "5120240048677": [
+   {
+    "Servidor": "1625546",
+    "campus": "SSA"
+   }
+  ],
+  "5120240048103": [
+   {
+    "Servidor": "1174014",
+    "campus": "JAC"
+   },
+   {
+    "Servidor": "1625546",
+    "campus": "BRU"
+   }
+  ],
+  "5120240047352": [
+   {
+    "Servidor": "1493986",
+    "campus": "SSA"
+   },
+   {
+    "Servidor": "1625546",
+    "campus": "BRU"
+   }
+  ],
+  "5120240046291": [
+   {
+    "Servidor": "1060428",
+    "campus": "FS"
+   },
+   {
+    "Servidor": "2157230",
+    "campus": "FS"
+   }
+  ],
+  "5120240046003": [
+   {
+    "Servidor": "3074421",
+    "campus": "SEA"
+   }
+  ],
+  "5120240046046": [
+   {
+    "Servidor": "2182174",
+    "campus": "EUN"
+   }
+  ],
+  "5120240045830": [
+   {
+    "Servidor": "3273237",
+    "campus": "REI"
+   }
+  ],
+  "5120240039783": [
+   {
+    "Servidor": "1631148",
+    "campus": "FS"
+   },
+   {
+    "Servidor": "1217448",
+    "campus": "FS"
+   }
+  ],
+  "5120240038507": [
+   {
+    "Servidor": "1222480",
+    "campus": "ILH"
+   },
+   {
+    "Servidor": "2222480",
+    "campus": "ILH"
+   },
+   {
+    "Servidor": "3273237",
+    "campus": "ILH"
+   }
+  ],
+  "5120240035613": [
+   {
+    "Servidor": "2584698",
+    "campus": "SSA"
+   }
+  ],
+  "5120240027386": [
+   {
+    "Servidor": "1246368",
+    "campus": "LF"
+   },
+   {
+    "Servidor": "1287486",
+    "campus": "LF"
+   },
+   {
+    "Servidor": "2148475",
+    "campus": "LF"
+   }
+  ],
+  "5120240018131": [
+   {
+    "Servidor": "2693067",
+    "campus": "LF"
+   }
+  ],
+  "5120240016970": [
+   {
+    "Servidor": "2419000",
+    "campus": "SSA"
+   },
+   {
+    "Servidor": "1919552",
+    "campus": "SSA"
+   }
+  ],
+  "5120240012095": [
+   {
+    "Servidor": "1375635",
+    "campus": "FS"
+   },
+   {
+    "Servidor": "1548636",
+    "campus": "FS"
+   },
+   {
+    "Servidor": "2865952",
+    "campus": "FS"
+   }
+  ],
+  "5120240008306": [
+   {
+    "Servidor": "1762481",
+    "campus": "SSA"
+   }
+  ],
+  "5120240003606": [
+   {
+    "Servidor": "2419000",
+    "campus": "SSA"
+   },
+   {
+    "Servidor": "282497",
+    "campus": "SSA"
+   }
+  ],
+  "5120240002260": [
+   {
+    "Servidor": "1625546",
+    "campus": "EC"
+   },
+   {
+    "Servidor": "3388674",
+    "campus": "EC"
+   }
+  ],
+  "5120230040096": [
+   {
+    "Servidor": "1625546",
+    "campus": "SSA"
+   }
+  ],
+  "5120230040088": [
+   {
+    "Servidor": "1246368",
+    "campus": "LF"
+   },
+   {
+    "Servidor": "1287486",
+    "campus": "LF"
+   },
+   {
+    "Servidor": "2148475",
+    "campus": "LF"
+   }
+  ],
+  "5120230036048": [
+   {
+    "Servidor": "1625546",
+    "campus": "SSA"
+   }
+  ],
+  "5120230036030": [
+   {
+    "Servidor": "1246368",
+    "campus": "LF"
+   }
+  ],
+  "5120230030252": [
+   {
+    "Servidor": "1625546",
+    "campus": "SSA"
+   }
+  ],
+  "5120230024430": [
+   {
+    "Servidor": "2419000",
+    "campus": "SSA"
+   }
+  ],
+  "5120230024376": [
+   {
+    "Servidor": "1625546",
+    "campus": "SSA"
+   }
+  ],
+  "5120230019950": [
+   {
+    "Servidor": "1367321",
+    "campus": "SSA"
+   }
+  ],
+  "5120230011908": [
+   {
+    "Servidor": "1991887",
+    "campus": "LF"
+   }
+  ],
+  "5120230011347": [
+   {
+    "Servidor": "2419000",
+    "campus": "SSA"
+   },
+   {
+    "Servidor": "1919552",
+    "campus": "SSA"
+   }
+  ],
+  "5120230007927": [
+   {
+    "Servidor": "268787",
+    "campus": "SF"
+   }
+  ],
+  "5120230002275": [
+   {
+    "Servidor": "1966723",
+    "campus": "FS"
+   },
+   {
+    "Servidor": "1667861",
+    "campus": "FS"
+   },
+   {
+    "Servidor": "1548636",
+    "campus": "FS"
+   },
+   {
+    "Servidor": "2865952",
+    "campus": "FS"
+   }
+  ],
+  "5120230002259": [
+   {
+    "Servidor": "2866231",
+    "campus": "LF"
+   },
+   {
+    "Servidor": "1667861",
+    "campus": "LF"
+   }
+  ],
+  "5120220031795": [
+   {
+    "Servidor": "2419000",
+    "campus": "SSA"
+   }
+  ],
+  "5120220025779": [
+   {
+    "Servidor": "1625546",
+    "campus": "SSA"
+   }
+  ],
+  "5120220019809": [
+   {
+    "Servidor": "1493986",
+    "campus": "SSA"
+   },
+   {
+    "Servidor": "1625546",
+    "campus": "SSA"
+   }
+  ],
+  "5120220012375": [
+   {
+    "Servidor": "3069804",
+    "campus": "EUN"
+   },
+   {
+    "Servidor": "1958920",
+    "campus": "EUN"
+   },
+   {
+    "Servidor": "2148475",
+    "campus": "EUN"
+   },
+   {
+    "Servidor": "1564971",
+    "campus": "EUN"
+   }
+  ],
+  "5120220009110": [
+   {
+    "Servidor": "3518421",
+    "campus": "JAG"
+   },
+   {
+    "Servidor": "1958920",
+    "campus": "JAG"
+   },
+   {
+    "Servidor": "2148475",
+    "campus": "JAG"
+   },
+   {
+    "Servidor": "1564971",
+    "campus": "JAG"
+   }
+  ],
+  "5120220008513": [
+   {
+    "Servidor": "1667861",
+    "campus": "LF"
+   }
+  ],
+  "5120220007770": [
+   {
+    "Servidor": "2419000",
+    "campus": "SSA"
+   }
+  ],
+  "5120220002779": [
+   {
+    "Servidor": "1174014",
+    "campus": "JAC"
+   },
+   {
+    "Servidor": "2877826",
+    "campus": "JAC"
+   },
+   {
+    "Servidor": "1877826",
+    "campus": "JAC"
+   },
+   {
+    "Servidor": "1174005",
+    "campus": "JAC"
+   }
+  ],
+  "5120220002752": [
+   {
+    "Servidor": "1174014",
+    "campus": "JAC"
+   },
+   {
+    "Servidor": "2877826",
+    "campus": "JAC"
+   },
+   {
+    "Servidor": "1877826",
+    "campus": "JAC"
+   },
+   {
+    "Servidor": "1174005",
+    "campus": "JAC"
+   }
+  ],
+  "5120220002736": [
+   {
+    "Servidor": "1174014",
+    "campus": "JAC"
+   },
+   {
+    "Servidor": "2877826",
+    "campus": "JAC"
+   },
+   {
+    "Servidor": "1877826",
+    "campus": "JAC"
+   },
+   {
+    "Servidor": "1174005",
+    "campus": "JAC"
+   }
+  ],
+  "5120220002728": [
+   {
+    "Servidor": "1174014",
+    "campus": "JAC"
+   },
+   {
+    "Servidor": "2877826",
+    "campus": "JAC"
+   },
+   {
+    "Servidor": "1877826",
+    "campus": "JAC"
+   },
+   {
+    "Servidor": "1174005",
+    "campus": "JAC"
+   }
+  ],
+  "5120210031296": [
+   {
+    "Servidor": "1625546",
+    "campus": "SSA"
+   }
+  ],
+  "5120210027035": [
+   {
+    "Servidor": "1174014",
+    "campus": "SSA"
+   }
+  ],
+  "5120210025440": [
+   {
+    "Servidor": "2419000",
+    "campus": "SSA"
+   },
+   {
+    "Servidor": "1704215",
+    "campus": "SSA"
+   },
+   {
+    "Servidor": "2584698",
+    "campus": "SSA"
+   }
+  ],
+  "5120210023366": [
+   {
+    "Servidor": "1625546",
+    "campus": "SSA"
+   }
+  ],
+  "5120210018753": [
+   {
+    "Servidor": "2584698",
+    "campus": "SSA"
+   },
+   {
+    "Servidor": "1625546",
+    "campus": "SSA"
+   }
+  ],
+  "5120210012143": [
+   {
+    "Servidor": "2135406",
+    "campus": "SSA"
+   }
+  ],
+  "5120210011074": [
+   {
+    "Servidor": "1367321",
+    "campus": "SSA"
+   },
+   {
+    "Servidor": "2584698",
+    "campus": "SSA"
+   }
+  ],
+  "5120200027954": [
+   {
+    "Servidor": "1667861",
+    "campus": "LF"
+   }
+  ],
+  "5120200022936": [
+   {
+    "Servidor": "2419000",
+    "campus": "SSA"
+   }
+  ],
+  "5120200020682": [
+   {
+    "Servidor": "1584862",
+    "campus": "CAM"
+   }
+  ],
+  "5120200019102": [
+   {
+    "Servidor": "1667861",
+    "campus": "LF"
+   }
+  ],
+  "5120200006370": [
+   {
+    "Servidor": "1367321",
+    "campus": "SSA"
+   }
+  ],
+  "5120200002838": [
+   {
+    "Servidor": "1737324",
+    "campus": "CAM"
+   }
+  ],
+  "5120200002820": [
+   {
+    "Servidor": "1737324",
+    "campus": "CAM"
+   }
+  ],
+  "5120200002528": [
+   {
+    "Servidor": "1334407",
+    "campus": "SSA"
+   },
+   {
+    "Servidor": "2419000",
+    "campus": "SSA"
+   },
+   {
+    "Servidor": "1919552",
+    "campus": "SSA"
+   }
+  ],
+  "5120190026365": [
+   {
+    "Servidor": "1174014",
+    "campus": "SSA"
+   },
+   {
+    "Servidor": "1625546",
+    "campus": "SSA"
+   },
+   {
+    "Servidor": "2584698",
+    "campus": "SSA"
+   }
+  ],
+  "5120190026357": [
+   {
+    "Servidor": "1174014",
+    "campus": "SSA"
+   },
+   {
+    "Servidor": "1625546",
+    "campus": "SSA"
+   },
+   {
+    "Servidor": "2584698",
+    "campus": "SSA"
+   }
+  ],
+  "5120190024230": [
+   {
+    "Servidor": "2584698",
+    "campus": "SSA"
+   },
+   {
+    "Servidor": "1625546",
+    "campus": "SSA"
+   }
+  ],
+  "5120190023358": [
+   {
+    "Servidor": "2419000",
+    "campus": "SSA"
+   },
+   {
+    "Servidor": "3374976",
+    "campus": "SSA"
+   }
+  ],
+  "5120190021576": [
+   {
+    "Servidor": "1564967",
+    "campus": "LF"
+   },
+   {
+    "Servidor": "2148475",
+    "campus": "LF"
+   },
+   {
+    "Servidor": "268572",
+    "campus": "LF"
+   }
+  ],
+  "5120190016076": [
+   {
+    "Servidor": "1098511",
+    "campus": "LF"
+   }
+  ],
+  "5120190008430": [
+   {
+    "Servidor": "1334407",
+    "campus": "SSA"
+   }
+  ],
+  "5120180010504": [
+   {
+    "Servidor": "2693067",
+    "campus": "LF"
+   },
+   {
+    "Servidor": "2148475",
+    "campus": "LF"
+   }
+  ],
+  "5120180005640": [
+   {
+    "Servidor": "1174014",
+    "campus": "SSA"
+   }
+  ],
+  "5120180003176": [
+   {
+    "Servidor": "1174014",
+    "campus": "SSA"
+   }
+  ],
+  "5120180002544": [
+   {
+    "Servidor": "1174014",
+    "campus": "SSA"
+   }
+  ],
+  "5120180002498": [
+   {
+    "Servidor": "2148475",
+    "campus": "LF"
+   }
+  ],
+  "5120180002048": [
+   {
+    "Servidor": "2148475",
+    "campus": "LF"
+   }
+  ],
+  "5120170001383": [
+   {
+    "Servidor": "2157229",
+    "campus": "IRE"
+   }
+  ],
+  "5120160011165": [
+   {
+    "Servidor": "2275005",
+    "campus": "CAM"
+   },
+   {
+    "Servidor": "1780798",
+    "campus": "CAM"
+   },
+   {
+    "Servidor": "1275005",
+    "campus": "CAM"
+   },
+   {
+    "Servidor": "1226151",
+    "campus": "CAM"
+   }
+  ],
+  "5120160009632": [
+   {
+    "Servidor": "1189954",
+    "campus": "CAM"
+   }
+  ],
+  "5120160005653": [
+   {
+    "Servidor": "1737324",
+    "campus": "CAM"
+   }
+  ],
+  "5120150011839": [
+   {
+    "Servidor": "1301620",
+    "campus": "EUN"
+   },
+   {
+    "Servidor": "1418774",
+    "campus": "EUN"
+   }
+  ],
+  "5120150009281": [
+   {
+    "Servidor": "1780798",
+    "campus": "FS"
+   },
+   {
+    "Servidor": "2865952",
+    "campus": "FS"
+   },
+   {
+    "Servidor": "1768060",
+    "campus": "FS"
+   }
+  ],
+  "5120150001256": [
+   {
+    "Servidor": "1174014",
+    "campus": "SSA"
+   }
+  ],
+  "5120140012557": [
+   {
+    "Servidor": "1178075",
+    "campus": "SSA"
+   }
+  ],
+  "5120130012066": [
+   {
+    "Servidor": "1174014",
+    "campus": "JAC"
+   },
+   {
+    "Servidor": "282497",
+    "campus": "LF"
+   }
+  ],
+  "5120130012074": [
+   {
+    "Servidor": "1174014",
+    "campus": "SSA"
+   }
+  ],
+  "5120130012031": [
+   {
+    "Servidor": "1174014",
+    "campus": "JAC"
+   }
+  ],
+  "3020150047291": [
+   {
+    "Servidor": "2164135",
+    "campus": "SF"
+   }
+  ],
+  "3020260006042": [
+   {
+    "Servidor": "2164135",
+    "campus": "SF"
+   }
+  ],
+  "3020250087228": [
+   {
+    "Servidor": "2164135",
+    "campus": "SF"
+   }
+  ],
+  "3020230016287": [
+   {
+    "Servidor": "2164135",
+    "campus": "SF"
+   }
+  ],
+  "3020230003827": [
+   {
+    "Servidor": "2164135",
+    "campus": "SF"
+   }
+  ]
+ }
+}

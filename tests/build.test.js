@@ -18,6 +18,7 @@ const {
   SALT_FILE,
   SALT_BACKUP_FILE,
   SHEET_MAP,
+  SHEET_MAP_DETALHADO,
   SOURCE_LABELS,
   extrairVinculos,
   nomeNaCitacao,
@@ -295,12 +296,27 @@ describe('registerSourceFile', () => {
 // ─── SHEET_MAP ────────────────────────────────────────────────────────────────
 
 describe('SHEET_MAP', () => {
-  test('maps all five expected Portuguese sheet names', () => {
+  test('maps the four Lattes sheets that still feed data.json', () => {
     expect(SHEET_MAP['produções bibliográficas']).toBe('bibliografica');
     expect(SHEET_MAP['produções técnicas']).toBe('tecnica');
-    expect(SHEET_MAP['registros e patentes']).toBe('inovacao');
     expect(SHEET_MAP['orientações concluídas']).toBe('concluidas');
     expect(SHEET_MAP['orientações em andamento']).toBe('andamento');
+  });
+
+  test('deliberately omits the innovation sheet — that source is the INPI now', () => {
+    // A aba Inovação contava 988 registros declarados no Lattes contra os ~160
+    // que o INPI conhece nos CNPJs do IFBA. `scripts/refresh-inovacao.js`
+    // preenche o array; o build o deixa vazio. Se este teste começar a falhar,
+    // alguém religou a planilha e o refresh vai sobrescrever o resultado.
+    expect(SHEET_MAP['registros e patentes']).toBeUndefined();
+    expect(SHEET_MAP['Registros e Patentes']).toBeUndefined();
+  });
+
+  test('SHEET_MAP_DETALHADO mantém a aba de registros para o data-groups.json', () => {
+    // O relatorio-grupos-pesquisa consome o data-groups.json, que continua
+    // trazendo os registros do Lattes com nome de servidor resolvido.
+    expect(SHEET_MAP_DETALHADO['registros e patentes']).toBe('inovacao');
+    expect(SHEET_MAP_DETALHADO['produções técnicas']).toBe('tecnica');
   });
 
   test('does not map unexpected keys', () => {
@@ -539,6 +555,15 @@ describe('data.json publicado não contém dados pessoais', () => {
     }
   );
 
+  // O CSV do INPI traz `titular` e `autores` por extenso, e a conversão passa
+  // por eles para resolver o SIAPE. `conferirLGPD` é a rede que impede um nome
+  // de sobreviver até o data.json; aqui ela roda contra o arquivo commitado.
+  test('inovacao passa na guarda de nome próprio do refresh-inovacao', () => {
+    const { conferirLGPD } = require('../scripts/refresh-inovacao');
+    expect(data.inovacao.length).toBeGreaterThan(0);
+    expect(() => conferirLGPD(data.inovacao)).not.toThrow();
+  });
+
   test('posgraduacao mantém dedupKey pseudonimizado (não a matrícula)', () => {
     const chaves = data.posgraduacao.map(r => r.dedupKey).filter(Boolean);
     expect(chaves.length).toBeGreaterThan(0);
@@ -629,11 +654,15 @@ describe('dedupKey no data.json', () => {
     }
   );
 
-  test('inovacao mantém a chave longa — comparar_pi.js extrai o nº do INPI dela', () => {
-    const comRegistro = data.inovacao
-      .map(r => r.dedupKey)
-      .filter(k => k && k.includes('numerodoregistro'));
-    expect(comRegistro.length).toBeGreaterThan(0);
+  test('o dedupKey de inovacao é o próprio nº do INPI, e comparar_pi.js o lê', () => {
+    // Enquanto a aba vinha do Lattes, o dedupKey era o título inteiro
+    // normalizado e o número ficava enterrado no meio dele. Com a fonte no
+    // INPI, o número é a chave. `extractDashboardNumber` aceita os dois.
+    const { extractDashboardNumber } = require('../scripts/comparar_pi');
+    const chaves = data.inovacao.map(r => r.dedupKey).filter(Boolean);
+    expect(chaves.length).toBe(data.inovacao.length);
+    chaves.forEach(k => expect(k).toMatch(/^[a-z0-9]+$/));
+    expect(chaves.every(k => extractDashboardNumber(k).length === 1)).toBe(true);
   });
 
   test('grupos tem o tamanho esperado (regressão do CSV alheio)', () => {

@@ -17,6 +17,7 @@ Any new data source integration **must** verify the `Instituição` field contai
 ## Commands
 
 - `npm run build` — process `.xlsx`/`.csv` files from `dados/` into `data.json` and `data-groups.json`
+- `node scripts/refresh-inovacao.js <inpi.csv>` — **required after every build**: fills the `inovacao` array from the INPI CSV. The build leaves it empty on purpose (see below)
 - `npm run validate` — check the committed `data.json` (structure, campus codes, absence of personal data)
 - `npm start` — dev server on port 8080 (`live-server`)
 - `npm test` — run Jest unit tests
@@ -32,6 +33,7 @@ Always run `npm run build`, `npm run validate` and `npm test` after touching the
 - **`dados/scraper-DGP/`** — research groups CSV. Build auto-selects the newest file whose name starts with `coletor` and doesn't end in `_old.csv` (`selectDgpGroupsCsvFiles`); other coletor files are ignored.
 - **`dados/scraper-SUAPPos/`** — postgraduate students CSV, timestamped filename (`alunos_pos_*.csv`).
 - **`dados/ic/`** — IC/ICT projects Excel (PNP/SETEC-MEC), one sheet per cycle (`Ciclo YYYY-YYYY`), processed separately from per-campus files (fixed column indices, not headers).
+- **INPI (`scraper-INPI`)** — the `inovacao` array does **not** come from `dados/` at all. It comes from a CSV produced by the sibling `scraper-INPI` repo, applied by `scripts/refresh-inovacao.js`. `SHEET_MAP` deliberately omits `'registros e patentes'`, so `npm run build` emits `inovacao: []`.
 - **`data.json`** (~32 MB, tracked in git — required for GitHub Pages) — lightweight arrays consumed by the dashboard: `bibliografica`, `tecnica`, `inovacao`, `concluidas`, `andamento`, `grupos`, `posgraduacao`, `ic`, plus `meta` (campuses, year range, source file dates). **Public — must never contain personal data** (see below).
 - **`data-groups.json`** (~64 MB, **gitignored**) — detailed re-processing with resolved servidor names/IDs and group memberships, used only by the separate `relatorio-grupos-pesquisa` project, not the main dashboard. Contains names and contacts, so it is regenerated locally with `npm run build` rather than committed.
 
@@ -59,6 +61,32 @@ Key mechanics to know before touching the pipeline:
 - Never commit raw `dados/` contents (gitignored); after adding files there, regenerate with `npm run build` and check the printed size/campus list/record counts.
 
 Full pipeline documentation (data provenance, column mappings, business rules, glossary) lives in `docs/proveniencia-dados.md` — consult it before adding a new data source.
+
+## Inovação comes from the INPI, not from Lattes (ago/2026)
+
+The tab used to count what each researcher declared in their own Lattes CV: 988
+records, against the ~160 the INPI knows under the institution's CNPJ. Most were
+someone else's intellectual property. The source is now the INPI itself.
+
+- **Robot**: sibling repo `scraper-INPI` — four bases (patents, software,
+  industrial designs, trademarks), two CNPJs (IFBA `10764307000112` and CEFET-BA
+  `13941232000196`, the former name).
+- **Applied by**: `scripts/refresh-inovacao.js <inpi.csv>`, which mirrors
+  `scripts/refresh-grupos.js` (validate before write, skip write when unchanged).
+- **Automated by**: `.github/workflows/refresh-inovacao.yml`, monthly.
+- **`npm run build` leaves `inovacao` empty.** Always follow it with
+  `refresh-inovacao.js`, or the tab ships blank.
+- **Campus cascade**: the INPI never gives a campus. Level 1 matches the INPI
+  number against the Lattes record; level 2 resolves the author's name to a
+  SIAPE; level 3 omits `campus` entirely (never invent an `NA` code —
+  `CODIGOS_VALIDOS` in `scripts/validate-data.js` would reject it).
+- **`inpi-campus.json`** (committed) carries the cascade's result so CI can
+  attribute campus without `dados/`. Level 1 erases itself after the first run —
+  it queries the very Lattes records the run replaces — so the map is not an
+  optimization, it is the only thing that survives.
+
+Full endpoint details, pePI quirks, and the two bases the INPI does not let
+anyone query live in `docs/proveniencia-dados.md` §2.5.
 
 ## Campus code mapping — `src/shared.js` is the single source
 
@@ -127,7 +155,7 @@ Campus codes cover 25 IFBA campuses (BAR, BRU, CAM, CFO, EC, EUN, FS, ILH, IRE, 
 
 ## Repository layout
 
-This is a **standalone repository** (`prof-davifr/dashboard-prpgi`), not a subtree of a monorepo — `git push origin main` is the whole story. Sibling projects (`scraper-DGP`, `scraper-SUAPPos`, `scraper-SUAPCNPQ`, `relatorio-grupos-pesquisa`) are independent repos alongside this one in `/home/davi/projetos/repos-independentes/`; files move between them through the filesystem (`dados/`, `data-groups.json`), not through git.
+This is a **standalone repository** (`prof-davifr/dashboard-prpgi`), not a subtree of a monorepo — `git push origin main` is the whole story. Sibling projects (`scraper-DGP`, `scraper-SUAPPos`, `scraper-SUAPCNPQ`, `scraper-INPI`, `relatorio-grupos-pesquisa`) are independent repos alongside this one in `/home/davi/projetos/repos-independentes/`; files move between them through the filesystem (`dados/`, `data-groups.json`, the INPI CSV), not through git.
 
 ## TODO.md
 

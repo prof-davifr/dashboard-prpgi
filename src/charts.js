@@ -235,25 +235,31 @@ function renderKPIsTecnica() {
 }
 
 function renderKPIsInovacao() {
-  // Use raw instead of filtered for innovation if instructions demand "próprio período", but we'll use filtered array
   const data = STATE.filtered.inovacao;
   const total = data.length;
+  // A fonte é o INPI, que dá o titular e os autores mas nunca o campus. Quando
+  // nenhum autor casa com a base do SUAP, o registro fica sem campus: some do
+  // mapa e da tabela por campus, mas continua no total. O KPI abaixo torna essa
+  // diferença visível, em vez de deixar a soma do mapa parecer errada.
+  const semCampus = data.filter(r => !r["campus"]).length;
   $('kpi-inovacao').innerHTML = `
     <div class="kpi-card"><div class="kpi-label">Total de Registros (PI)</div><div class="kpi-value">${total}</div></div>
+    <div class="kpi-card"><div class="kpi-label">Sem Campus Atribuído</div><div class="kpi-value">${semCampus}</div></div>
   `;
 }
 
 function renderChartsInovacao() {
   const data = STATE.filtered.inovacao;
   
-  // Evo 1: Patentes e Softwares
+  // Evo 1: Patentes e Softwares — as duas bases de maior volume no INPI
   const patentes = data.filter(r => {
     const t = (r["Tipo"]||"").toLowerCase();
     return t.includes("patente") || t.includes("software") || t.includes("computador");
   });
   processEvolucao(patentes, "chart-inovacao-evo-1");
-  
-  // Evo 2: Marcas e Outros
+
+  // Evo 2: Marcas e Desenhos Industriais. O gráfico ficou vazio enquanto a aba
+  // vinha do Lattes: não havia nenhuma marca declarada, e só 6 desenhos.
   const marcas = data.filter(r => {
     const t = (r["Tipo"]||"").toLowerCase();
     return !t.includes("patente") && !t.includes("software") && !t.includes("computador");

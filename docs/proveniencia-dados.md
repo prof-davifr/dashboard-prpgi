@@ -268,6 +268,127 @@ Anual, conforme preenchimento dos ciclos na planilha compartilhada.
 
 ---
 
+### 2.5 INPI (pePI) — Propriedade Intelectual
+
+#### Origem
+
+Robô `scraper-INPI` (repositório irmão), que consulta a Busca de Propriedade
+Intelectual do INPI em `busca.inpi.gov.br/pePI`. A sessão é anônima: o pePI não
+pede credencial para consultar.
+
+**Esta fonte substituiu o Lattes na aba Inovação em agosto de 2026.** Antes, o
+array `inovacao` vinha da planilha `Registros e Patentes` do SUAP, ou seja, do
+que cada pesquisador declarava no próprio currículo. Eram 988 registros contra
+os ~160 que o INPI conhece no CNPJ da instituição: a maioria era propriedade
+intelectual de outra titularidade — do próprio pesquisador, de um vínculo
+anterior, ou de depósito que não se formalizou.
+
+A busca roda com dois CNPJs, porque as patentes antigas continuam registradas no
+nome anterior da instituição:
+
+| CNPJ | Instituição |
+|---|---|
+| 10.764.307/0001-12 | IFBA |
+| 13.941.232/0001-96 | CEFET-BA (nome anterior) |
+
+#### As quatro bases
+
+| Base | Servlet e parâmetros | Volume (ago/2026) |
+|---|---|---|
+| Patentes | `PatenteServletController`, `Action=SearchAvancado`, `CpfCnpjDepositante` | 20 IFBA + 1 CEFET-BA |
+| Programas de computador | `ProgramaServletController`, `Action=SearchBasico`, `Coluna=CpfCnpjTitularPrograma`, `FormaPesquisa=expExata` | 130 IFBA |
+| Desenhos industriais | `DesenhoServletController`, `Action=SearchAvancado`, `CpfCnpjDepositante` **e** `Action=SearchBasico`, `Coluna=NomeDepositante` | 5 (união das duas buscas) |
+| Marcas | `MarcasServletController`, fluxo de duas etapas (abaixo) | 1 IFBA + 3 CEFET-BA |
+
+#### Particularidades do pePI
+
+Cada uma custou uma sessão de depuração; todas estão tratadas em
+`scraper-INPI/src/`.
+
+- **Codificação ISO-8859-1.** Decodificar como UTF-8 quebra os acentos dos
+  nomes, e é por nome que o campus do autor é resolvido.
+- **Erro com HTTP 200.** O pePI devolve `Erro: java.lang.NullPointerException` e
+  `Erro: java.sql.SQLException` no corpo, com status 200. `src/sessao.js` lê o
+  corpo, não o status.
+- **Formulário completo obrigatório.** As buscas avançadas de patente e de
+  desenho lançam `NullPointerException` se qualquer campo faltar. Os 17 campos
+  da patente e os 13 do desenho vão juntos, vazios inclusive.
+- **Uma sessão por base.** O pePI guarda a busca corrente na sessão, e o estado
+  vaza: a segunda etapa da busca de marcas devolve 403 numa sessão que já serviu
+  outra base, e uma sequência longa de páginas de detalhe fez a busca seguinte
+  devolver zero. Zero é indistinguível de "não há registro", então a coleta saía
+  pela metade sem erro. Daí também os pisos de `MINIMO_ESPERADO`.
+- **Marcas: busca por titular fora do menu.** `Pesquisa_titular.jsp` só aparece
+  no menu de dentro da página de detalhe de uma marca. A etapa 1
+  (`Action=searchNome`, `tipoPesquisa=BY_CNPJ_NOME`) devolve a lista de
+  *titulares*; a etapa 2 (`Action=searchMarca&pos=N`) devolve as marcas daquele
+  titular.
+- **Desenhos: duas buscas.** O formulário avançado aceita CNPJ, mas o INPI
+  deixou esse campo vazio nos registros antigos — por CNPJ vem 1, por nome vêm
+  5. As duas buscas se unem pelo número do pedido, e a busca por nome exige a
+  guarda IFBA ≠ IFBaiano sobre o titular da página de detalhe (§6.2).
+- **Código INID nos rótulos.** A ficha de patente escreve `(73) Nome do
+  Titular:` e a de programa escreve `Nome do Titular:`. `src/parse.js` remove o
+  número, senão nenhum autor de patente é encontrado.
+- **Página de detalhe é a única fonte dos autores.** A lista de resultados traz
+  só número, data e título. São ~160 páginas de detalhe por coleta, uma a cada
+  1,5 s.
+
+#### Bases que o INPI não permite consultar
+
+| Base | Motivo |
+|---|---|
+| Topografia de circuitos integrados | O próprio INPI responde: "no momento não há Consulta para a base de Topografia de Circuitos Integrados" |
+| Contratos de transferência de tecnologia | `ContratoSearchBasico.jsp` exige login com usuário e senha; não tem acesso anônimo |
+
+Nenhuma das duas tinha registro no dashboard, então nada se perdeu.
+
+#### Atribuição de campus
+
+O INPI dá o titular (a instituição) e os autores (pessoas), **nunca o campus**.
+`scripts/refresh-inovacao.js` resolve numa cascata de três níveis:
+
+| Nível | Como | Resultado |
+|---|---|---|
+| 1 | O número INPI casa com o registro declarado no Lattes | Herda `campus` e `Servidor` |
+| 2 | O nome do autor casa com a base do SUAP | Resolve o SIAPE e o campus |
+| 3 | Nenhum dos dois | O campo `campus` não é emitido |
+
+No nível 3 o registro conta nos KPIs e some do mapa e da tabela por campus. Um
+KPI próprio, "Sem Campus Atribuído", torna a diferença visível. **Não invente um
+código como `NA`**: `CODIGOS_VALIDOS` em `scripts/validate-data.js` o recusaria.
+
+Um registro com vários autores vira **um registro por autor**, o mesmo fan-out
+de coautoria de `build.js`. É o que mantém o KPI "p/ Servidor" correto.
+
+#### `inpi-campus.json` — por que existe
+
+Os níveis 1 e 2 dependem de `dados/scraper-SUAPCNPQ/`, que é gitignored e não
+existe no runner do GitHub Actions. Pior: **o nível 1 se apaga sozinho**, porque
+a primeira execução substitui exatamente os registros do Lattes que ele
+consultava.
+
+Por isso o resultado da cascata é gravado em `inpi-campus.json`, versionado.
+Quando `dados/` está por perto, `refresh-inovacao.js` resolve a cascata e
+atualiza o mapa; quando não está, ele lê o mapa. O CI cai sempre no segundo
+caso. O arquivo guarda apenas número INPI → SIAPE → campus, que o `data.json`
+já publica.
+
+#### LGPD
+
+O CSV que o robô produz traz `titular` e `autores` por extenso. **Ele não é
+versionado**, e os nomes servem só para resolver o SIAPE dentro do
+`refresh-inovacao.js`. `conferirLGPD()` recusa qualquer valor com espaço ou
+letra acentuada nos campos de `inovacao` — a assinatura de um nome próprio.
+
+#### Frequência de atualização
+
+Mensal, pelo workflow `.github/workflows/refresh-inovacao.yml` (dia 1, 07:00
+UTC), ou à mão por `workflow_dispatch`. O robô roda igual na máquina local, e o
+CSV vale o mesmo nos dois caminhos.
+
+---
+
 ## 3. Pipeline de Build (`scripts/build.js`)
 
 ### 3.1 Fluxo Geral

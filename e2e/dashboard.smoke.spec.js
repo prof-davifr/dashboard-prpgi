@@ -28,7 +28,7 @@ test.beforeEach(async ({ page }) => {
 test('carrega e inicializa com dados reais', async ({ page }) => {
   // Filtros populados
   await expect(page.locator('#period-filter option').first()).toHaveText(/Todo o Período \(\d{4}-\d{4}\)/);
-  await expect(page.locator('#campus-filter option')).toHaveCount(26); // "Todos" + 25 campi
+  await expect(page.locator('#campus-filter option')).toHaveCount(27); // "Todos" + 26 campi
 
   // KPIs da aba científica com valores
   const total = await firstKpiValue(page, 'kpi-cientifica');

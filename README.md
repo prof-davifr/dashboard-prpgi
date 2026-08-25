@@ -43,12 +43,20 @@ Para atualizar os números do dashboard, siga o processo de *ETL* simplificado:
     ```bash
     npm run build
     ```
-3. **Validação**: Rode as verificações de integridade e a suíte de testes:
+3. **Inovação**: O `npm run build` deixa a aba Inovação **vazia de propósito** —
+   a fonte dela é o INPI, não o Lattes. Colete e aplique:
+    ```bash
+    cd ../scraper-INPI && node cli/coletar.js --out /tmp/inpi.csv
+    cd -            && node scripts/refresh-inovacao.js /tmp/inpi.csv
+    ```
+   Sem este passo o dashboard publica a aba Inovação em branco. O CSV traz nomes
+   de autores: não versione, e apague depois de usar.
+4. **Validação**: Rode as verificações de integridade e a suíte de testes:
     ```bash
     npm run validate   # estrutura, códigos de campus e ausência de dados pessoais
     npm test
     ```
-4. **Deploy**: Faça o push para o repositório. O GitHub Pages atualizará a visualização automaticamente, e a Action de CI roda `npm test` + `npm run validate` a cada push.
+5. **Deploy**: Faça o push para o repositório. O GitHub Pages atualizará a visualização automaticamente, e a Action de CI roda `npm test` + `npm run validate` a cada push.
 
 ### Dados pessoais (LGPD)
 

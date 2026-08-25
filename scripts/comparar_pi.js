@@ -94,13 +94,28 @@ function normalizeINPI(raw) {
   return results;
 }
 
+/**
+ * Tira o número do INPI do `dedupKey` de um registro de `inovacao`.
+ *
+ * Dois formatos convivem, porque a fonte da aba mudou em ago/2026:
+ *
+ *   - antigo (Lattes): o título inteiro normalizado, com o número no meio —
+ *     "...numerodoregistrobr5120240039597dataderegistro22102024titulo...";
+ *   - novo (INPI): o número já normalizado por `normalizeINPI`, e nada mais.
+ *
+ * O formato antigo ainda aparece em relatórios de comparação rodados sobre um
+ * data.json anterior à troca, então os dois continuam valendo.
+ */
 function extractDashboardNumber(dedupKey) {
   if (!dedupKey) return [];
   const m = dedupKey.match(/numerodoregistro([a-z0-9]+)dataderegistro/);
-  if (!m) return [];
-  const raw = m[1];
-  // Already lowercase + alphanumeric from the dedupKey, but apply same normalization
-  let n = raw.replace(/^(pi|mu|br|di|so)+/, '');
+  const raw = m ? m[1] : dedupKey;
+  // Sem o formato longo, só um número puro serve. O `dedupKey` dos demais
+  // datasets é o `shortHash`: 16 caracteres hexadecimais, que às vezes saem só
+  // com dígitos ("37c9a15262f008d1" começa com 3). Recusar pela assinatura
+  // exata é mais seguro do que pelo primeiro caractere.
+  if (!m && (!/^\d+$/.test(raw) || /^[0-9a-f]{16}$/.test(raw))) return [];
+  const n = raw.replace(/^(pi|mu|br|di|so)+/, '');
   return n.length > 0 ? [n] : [];
 }
 
