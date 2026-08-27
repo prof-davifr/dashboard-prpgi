@@ -55,8 +55,10 @@ jobs:
             echo "Sem mudanças nos grupos — nada a commitar."
             exit 0
           fi
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          # commita como prof-davifr (não como github-actions[bot]), para o
+          # histórico e a lista de contributors ficarem só com prof-davifr
+          git config user.name "prof-davifr"
+          git config user.email "prof-davifr@users.noreply.github.com"
           git add data.json
           git commit -m "chore(data): atualiza grupos de pesquisa (DGP) [auto]"
           git push
