@@ -76,8 +76,6 @@ Frontend estático (Chart.js + Leaflet + SheetJS) + pipeline ETL em `scripts/bui
 - [x] **`SHEET_MAP` sem `registros e patentes`** — o `npm run build` passa a emitir `inovacao: []`. `SHEET_MAP_DETALHADO` mantém a aba para o `data-groups.json`. Ordem obrigatória documentada no README e no CLAUDE.md
 - [x] **Frontend** — KPI "Sem Campus Atribuído"; gráfico "Marcas e Outros" renomeado para "Marcas e Desenhos Industriais" (estava vazio, porque o Lattes não trazia marca); modal de metodologia com a fonte INPI e a explicação da queda dos números
 - [x] **Workflow `refresh-inovacao.yml`** — mensal (dia 1, 07:00 UTC) mais `workflow_dispatch`, no padrão do `refresh-grupos.yml`
-- [ ] **Segredo `SCRAPER_INPI_TOKEN`** — o `scraper-INPI` é privado e o dashboard é público, então o `actions/checkout` do `refresh-inovacao.yml` precisa de um PAT com leitura naquele repositório. Sem o segredo, só o workflow quebra; a coleta local continua valendo
-- [ ] **Bases que o INPI não permite consultar** — topografia de circuitos integrados ("no momento não há Consulta", diz o próprio INPI) e contratos de transferência de tecnologia (exige login com usuário e senha). Nenhuma tinha registro no dashboard. Reavaliar se a PRPGI obtiver credencial do pePI
 
 ### Apresentação — ajustes de rótulo e layout (ago/2026)
 - [x] **Gráfico "Distribuição Qualis" removido** — quase todo o volume caía em "Sem Estrato". O campo `Estrato` continua no `data.json` e na exportação; só o gráfico saiu (`index.html`, `src/charts.js`). Limite de canvas em `tests/acessibilidade.test.js` foi de 32 → 31 e `e2e/dashboard.smoke.spec.js` não espera mais `chart-cientifica-pie`
@@ -95,20 +93,30 @@ Frontend estático (Chart.js + Leaflet + SheetJS) + pipeline ETL em `scripts/bui
 - [x] **Lattes recoletado (2024-2026, 29 campi)** — `core/scraper.py` do `scraper-SUAPCNPQ` esperava a tabela de resultados com o limite de 120 min, três vezes; IFBA e PO não têm produção e nunca renderizam tabela, então a coleta inteira travava. Novo `TABLE_TIMEOUT` (10 min, ajustável por `SUAP_TABLE_TIMEOUT_MIN`) marca o campus como "sem produção" e segue
 - [x] **Histórico preservado no merge** — o SUAP trocou as siglas de três campi (FS→FSA, PA→PAF, VC→VDC) e o coletor abriu arquivos novos, sem histórico; além disso 19 campi antes vinham de `dados/old/` (2000-2026). O primeiro build perdeu 1094 registros técnicos. Rodando `merge_production_data` dos arquivos antigos sobre os mestres, nada se perde: bibliográfica +2706, técnica +2072, inovação +43, concluídas +1132, andamento +368
 - [x] **Campus Itabuna (ITA)** — o SUAP passou a listar Itabuna como campus. `CAMPUS_TO_CITY` ganhou `ITA: ITABUNA` (26 códigos), as coordenadas já existiam em `IFBA_COORDS` porque o DGP listava Itabuna como unidade, e o filtro de campus do `index.html` ganhou a opção. 8 registros
-- [ ] **Mapa da aba Orientações mostra grupos, não orientações** — `src/charts.js:438` chama `renderGenericMap(STATE.filtered.grupos, 'map-orientacoes', …)` com o rótulo "Pesquisadores (aprox.)", enquanto o título do card diz "Distribuição Geográfica" numa aba de orientações. Filtrar por Itabuna deixa o mapa vazio, porque o campus não tem grupo do DGP
+
+### Automação e estado das bases (31/08/2026)
+- [x] **Refresh automático dos grupos de pesquisa rodando ponta a ponta** — a rodada agendada de 31/08/2026 (run 33391536036) passou em 3m27s: clonou o `scraper-DGP`, varreu o DGP/CNPq, atualizou só o array `grupos` do `data.json`, commitou como `prof-davifr` (d047af9) e disparou o deploy do Pages (run 33391821794). O ciclo semanal não depende de credencial nem de `dados/`
+- [x] **Bases conferidas no `data.json` publicado** — bibliográfica 50.700, técnica 70.856, inovação 265 (INPI), orientações concluídas 26.131, em andamento 2.545, grupos 210, pós-graduação 2.548, IC 1.333
 
 ---
 
 ## 📋 Backlog
 
+### 🚨 Bloqueios com prazo
+
+- [ ] **CI vermelho desde 27/08/2026** — o passo "Validar estrutura e ausência de PII" falha (run 33102453371, commit `beb67bd`); reproduzido local com `npm run validate`. A guarda de PII do `scripts/validate-data.js` varre todo arquivo versionado e acusa o endereço no-reply do GitHub que o próprio `beb67bd` escreveu no `git config user.email` de `.github/workflows/refresh-grupos.yml` (para o commit automático sair como `prof-davifr`, e não como o robô do Actions). Escolher entre montar o endereço em tempo de execução (sem escrevê-lo por extenso no arquivo), usar `${{ github.actor_id }}`/um segredo, ou isentar `.github/workflows/` da varredura — a isenção abre buraco na guarda. Enquanto não se resolve, todo push nasce vermelho e mascara falha real
+- [ ] **Segredo `SCRAPER_INPI_TOKEN` não existe** — `gh secret list` volta vazio (conferido em 31/08/2026), e o cron do `refresh-inovacao.yml` dispara **todo dia 1 às 07:00 UTC**, ou seja, na próxima madrugada: o `actions/checkout` do `scraper-INPI` (repositório privado) vai falhar com "Repository not found". Falta gerar um PAT com leitura em `prof-davifr/scraper-INPI` e gravá-lo como segredo deste repositório. Só o workflow quebra — a coleta local seguida de `node scripts/refresh-inovacao.js <inpi.csv>` continua valendo
+- [ ] **Actions ainda em `@v4` (Node 20 descontinuado)** — toda rodada sai com a anotação "Node.js 20 is deprecated … forced to run on Node.js 24" para `actions/checkout@v4` e `actions/setup-node@v4` (runs 33102453371 e 33391536036). Subir os três workflows (`ci.yml`, `refresh-grupos.yml`, `refresh-inovacao.yml`) para `@v5` antes de o forçamento virar erro
+
 ### 🔴 Crítico
 
-- [x] **`git push --force`** — verificado em 05/08/2026: `origin/main` == `main` local (bbd138b), histórico remoto de `main`, branch copilot e PR #1 sem `data-groups.json` em nenhum commit alcançável; rewrite já publicada. Objetos antigos ainda podem ficar alcançáveis por SHA até o GC do GitHub — para remoção efetiva, abrir chamado no GitHub Support pedindo a purga, e tratar os dados como já expostos
 - [ ] **Confirmar com a PRPGI o que pode ser público** — a régua atual foi definida tecnicamente (nada de nome, matrícula, e-mail ou telefone no que é versionado). Falta o aval formal sobre granularidade por aba e sobre o tratamento dos dados já expostos no histórico do GitHub
 - [ ] **`docs/validacao/relatorio-comparacao-PI.pdf` e `.html`** — foram removidos por vazarem inventores e contatos. Se ainda forem entregáveis, regerar a partir do `.md` público
+- [x] **`git push --force`** — verificado em 05/08/2026: `origin/main` == `main` local (bbd138b), histórico remoto de `main`, branch copilot e PR #1 sem `data-groups.json` em nenhum commit alcançável; rewrite já publicada. Objetos antigos ainda podem ficar alcançáveis por SHA até o GC do GitHub — para remoção efetiva, abrir chamado no GitHub Support pedindo a purga, e tratar os dados como já expostos
 
 ### 🟡 Alta
 
+- [ ] **Mapa da aba Orientações mostra grupos, não orientações** — `src/charts.js:444` chama `renderGenericMap(STATE.filtered.grupos, 'map-orientacoes', …)` com o rótulo "Pesquisadores (aprox.)", enquanto o título do card diz "Distribuição Geográfica" numa aba de orientações. Filtrar por Itabuna deixa o mapa vazio, porque o campus não tem grupo do DGP
 - [ ] **Automação dos scrapers** — Lattes/SUAP/DGP/IC ainda exigem exportação manual por campus (citado no slide 11 da apresentação). Pipeline CI/CD completo com os scrapers, agora que o CI base existe
 - [ ] **Deploy no CI** — a Action atual só valida; o GitHub Pages continua servindo `main` direto. Avaliar job de deploy explícito (`actions/deploy-pages`) para desacoplar publicação de push
 
@@ -122,6 +130,8 @@ Frontend estático (Chart.js + Leaflet + SheetJS) + pipeline ETL em `scripts/bui
 - Existe também `Exportar para XLS` (`?instituicao=IFBA&export_to_xls=1`), mesmo sistema de tarefas (`djtools`) do `scraper-SUAPPos`
 - Login SUAP: campos `#id_username`/`#id_password` + submit via JS (`document.querySelector('form').submit()`) — o clique no botão é interceptado por um overlay `<ul class="_main_menu">`
 - Formato de saída esperado pelo Coletor DGP (`parseTXT`): `ID\tNome` com ID de 16 dígitos (header `#\tNome` é ignorado)
+
+- [ ] **SUAP (lista de grupos) ainda é local** — login institucional + rede IFBA não cabem em runner público. A varredura do DGP já roda sozinha no Actions, mas parte da lista versionada: grupo novo criado no SUAP só entra depois de uma execução local. Opções documentadas no README do `scraper-DGP`: **cron local** (`./pipeline.sh --commit`) ou **self-hosted runner** com o `.env`
 
 **Fase 1 — lista do SUAP** ✅
 - [x] `suap/listar_grupos.py` (Selenium) no repo `scraper-DGP`: login (submit via JS — o botão "Acessar" é interceptado por overlay) → GET do changelist → extrai ID+nome das 210 linhas → escreve `lista de grupos de pesquisa.txt` (`#\tNome` + `ID\tNome`)
@@ -141,10 +151,10 @@ Frontend estático (Chart.js + Leaflet + SheetJS) + pipeline ETL em `scripts/bui
 **Automação contínua (GitHub Actions)** ✅
 - [x] `.github/workflows/refresh-grupos.yml` — roda **semanal** (seg 06:00 UTC) ou manual (`workflow_dispatch`): clona o `scraper-DGP` (lista + CLI públicos), varre o DGP, atualiza **só o array `grupos`** do `data.json` via `scripts/refresh-grupos.js` e commita/push (mesmo repo, sem PAT). Não precisa de credenciais nem expõe PII (só o `data.json` anonimizado vai ao git)
 - [x] `scripts/refresh-grupos.js` — reusa `parseCSV` do `build.js` + `validate` do `validate-data.js`; **não reescreve o arquivo se os grupos não mudaram** (evita diff espúrio)
-- [ ] **SUAP (lista de grupos) ainda é local** — login institucional + rede IFBA não cabem em runner público. Opções documentadas no README do `scraper-DGP`: **cron local** (`./pipeline.sh --commit`) ou **self-hosted runner** com o `.env`
 
 ### 🟢 Média
 
+- [ ] **Bases que o INPI não permite consultar** — topografia de circuitos integrados ("no momento não há Consulta", diz o próprio INPI) e contratos de transferência de tecnologia (exige login com usuário e senha). Nenhuma tinha registro no dashboard. Reavaliar se a PRPGI obtiver credencial do pePI
 - [ ] **Pré-agregação por campus/ano/área no build** — **medir antes de fazer.** Números de ago/2026 (desktop): `data.json` são 21 MB, mas o GitHub Pages já serve gzipado, então o download real é **2,2 MB**. O custo dominante é `JSON.parse` (346 ms), seguido do dedup (194 ms) e do filtro (63 ms) sobre 163 mil registros. Num celular mediano isso é ~1–1,7 s de parse, uma vez só (a Cache API evita repetir). A pré-agregação ataca CPU, não bytes — só compensa se o parse virar queixa real de usuário
 - [ ] **Acessibilidade: rodar auditoria com leitor de tela** — a estrutura está corrigida (ARIA de abas, rótulo nos 32 gráficos, diálogos com trap de foco, `caption`/`scope` nas tabelas, contraste AA, foco visível), tudo coberto por `tests/acessibilidade.test.js`. Falta a validação qualitativa com NVDA/Orca e a descrição textual dos dados de cada gráfico (tabela alternativa)
 
