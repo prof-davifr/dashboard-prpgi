@@ -50,9 +50,9 @@ Frontend estático (Chart.js + Leaflet + SheetJS) + pipeline ETL em `scripts/bui
 - [x] **`data.json` público anonimizado** — `posgraduacao` não emite mais `nome`/`matricula`/`email_academico`/`email_pessoal`; `dedupKey` e os campos `orientador`/`bolsista` de IC viram pseudônimos estáveis (`pseudonymize()` em `scripts/build.js`, salt em `.build-salt` gitignored). Nenhuma feature mudou: o frontend só usava esses campos em `new Set(...).size`
 - [x] **`data-groups.json` fora do versionamento e do histórico** — continha nomes, contatos e composição de equipes; purgado com `git filter-repo`, `.git` caiu de 210 MB → 34 MB
 - [x] **`src/shared.js`** — fonte única de `CAMPUS_TO_CITY`, `IFBA_COORDS`, `normalizeText`, `mapUnidadeToCampus` e `lookupCoords`; eliminadas as 4 cópias divergentes (`script.js`, `browserEnv.js`, `campus-filter.test.js`, `comparar_pi.js`). Validado por teste de mutação: reintroduzir o bug de acentos agora quebra 6 testes
-- [x] **`npm run build` / `npm run validate`** — scripts criados e README/CLAUDE.md reconciliados
+- [x] **`npm run build` / `npm run validate`** — scripts criados e README e instruções do repositório reconciliados
 - [x] **CI** — `.github/workflows/ci.yml` roda `npm test`, `npm run validate` (estrutura, códigos de campus, ausência de PII) e guarda de 50 MB por arquivo versionado
-- [x] Seção obsoleta de monorepo/subtree removida do `CLAUDE.md` (o repositório é independente)
+- [x] Seção obsoleta de monorepo/subtree removida das instruções do repositório (ele é independente)
 - [x] **Nomes de servidores vazavam no `data.json` público** — `extrairVinculos` exigia SIAPE de 7+ dígitos, e as linhas de matrícula curta (5 ou 6 dígitos, servidores antigos) caíam no fallback que copiava o `VinculoQueryset` cru para `Servidor`: 3.385 registros com o nome completo de 70 pessoas. Regex para `\d{5,}` em `build.js` e `comparar_pi.js`. Como efeito colateral, o fan-out de coautoria voltou a valer nessas linhas (+484 bibliográfica, +68 técnica, +14 inovação). A guarda LGPD de `tests/build.test.js` só olhava o nome do campo; agora também valida o valor de `Servidor`
 
 ### Fase 3 — dados, performance, estrutura e acessibilidade (ago/2026)
@@ -73,7 +73,7 @@ Frontend estático (Chart.js + Leaflet + SheetJS) + pipeline ETL em `scripts/bui
 - [x] **Particularidades do pePI tratadas** — ISO-8859-1; erro com HTTP 200 no corpo; formulário completo obrigatório (NullPointerException se faltar campo); código INID nos rótulos da ficha de patente; **uma sessão por base**, porque o estado vaza e a busca seguinte devolvia zero — indistinguível de "não há registro", então a coleta saía pela metade sem erro. Daí os pisos de `MINIMO_ESPERADO`
 - [x] **`scripts/refresh-inovacao.js`** — espelha o `refresh-grupos.js` (valida antes de escrever, não reescreve se nada mudou). Cascata de campus em três níveis, porque o INPI nunca informa campus: número INPI → nome do autor → sem atribuição. Fan-out por autor mantém o KPI "p/ Servidor" correto. 22 testes
 - [x] **`inpi-campus.json` versionado** — o nível 1 da cascata se apaga sozinho: ele consulta os registros do Lattes que a própria execução substitui. E os níveis 1 e 2 dependem de `dados/`, gitignored e ausente no runner. O mapa é o que sobrevive, e é o que o CI usa
-- [x] **`SHEET_MAP` sem `registros e patentes`** — o `npm run build` passa a emitir `inovacao: []`. `SHEET_MAP_DETALHADO` mantém a aba para o `data-groups.json`. Ordem obrigatória documentada no README e no CLAUDE.md
+- [x] **`SHEET_MAP` sem `registros e patentes`** — o `npm run build` passa a emitir `inovacao: []`. `SHEET_MAP_DETALHADO` mantém a aba para o `data-groups.json`. Ordem obrigatória documentada no README e nas instruções do repositório
 - [x] **Frontend** — KPI "Sem Campus Atribuído"; gráfico "Marcas e Outros" renomeado para "Marcas e Desenhos Industriais" (estava vazio, porque o Lattes não trazia marca); modal de metodologia com a fonte INPI e a explicação da queda dos números
 - [x] **Workflow `refresh-inovacao.yml`** — mensal (dia 1, 07:00 UTC) mais `workflow_dispatch`, no padrão do `refresh-grupos.yml`
 
@@ -112,7 +112,7 @@ Frontend estático (Chart.js + Leaflet + SheetJS) + pipeline ETL em `scripts/bui
 
 - [ ] **Confirmar com a PRPGI o que pode ser público** — a régua atual foi definida tecnicamente (nada de nome, matrícula, e-mail ou telefone no que é versionado). Falta o aval formal sobre granularidade por aba e sobre o tratamento dos dados já expostos no histórico do GitHub
 - [ ] **`docs/validacao/relatorio-comparacao-PI.pdf` e `.html`** — foram removidos por vazarem inventores e contatos. Se ainda forem entregáveis, regerar a partir do `.md` público
-- [x] **`git push --force`** — verificado em 05/08/2026: `origin/main` == `main` local (bbd138b), histórico remoto de `main`, branch copilot e PR #1 sem `data-groups.json` em nenhum commit alcançável; rewrite já publicada. Objetos antigos ainda podem ficar alcançáveis por SHA até o GC do GitHub — para remoção efetiva, abrir chamado no GitHub Support pedindo a purga, e tratar os dados como já expostos
+- [x] **`git push --force`** — verificado em 05/08/2026: `origin/main` == `main` local (bbd138b), histórico remoto de `main`, branch auxiliar e PR #1 sem `data-groups.json` em nenhum commit alcançável; rewrite já publicada. Objetos antigos ainda podem ficar alcançáveis por SHA até o GC do GitHub — para remoção efetiva, abrir chamado no GitHub Support pedindo a purga, e tratar os dados como já expostos
 
 ### 🟡 Alta
 
@@ -185,7 +185,7 @@ O SISPROC (sistema de processos eletrônicos do IFBA) registra os processos da p
 
 - `mapUnidadeToCampus` tem fallback "SSA": Unidade não reconhecida vira Salvador. **Medido em ago/2026: 0 dos 197 grupos caem nesse fallback cego** — os 94 grupos em SSA casam legitimamente com "Salvador" ou com a referência à sede. É uma armadilha latente para dados futuros, não um bug ativo; mudar para `""` + marcação "não identificado" na UI exige decisão de negócio
 - `data-groups.json` pode estar defasado em relação a `data.json` se o build falhar no meio (verificar atomicidade da escrita dos dois arquivos)
-- `AGENTS.md` (gitignored) ainda pode ter instruções divergentes sobre o comando de build — README e `CLAUDE.md` foram reconciliados em `npm run build`
+- `AGENTS.md` (gitignored) ainda pode ter instruções divergentes sobre o comando de build — o README e as instruções do repositório foram reconciliados em `npm run build`
 - O salt de pseudonimização vive em `.build-salt` e numa cópia em `~/.config/dashboard-prpgi/build-salt` (ambos `0600`, nenhum versionado). O build restaura da cópia se o local sumir. Perder **os dois** não perde dados, mas gera salt novo e um diff de 21 MB no `data.json` — ao migrar de máquina, leve a cópia junto
 - Nenhuma função de renderização tem teste unitário. Para verificar de verdade, dirigir o Chrome pelo DevTools Protocol (`--headless=new --remote-debugging-port=9222`) e checar o DOM vivo. `--dump-dom` com `--virtual-time-budget` **não serve**: fotografa antes de o `data.json` carregar e a página parece travada em "Carregando dados…" mesmo funcionando
 - A guarda de telefone em `validate-data.js` exige DDD entre parênteses ou celular com 9 inicial. O formato solto `NNNN-NNNN` é ambíguo demais (colide com números do INPI e intervalos de ano) e não é detectado — a guarda de e-mail é a rede principal
