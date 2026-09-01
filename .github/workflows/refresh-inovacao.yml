@@ -4,16 +4,16 @@ name: Atualizar propriedade intelectual (INPI)
 # industriais e marcas) pelo CNPJ do IFBA e do CEFET-BA, e substitui o array
 # `inovacao` do data.json.
 #
-# Diferente do refresh-grupos.yml, este workflow não é indispensável: o robô
-# roda igual na máquina local, e o CSV vale o mesmo nos dois caminhos. Se o
-# pePI bloquear as faixas de IP do GitHub Actions, é só rodar
-# `node cli/coletar.js` local e chamar o refresh à mão.
+# A coleta mensal passou a rodar na máquina do assessor, pelo temporizador em
+# `scraper-INPI/systemd/`. Lá os dois repositórios estão no disco, então não é
+# preciso token nenhum — o runner público precisava de um, porque o
+# `scraper-INPI` é privado e este repositório é público.
+#
+# O agendamento aqui foi removido por isso. O disparo manual continua, para o
+# caso de a máquina local ficar indisponível; ele exige o segredo
+# SCRAPER_INPI_TOKEN.
 
 on:
-  schedule:
-    # Mensal (dia 1, 07:00 UTC) — a base do INPI muda devagar, e a coleta faz
-    # cerca de 170 requisições ao pePI, uma a cada 1,5 s.
-    - cron: '0 7 1 * *'
   workflow_dispatch: {}
 
 permissions:
