@@ -128,6 +128,25 @@ Campus codes cover 25 IFBA campuses (BAR, BRU, CAM, CFO, EC, EUN, FS, ILH, IRE, 
 - Small categories (<2%) in evolution/pie charts get aggregated into "Outras" (bibliográfica types, técnica types, inovação types, IC areas).
 - Postgraduate-specific business rules (cohort maturity thresholds, situação bucketing) live in `src/posgraduacao.js` — see `docs/proveniencia-dados.md` §6.4–6.5 rather than re-deriving from code.
 
+## Second page: Pós-Graduação Validação (frozen, set/2026)
+
+`pos-validacao-f85b5515.html` is a standalone, unlisted page holding the PNP cycle methodology (ciclo encerrado, CCiclo, EvCiclo, RCiclo, IEA) that used to be the Pós-Graduação tab. It was frozen on 02/09/2026 so the main tab could be redesigned around simpler indicators without discarding the work.
+
+| File | Role |
+|---|---|
+| `pos-validacao-f85b5515.html` | the page. Random filename suffix + `robots: noindex, nofollow` |
+| `src/pos-validacao.js` | **frozen** copy of the old `src/posgraduacao.js`. Do not edit |
+| `src/pos-validacao-init.js` | replaces `cache.js`+`filters.js` for this page only |
+| `src/pos-validacao-porta.js` | client-side password gate; holds only a SHA-256 hash |
+| `tests/pos-validacao.test.js` | the frozen unit suite (mirrors `tests/posgraduacao.test.js`) |
+| `e2e/pos-validacao.spec.js` | skips unless `POS_VALIDACAO_SENHA` is set |
+
+Load order there is `shared.js → core.js → charts.js → pos-validacao.js → pos-validacao-init.js → pos-validacao-porta.js`. No Leaflet, no SheetJS — the frozen renderer uses neither. `src/core.js` runs `getElementById('year')` unguarded, so the page must keep a `#year` element.
+
+**The password is not access control.** GitHub Pages is static hosting with no authentication, and `data.json` is public. The gate discourages casual access and labels the page as unofficial. It relies on `crypto.subtle`, which needs a secure context (HTTPS or localhost).
+
+Undo path back to the old tab: `git revert` the single redesign commit (sha recorded in `TODO.md`), or `git checkout pos-pnp-congelado-2026-09-02 -- <files>`.
+
 ## Testing
 
 - `tests/build.test.js` covers `scripts/build.js` pure functions (`findFiles`, `parseCSV`, `getSourceKey`, `registerSourceFile`, DGP CSV selection, `pseudonymize`, `SHEET_MAP`, `SOURCE_LABELS`) plus the LGPD guard asserting `data.json` carries no personal fields.

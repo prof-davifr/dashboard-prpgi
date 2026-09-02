@@ -5,6 +5,49 @@ Frontend estático (Chart.js + Leaflet + SheetJS) + pipeline ETL em `scripts/bui
 
 ---
 
+## 🔵 Em andamento — remodelagem da aba Pós-Graduação (set/2026)
+
+### Etapa 1 — congelamento (feito)
+- [x] **A metodologia de ciclos da PNP saiu do painel principal e virou página própria.**
+      `pos-validacao-f85b5515.html` ("Pós-Graduação Validação"), não listada,
+      com `robots: noindex, nofollow` e porta de senha no cliente. Arquivos:
+      `src/pos-validacao.js` (cópia congelada de `src/posgraduacao.js`),
+      `src/pos-validacao-init.js`, `src/pos-validacao-porta.js`,
+      `tests/pos-validacao.test.js`, `e2e/pos-validacao.spec.js`.
+      Etiqueta `pos-pnp-congelado-2026-09-02` guarda código e `data.json` do
+      estado anterior. A senha não é controle de acesso: o GitHub Pages é
+      estático e o `data.json` é público.
+- [x] **`parseCSV` deixou de perder registros com quebra de linha dentro das
+      aspas.** O parser fazia `split('\n')` antes de olhar as aspas; um aluno do
+      mestrado com o e-mail acadêmico partido em duas linhas virava dois
+      registros defeituosos, ambos descartados. Novo `splitCsvRecords()` varre o
+      texto uma vez só. Dois testes de regressão em `tests/build.test.js`.
+- [x] **Conferência da coleta do SUAP (02/09/2026).** Mestrado 1813 → 1840 (+27,
+      mesmos 7 programas), Especialização 2766 (inalterada), Doutorado 163
+      (inalterado). Nenhum programa entrou ou saiu. Confirma que só a
+      Especialização sofre perda.
+- [x] **`.env` dos três robôs com credencial do SUAP em `600`**
+      (`scraper-prpgi`, `scraper-SUAPPos`, `scraper-SUAPCNPQ`).
+
+### Etapa 2 — remodelagem (pendente)
+- [ ] **Substituir a aba Pós-Graduação por indicadores simples**: cursos por
+      campus, alunos por curso, por campus e por situação. Reescrever
+      `src/posgraduacao.js`, simplificar `filterPosGraduacao` em
+      `src/filters.js`, limpar as ramificações de `src/core.js` e
+      `src/cache.js`, tirar o texto PNP do modal de `index.html`.
+      **Sair em um commit só**, e anotar o sha aqui para o `git revert`.
+- [ ] **Corrigir o filtro Lato Sensu nos dois robôs.** A regra descarta 2193
+      alunos de 45 cursos que são especialização de verdade, só não escrevem
+      "lato sensu" no nome. Ela vive em `scraper-SUAPPos/src/scraper.py:84`
+      (`_is_lato_sensu()`) **e** em `scraper-prpgi/src/scrapers/pos.py:97`.
+      Corrigir os dois, ou o robô consolidado desfaz a correção do outro.
+- [ ] **Decidir a classificação das situações novas** que entram com os 2193
+      alunos: Aperfeiçoado (272), Em Migração (95), Não concluído (47), Formado
+      (3), Aguardando Colação de Grau (1), Cancelamento Compulsório (1). Hoje
+      `normalizePosGraduacaoOutcome()` joga todas em "Outros".
+
+---
+
 ## 🟢 Concluído
 
 ### Fundação e Pipeline ETL
