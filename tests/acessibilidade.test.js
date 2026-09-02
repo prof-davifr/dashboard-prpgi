@@ -201,3 +201,66 @@ describe('documento', () => {
     expect(html).toMatch(/class="controls"[^>]*aria-label=/);
   });
 });
+
+// ─── Página Pós-Graduação Validação ──────────────────────────────────────────
+//
+// Página congelada, fora do painel principal. Ela reusa os mesmos ids e os
+// mesmos canvas da antiga aba, então as regressões de acessibilidade valem
+// igual — e ninguém as revisita, porque o arquivo não muda mais.
+
+describe('página Pós-Graduação Validação', () => {
+  const PAGINA = 'pos-validacao-f85b5515.html';
+  const pv = fs.readFileSync(path.join(RAIZ, PAGINA), 'utf-8');
+
+  test('declara o idioma e pede para não ser indexada', () => {
+    expect(pv).toMatch(/<html[^>]*lang="pt-?[bB][rR]"/);
+    expect(pv).toMatch(/<meta name="robots" content="noindex, nofollow"/);
+  });
+
+  test('todo canvas tem nome acessível', () => {
+    const canvases = [...pv.matchAll(/<canvas[^>]*>/g)].map(m => m[0]);
+    expect(canvases.length).toBe(12);
+    canvases.forEach(c => {
+      expect(c).toMatch(/role="img"/);
+      expect(c).toMatch(/aria-label="Gráfico: .+"/);
+    });
+  });
+
+  test('o campo de senha tem rótulo e o erro é anunciado', () => {
+    expect(pv).toMatch(/<label for="porta-senha"/);
+    expect(pv).toMatch(/id="porta-senha"/);
+    expect(pv).toMatch(/id="porta-erro"[^>]*role="alert"/);
+  });
+
+  test('o overlay de carregamento é anunciado', () => {
+    expect(pv).toMatch(/id="loading"[^>]*aria-live="polite"/);
+  });
+
+  test('a seção de indicadores tem nome, já que não é mais um tabpanel', () => {
+    const secao = pv.match(/<section id="tab-posgraduacao"[^>]*>/)[0];
+    expect(secao).toMatch(/aria-label="/);
+    expect(secao).not.toMatch(/role="tabpanel"/);
+  });
+
+  test('carrega os módulos congelados na ordem certa', () => {
+    const ordem = [...pv.matchAll(/<script src="(src\/[\w.-]+)"/g)].map(m => m[1]);
+    expect(ordem).toEqual([
+      'src/shared.js',
+      'src/core.js',
+      'src/charts.js',
+      'src/pos-validacao.js',
+      'src/pos-validacao-init.js',
+      'src/pos-validacao-porta.js'
+    ]);
+  });
+
+  test('não carrega Leaflet nem SheetJS — a página não tem mapa nem exportação', () => {
+    expect(pv).not.toMatch(/leaflet/i);
+    expect(pv).not.toMatch(/xlsx/i);
+  });
+
+  test('avisa que a página está congelada e não é oficial', () => {
+    expect(pv).toMatch(/congelada desde 02\/09\/2026 e não é o painel oficial/);
+    expect(pv).toMatch(/href="index\.html"/);
+  });
+});
