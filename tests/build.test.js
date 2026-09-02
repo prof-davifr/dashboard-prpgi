@@ -155,6 +155,27 @@ describe('parseCSV', () => {
     expect(Object.keys(rows[0])).toContain('Ano');
   });
 
+  // Regressão: o SUAP exporta células com quebra de linha dentro das aspas.
+  // O parser antigo fazia split('\n') antes de olhar as aspas, e o registro
+  // virava dois registros defeituosos — descartados adiante por ficarem sem
+  // ano. Um aluno do mestrado sumiu do painel assim, em silêncio.
+  test('mantém a quebra de linha dentro de um campo entre aspas', () => {
+    // O valor imita a célula quebrada do SUAP sem usar um e-mail de verdade:
+    // scripts/validate-data.js recusa qualquer e-mail em arquivo versionado.
+    const rows = writeCsvAndParse('Nome,Contato,Ano\nAlice,"contato\r\n,contato,2021.1",2021');
+    expect(rows).toHaveLength(1);
+    expect(rows[0].Nome).toBe('Alice');
+    expect(rows[0].Ano).toBe('2021');
+    expect(rows[0].Contato).toContain('contato');
+  });
+
+  test('aceita registros terminados em CRLF', () => {
+    const rows = writeCsvAndParse('Nome,Ano\r\nAlice,2021\r\nBob,2022\r\n');
+    expect(rows).toHaveLength(2);
+    expect(rows[0]).toEqual({ Nome: 'Alice', Ano: '2021' });
+    expect(rows[1]).toEqual({ Nome: 'Bob', Ano: '2022' });
+  });
+
   test('handles real-world DGP-like CSV structure', () => {
     const csv = [
       'Situação,Ano Formação,Pesquisadores,Estudantes,Área,Último Envio,Unidade',
