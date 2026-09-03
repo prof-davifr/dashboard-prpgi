@@ -12,6 +12,8 @@ const {
   isDgpGroupsCsv,
   selectDgpGroupsCsvFiles,
   selectPosGraduacaoCsvFiles,
+  normalizeCampusCode,
+  CAMPUS_CODE_FIX,
   pseudonymize,
   shortHash,
   loadOrCreateSalt,
@@ -186,6 +188,38 @@ describe('parseCSV', () => {
     expect(rows[0]['Situacao']).toBe('Certificado');
     expect(rows[0]['AnoFormacao']).toBe('2015');
     expect(rows[0]['Pesquisadores']).toBe('5');
+  });
+});
+
+// ─── CAMPUS_CODE_FIX ──────────────────────────────────────────────────────────
+
+describe('normalizeCampusCode', () => {
+  test('corrige as quatro grafias que as fontes produzem', () => {
+    expect(normalizeCampusCode('VDC')).toBe('VC');   // Vitória da Conquista
+    expect(normalizeCampusCode('FSA')).toBe('FS');   // Feira de Santana
+    expect(normalizeCampusCode('PAF')).toBe('PA');   // Paulo Afonso
+    expect(normalizeCampusCode('PSG')).toBe('PS');   // Porto Seguro (set/2026)
+  });
+
+  test('normaliza caixa e espaços antes de comparar', () => {
+    expect(normalizeCampusCode(' psg ')).toBe('PS');
+    expect(normalizeCampusCode('vdc')).toBe('VC');
+  });
+
+  test('devolve o código intacto quando não há correção', () => {
+    expect(normalizeCampusCode('SSA')).toBe('SSA');
+    expect(normalizeCampusCode('')).toBe('');
+    expect(normalizeCampusCode(null)).toBe('');
+  });
+
+  // Regressão: o SUAP passou a exportar PSG no lugar de PS entre a coleta de
+  // agosto e a de setembro de 2026. CODIGOS_VALIDOS não conhece PSG, e a
+  // validação é bloqueante, então o build inteiro parava.
+  test('todo destino da correção é um código que a validação aceita', () => {
+    const { CAMPUS_TO_CITY } = require('../src/shared');
+    Object.values(CAMPUS_CODE_FIX).forEach(destino => {
+      expect(Object.keys(CAMPUS_TO_CITY)).toContain(destino);
+    });
   });
 });
 
