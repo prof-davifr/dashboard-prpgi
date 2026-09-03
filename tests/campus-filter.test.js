@@ -146,11 +146,18 @@ describe('Pós-Graduação campus filter', () => {
     }
   });
 
-  test('VC (Vitória da Conquista) tem 71 registros (snapshot único mais recente)', () => {
-    // Os CSVs do SUAPPos são snapshots cumulativos; o build usa apenas o mais
-    // recente (antes concatenava 3 e inflava para 213).
-    const vc = data.posgraduacao.filter(r => r.campus === 'VC');
-    expect(vc.length).toBe(71);
+  // Os CSVs do SUAPPos são snapshots cumulativos, e o build usa apenas o mais
+  // recente. Quando ele concatenava três, VC saltava de 71 para 213 porque cada
+  // aluno entrava três vezes.
+  //
+  // O teste guardava o número 71. Ele quebrava a cada coleta nova — e quebrou
+  // em 03/09/2026, quando a correção do filtro Lato Sensu levou VC a 146. O
+  // invariante que interessa não é a contagem, é a ausência de repetição: um
+  // aluno aparece uma vez só.
+  test('nenhum aluno aparece duas vezes (snapshot único, não concatenado)', () => {
+    const chaves = data.posgraduacao.map(r => r.dedupKey).filter(Boolean);
+    expect(chaves.length).toBe(data.posgraduacao.length);
+    expect(new Set(chaves).size).toBe(chaves.length);
   });
 
   test('campus filter works for all posgraduacao campuses', () => {
