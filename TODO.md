@@ -38,7 +38,7 @@ Frontend estático (Chart.js + Leaflet + SheetJS) + pipeline ETL em `scripts/bui
       vir da barra global; ficaram três seletores na aba (curso, categoria,
       situação). `src/posgraduacao.js` reescrito; a versão antiga segue em
       `src/pos-validacao.js`.
-      **Para desfazer: `git revert <SHA_ETAPA_2>`.**
+      **Para desfazer: `git revert 49713cf`.**
 - [x] **As dezesseis situações do SUAP entram em cinco grupos**
       (`POSGRAD_SITUACAO_BUCKET`): Matriculado; Concluinte (Concluído,
       Formado); Aperfeiçoado; Evadido (Cancelado, Evasão, Desligado, Abandono,
