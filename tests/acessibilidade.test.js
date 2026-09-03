@@ -128,7 +128,10 @@ describe('gráficos', () => {
   const canvases = [...html.matchAll(/<canvas[^>]*>/g)].map(m => m[0]);
 
   test('todo canvas tem nome acessível — o Chart.js desenha em pixels', () => {
-    expect(canvases.length).toBeGreaterThanOrEqual(31);
+    // 24 desde set/2026: a aba Pós-Graduação trocou os 12 gráficos da
+    // metodologia de ciclos por 5 de indicadores gerais. Os 12 antigos vivem
+    // agora em pos-validacao-f85b5515.html, com suíte própria mais abaixo.
+    expect(canvases.length).toBeGreaterThanOrEqual(24);
     canvases.forEach(c => {
       expect(c).toMatch(/role="img"/);
       expect(c).toMatch(/aria-label="Gráfico: .+"/);

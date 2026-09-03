@@ -5,7 +5,7 @@ Frontend estático (Chart.js + Leaflet + SheetJS) + pipeline ETL em `scripts/bui
 
 ---
 
-## 🔵 Em andamento — remodelagem da aba Pós-Graduação (set/2026)
+## 🟣 Remodelagem da aba Pós-Graduação (set/2026)
 
 ### Etapa 1 — congelamento (feito)
 - [x] **A metodologia de ciclos da PNP saiu do painel principal e virou página própria.**
@@ -29,22 +29,31 @@ Frontend estático (Chart.js + Leaflet + SheetJS) + pipeline ETL em `scripts/bui
 - [x] **`.env` dos três robôs com credencial do SUAP em `600`**
       (`scraper-prpgi`, `scraper-SUAPPos`, `scraper-SUAPCNPQ`).
 
-### Etapa 2 — remodelagem (pendente)
-- [ ] **Substituir a aba Pós-Graduação por indicadores simples**: cursos por
-      campus, alunos por curso, por campus e por situação. Reescrever
-      `src/posgraduacao.js`, simplificar `filterPosGraduacao` em
-      `src/filters.js`, limpar as ramificações de `src/core.js` e
-      `src/cache.js`, tirar o texto PNP do modal de `index.html`.
-      **Sair em um commit só**, e anotar o sha aqui para o `git revert`.
-- [ ] **Corrigir o filtro Lato Sensu nos dois robôs.** A regra descarta 2193
-      alunos de 45 cursos que são especialização de verdade, só não escrevem
-      "lato sensu" no nome. Ela vive em `scraper-SUAPPos/src/scraper.py:84`
-      (`_is_lato_sensu()`) **e** em `scraper-prpgi/src/scrapers/pos.py:97`.
-      Corrigir os dois, ou o robô consolidado desfaz a correção do outro.
-- [ ] **Decidir a classificação das situações novas** que entram com os 2193
-      alunos: Aperfeiçoado (272), Em Migração (95), Não concluído (47), Formado
-      (3), Aguardando Colação de Grau (1), Cancelamento Compulsório (1). Hoje
-      `normalizePosGraduacaoOutcome()` joga todas em "Outros".
+### Etapa 2 — remodelagem (feita)
+- [x] **Aba Pós-Graduação remodelada.** Saíram as três sub-abas e os doze
+      gráficos da metodologia PNP; entraram seis KPIs (Alunos, Matriculados,
+      Concluintes, Evadidos, Cursos, Campi), cinco gráficos (alunos por campus,
+      cursos por campus, situação, programas com mais alunos, ingressos por
+      ano), mapa e tabela campus/ano com exportação. Período e campus passaram a
+      vir da barra global; ficaram três seletores na aba (curso, categoria,
+      situação). `src/posgraduacao.js` reescrito; a versão antiga segue em
+      `src/pos-validacao.js`.
+      **Para desfazer: `git revert <SHA_ETAPA_2>`.**
+- [x] **As dezesseis situações do SUAP entram em cinco grupos**
+      (`POSGRAD_SITUACAO_BUCKET`): Matriculado; Concluinte (Concluído,
+      Formado); Aperfeiçoado; Evadido (Cancelado, Evasão, Desligado, Abandono,
+      Falecido, Cancelamento Compulsório); Outros. Aperfeiçoado tem grupo
+      próprio: o aluno cumpriu os créditos sem obter o título de especialista,
+      e somá-lo a qualquer um dos outros dois distorce ambos.
+- [x] **Filtro Lato Sensu removido dos dois robôs.** Ele descartava 2193 alunos
+      de 45 cursos que são especialização de verdade, e sumia com 13 campi da
+      aba. Vivia em `scraper-SUAPPos/src/scraper.py` e em
+      `scraper-prpgi/src/scrapers/pos.py`; os dois foram corrigidos na mesma
+      sessão, senão o robô consolidado desfaria a correção do outro.
+- [x] **`PSG` → `PS` em `CAMPUS_CODE_FIX`.** O SUAP trocou o código de Porto
+      Seguro entre a coleta de agosto e a de setembro de 2026. `CODIGOS_VALIDOS`
+      não conhece `PSG` e a validação é bloqueante, então o build inteiro
+      parava.
 
 ---
 

@@ -15,11 +15,11 @@ const TABS = [
   { btn: '#aba-grupos', panel: '#tab-grupos', canvases: ['chart-grupos-evo-combined', 'chart-grupos-pie'] },
   { btn: '#aba-pesquisadores', panel: '#tab-pesquisadores', canvases: ['chart-pesquisadores-evolucao', 'chart-pesquisadores-area'] },
   { btn: '#aba-orientacoes', panel: '#tab-orientacoes', canvases: ['chart-orientacoes-evo-1', 'chart-orientacoes-pie'] },
-  { btn: '#aba-posgraduacao', panel: '#tab-posgraduacao', canvases: ['chart-posgraduacao-evolucao', 'chart-posgraduacao-status'] },
+  { btn: '#aba-posgraduacao', panel: '#tab-posgraduacao', canvases: ['chart-posgraduacao-campus', 'chart-posgraduacao-situacao'] },
   { btn: '#aba-ic', panel: '#tab-ic', canvases: ['chart-ic-evolucao', 'chart-ic-modalidade'] },
 ];
 
-const MAPS = ['map-cientifica', 'map-tecnica', 'map-inovacao', 'map-grupos', 'map-pesquisadores', 'map-orientacoes', 'map-ic'];
+const MAPS = ['map-cientifica', 'map-tecnica', 'map-inovacao', 'map-grupos', 'map-pesquisadores', 'map-orientacoes', 'map-posgraduacao', 'map-ic'];
 
 test.beforeEach(async ({ page }) => {
   await gotoDashboard(page);
@@ -96,41 +96,41 @@ test('filtro por campus atualiza KPIs e mapas', async ({ page }) => {
   await expect.poll(async () => mapCircles(page, 'map-cientifica'), { timeout: 15_000 }).toBeGreaterThan(0);
 });
 
-test('pós-graduação: filtros de gestão e subtabs funcionam', async ({ page }) => {
+test('pós-graduação: KPIs, filtros e mapa respondem ao recorte', async ({ page }) => {
   await page.click('#aba-posgraduacao');
   await expect(page.locator('#tab-posgraduacao')).toHaveClass(/active/);
 
-  // Filtro de campus da pós populado com opções reais
-  await expect(page.locator('#posgrad-campus-filter option')).not.toHaveCount(1);
+  // O filtro de programa se popula a partir do data.json, não do HTML.
+  await expect(page.locator('#posgrad-curso-filter option')).not.toHaveCount(1);
 
-  // Os KPIs de gestão (Matriculados = Em curso + Retidos) contam sobre o
-  // recorte inteiro: o filtro "Ciclos encerrados", ligado por padrão, não se
-  // aplica a eles. Ler por rótulo, e não por posição, e checar a identidade
-  // entre os três, deixa o teste independente da distribuição dos dados —
-  // um campus pode ter zero retidos sem que isso seja falha.
-  const kpi = (label) => kpiValueByLabel(page, 'kpi-posgraduacao-overview', label);
+  // Ler por rótulo, e não por posição, deixa o teste independente da ordem dos
+  // cartões e da distribuição dos dados.
+  const kpi = (label) => kpiValueByLabel(page, 'kpi-posgraduacao', label);
 
-  const total = await kpi('Matriculados (M)');
-  expect(total).toBeGreaterThan(0);
+  const alunos = await kpi('Alunos');
+  expect(alunos).toBeGreaterThan(0);
 
-  await page.selectOption('#posgrad-campus-filter', 'VC');
-  const vc = await kpi('Matriculados (M)');
-  expect(vc).toBeGreaterThan(0);
-  expect(vc).toBeLessThanOrEqual(total);
-  expect(vc).toBe((await kpi('Em curso')) + (await kpi('Retidos')));
+  // Os quatro grupos de situação somam o total. Aperfeiçoado tem grupo próprio,
+  // então ele entra na conta junto com Outros.
+  const soma = (await kpi('Matriculados')) + (await kpi('Concluintes')) + (await kpi('Evadidos'));
+  expect(soma).toBeGreaterThan(0);
+  expect(soma).toBeLessThanOrEqual(alunos);
 
-  // Subtabs
-  await page.click('[data-subtarget="subtab-cursos"]');
-  await expect(page.locator('#subtab-cursos')).toHaveClass(/active/);
-  await expect
-    .poll(async () => chartHasData(page, 'chart-posgraduacao-curso-evolucao'), { timeout: 15_000 })
-    .toBe(true);
+  expect(await kpi('Cursos')).toBeGreaterThan(0);
+  expect(await kpi('Campi')).toBeGreaterThan(1);
 
-  await page.click('[data-subtarget="subtab-campus"]');
-  await expect(page.locator('#subtab-campus')).toHaveClass(/active/);
-  await expect
-    .poll(async () => chartHasData(page, 'chart-posgraduacao-campus-evolucao'), { timeout: 15_000 })
-    .toBe(true);
+  // O campus agora vem do filtro global, como nas outras abas.
+  await page.selectOption('#campus-filter', 'VC');
+  await expect.poll(async () => kpi('Alunos'), { timeout: 15_000 }).toBeLessThan(alunos);
+  expect(await kpi('Campi')).toBe(1);
+
+  await page.selectOption('#campus-filter', 'all');
+  await expect.poll(async () => kpi('Alunos'), { timeout: 15_000 }).toBe(alunos);
+
+  // O filtro de situação recorta sem zerar.
+  await page.selectOption('#posgrad-situacao-filter', 'Matriculado');
+  await expect.poll(async () => kpi('Alunos'), { timeout: 15_000 }).toBeLessThan(alunos);
+  expect(await kpi('Concluintes')).toBe(0);
 });
 
 test('tabela detalhada expande e exporta para Excel', async ({ page }) => {

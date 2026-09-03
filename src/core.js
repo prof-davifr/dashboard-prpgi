@@ -89,14 +89,13 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
 
     // Reset post-graduation filters if switching away from that tab
     if (switchingFromPosGraduacao && !switchingToPosGraduacao) {
-      const posgradFilters = ['posgrad-categoria-filter', 'posgrad-status-filter', 'posgrad-campus-filter', 'posgrad-curso-filter'];
+      const posgradFilters = ['posgrad-curso-filter', 'posgrad-categoria-filter', 'posgrad-situacao-filter'];
       posgradFilters.forEach(id => {
         const elem = $(id);
         if (elem && elem.value !== 'all') {
           elem.value = 'all';
         }
       });
-      if ($('posgrad-matured-only-toggle')) $('posgrad-matured-only-toggle').checked = true;
       processData();
     }
 
@@ -230,16 +229,18 @@ function updateFilterVisibility() {
   const activeTab = document.querySelector('.tab-btn.active');
   if (!activeTab) return;
   
+  // Na pós-graduação não há coautoria nem servidor: "Desduplicar" e "p/ Servidor"
+  // não se aplicam. O filtro de período, sim — ele recorta o ano de ingresso.
   const isPosGraduacaoTab = activeTab.dataset.target === 'tab-posgraduacao';
-  const periodFilter = $('period-filter');
-  
-  // Show/hide unique toggle (not needed for post-graduation)
+
   const uniqueToggle = $('unique-toggle');
   if (uniqueToggle) {
     uniqueToggle.parentElement.style.display = isPosGraduacaoTab ? 'none' : 'flex';
   }
-  if (periodFilter) {
-    periodFilter.style.display = isPosGraduacaoTab ? 'none' : '';
+
+  const relativeToggle = $('relative-metrics-toggle');
+  if (relativeToggle) {
+    relativeToggle.parentElement.style.display = isPosGraduacaoTab ? 'none' : 'flex';
   }
 }
 

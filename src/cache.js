@@ -94,28 +94,11 @@ async function initDashboard() {
     }
     
     // Post-graduation filter event listeners
-    ['posgrad-categoria-filter', 'posgrad-status-filter', 'posgrad-campus-filter', 'posgrad-curso-filter', 'posgrad-matured-only-toggle']
+    ['posgrad-curso-filter', 'posgrad-categoria-filter', 'posgrad-situacao-filter']
       .forEach(id => {
         const elem = $(id);
         if (elem) elem.addEventListener('change', processData);
       });
-    
-    // Subtabs event listeners
-    document.querySelectorAll('.sub-tab-btn').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        const subtarget = e.target.dataset.subtarget;
-        // Update active subtab
-        document.querySelectorAll('.sub-tab-btn').forEach(b => b.classList.remove('active'));
-        document.querySelectorAll('.subtab-content').forEach(c => c.classList.remove('active'));
-        e.target.classList.add('active');
-        $(subtarget).classList.add('active');
-        
-        // Re-render post-graduation charts for the new subtab
-        if ($('tab-posgraduacao') && $('tab-posgraduacao').classList.contains('active')) {
-          renderChartsPosGraduacao();
-        }
-      });
-    });
     
     // Update filter visibility based on active tab
     updateFilterVisibility();

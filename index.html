@@ -284,124 +284,77 @@
     <!-- Tab 7: Pós-Graduação -->
     <section id="tab-posgraduacao" class="tab-content" role="tabpanel" aria-labelledby="aba-posgraduacao" tabindex="0">
         <div class="chart-card" style="margin-bottom: 1.5rem;">
-            <div class="chart-title">Filtros de Gestão da Pós-Graduação</div>
+            <div class="chart-title">Filtros da Pós-Graduação</div>
             <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center;">
-                <select id="posgrad-categoria-filter" style="min-width: 160px; font-size: 0.85rem; padding: 0.35rem 0.6rem;" title="Filtra por modalidade do programa (Mestrado, Doutorado, Especialização).">
+                <label class="sr-only" for="posgrad-curso-filter">Programa</label>
+                <select id="posgrad-curso-filter" style="min-width: 260px; font-size: 0.85rem; padding: 0.35rem 0.6rem;" title="Filtra por programa/curso específico.">
+                    <option value="all">Todos os Programas</option>
+                </select>
+                <label class="sr-only" for="posgrad-categoria-filter">Categoria</label>
+                <select id="posgrad-categoria-filter" style="min-width: 160px; font-size: 0.85rem; padding: 0.35rem 0.6rem;" title="Filtra por modalidade do programa.">
                     <option value="all">Todas as Categorias</option>
                     <option value="Mestrado">Mestrado</option>
                     <option value="Doutorado">Doutorado</option>
                     <option value="Especialização">Especialização</option>
                 </select>
-                <select id="posgrad-status-filter" style="min-width: 160px; font-size: 0.85rem; padding: 0.35rem 0.6rem;" title="Filtra por situação acadêmica atual registrada no SUAP.">
-                    <option value="all">Todos os Status</option>
+                <label class="sr-only" for="posgrad-situacao-filter">Situação</label>
+                <select id="posgrad-situacao-filter" style="min-width: 160px; font-size: 0.85rem; padding: 0.35rem 0.6rem;" title="Filtra pela situação do aluno, agrupada em cinco categorias.">
+                    <option value="all">Todas as Situações</option>
                     <option value="Matriculado">Matriculado</option>
-                    <option value="Concluído">Concluído</option>
-                    <option value="Cancelado">Cancelado</option>
-                    <option value="Desligado">Desligado</option>
-                    <option value="Evasão">Evasão</option>
+                    <option value="Concluinte">Concluinte</option>
+                    <option value="Aperfeiçoado">Aperfeiçoado</option>
+                    <option value="Evadido">Evadido</option>
+                    <option value="Outros">Outros</option>
                 </select>
-                <select id="posgrad-campus-filter" style="min-width: 160px; font-size: 0.85rem; padding: 0.35rem 0.6rem;" title="Filtra por campus do programa.">
-                    <option value="all">Todos os Campi</option>
-                </select>
-                <select id="posgrad-curso-filter" style="min-width: 180px; font-size: 0.85rem; padding: 0.35rem 0.6rem;" title="Filtra por programa/curso específico.">
-                    <option value="all">Todos os Programas</option>
-                </select>
-                <label style="display:flex;align-items:center;gap:0.4rem;color:#444;font-weight:600;font-size:0.85rem;" title="Mantém apenas ciclos de matrícula encerrados. Regra PNP (retenção crítica): Mestrado ≥ 24+12 meses, Doutorado ≥ 48+12 meses, Especialização ≥ 18+12 meses (lato sensu).">
-                    <input type="checkbox" id="posgrad-matured-only-toggle" checked style="width: 14px; height: 14px;">
-                    Ciclos encerrados
-                    <span class="tip-dot" title="Ciclo encerrado = turma de ingresso cujo término previsto ocorreu há 1 ano ou mais (retenção crítica, PNP).">?</span>
-                </label>
             </div>
             <div class="inline-help">
-                <strong>O que é ciclo encerrado:</strong> turma de ingresso (ano+semestre de entrada) cujo término previsto ocorreu há 1 ano ou mais.
-                Regra PNP (retenção crítica): Mestrado ≥ 24+12 meses, Doutorado ≥ 48+12 meses, Especialização ≥ 18+12 meses (prazo padrão lato sensu).
-                Esse recorte alinha os indicadores por ciclo (Conclusão, Evasão, Retenção e Eficiência Acadêmica) à Plataforma Nilo Peçanha.
+                <strong>Como ler:</strong> um registro é um aluno, e o ano é o de ingresso.
+                As situações do SUAP entram em cinco grupos: <em>Matriculado</em>; <em>Concluinte</em> (Concluído, Formado);
+                <em>Aperfeiçoado</em> (cumpriu os créditos, sem o título de especialista); <em>Evadido</em> (Cancelado,
+                Evasão, Desligado, Abandono, Falecido, Cancelamento Compulsório); e <em>Outros</em>.
+                Os filtros de período e de campus são os da barra do topo.
             </div>
         </div>
-        <!-- Subtabs Navigation -->
-        <div class="sub-tabs">
-            <button class="sub-tab-btn active" data-subtarget="subtab-overview">Resumo Executivo</button>
-            <button class="sub-tab-btn" data-subtarget="subtab-cursos">Desempenho por Coorte</button>
-            <button class="sub-tab-btn" data-subtarget="subtab-campus">Risco por Programa/Campus</button>
-        </div>
-        
-        <!-- Subtabs Content -->
-        <div class="subtab-content active" id="subtab-overview">
-            <div class="kpi-grid" id="kpi-posgraduacao-overview"></div>
-            <div class="charts-container">
-                <div class="chart-row-full chart-card">
-                    <div class="chart-title" title="Volume de ingressos por ano de entrada e modalidade do programa.">Entradas por Coorte e Categoria</div>
-                    <div class="chart-wrapper large"><canvas id="chart-posgraduacao-evolucao" role="img" aria-label="Gráfico: Entradas por Coorte e Categoria"></canvas></div>
+
+        <div class="kpi-grid" id="kpi-posgraduacao"></div>
+
+        <div class="charts-container">
+            <div class="chart-row-full chart-card">
+                <div class="chart-title" title="Alunos por campus, separados por modalidade do programa.">Alunos por Campus</div>
+                <div class="chart-wrapper large"><canvas id="chart-posgraduacao-campus" role="img" aria-label="Gráfico: Alunos por Campus"></canvas></div>
+            </div>
+            <div class="chart-row-split">
+                <div class="chart-card">
+                    <div class="chart-title" title="Quantidade de programas distintos com aluno em cada campus.">Cursos por Campus</div>
+                    <div class="chart-wrapper"><canvas id="chart-posgraduacao-cursos-campus" role="img" aria-label="Gráfico: Cursos por Campus"></canvas></div>
                 </div>
-                <div class="chart-row-split">
-                    <div class="chart-card">
-                        <div class="chart-title" title="Distribuição de desfechos (Concluinte, Em curso, Retido, Evadido, Outros) para ciclos encerrados.">Desfecho dos Ciclos</div>
-                        <div class="chart-wrapper"><canvas id="chart-posgraduacao-status" role="img" aria-label="Gráfico: Desfecho dos Ciclos"></canvas></div>
-                    </div>
-                    <div class="chart-card">
-                        <div class="chart-title" title="Compara conclusão, evasão e retenção por modalidade, apenas em ciclos encerrados.">Risco por Categoria (Ciclos encerrados)</div>
-                        <div class="chart-wrapper"><canvas id="chart-posgraduacao-categoria" role="img" aria-label="Gráfico: Risco por Categoria (Ciclos encerrados)"></canvas></div>
-                    </div>
-                </div>
-                <div class="chart-row-split">
-                    <div class="chart-card">
-                        <div class="chart-title" title="Programas com maior volume de alunos ativos, separados em Em curso e Retidos.">Programas com Maior Volume Ativo</div>
-                        <div class="chart-wrapper"><canvas id="chart-posgraduacao-topcursos" role="img" aria-label="Gráfico: Programas com Maior Volume Ativo"></canvas></div>
-                    </div>
-                    <div class="chart-card">
-                        <div class="chart-title" title="Compara Em curso, Retenção e Evasão por campus.">Situação Ativa por Campus</div>
-                        <div class="chart-wrapper"><canvas id="chart-posgraduacao-campusrisk" role="img" aria-label="Gráfico: Situação Ativa por Campus"></canvas></div>
-                    </div>
-                </div>
-                <div class="chart-row-full chart-card">
-                    <div class="chart-title" title="Evolução anual de Conclusão Ciclo (CCiclo), Evasão Ciclo (EvCiclo) e Retenção Ciclo (RCiclo) para ciclos encerrados.">Taxas por Ano de Coorte (Ciclos encerrados)</div>
-                    <div class="chart-wrapper large"><canvas id="chart-posgraduacao-completion" role="img" aria-label="Gráfico: Taxas por Ano de Coorte (Ciclos encerrados)"></canvas></div>
+                <div class="chart-card">
+                    <div class="chart-title" title="Distribuição dos alunos entre os cinco grupos de situação.">Situação dos Alunos</div>
+                    <div class="chart-wrapper"><canvas id="chart-posgraduacao-situacao" role="img" aria-label="Gráfico: Situação dos Alunos"></canvas></div>
                 </div>
             </div>
-        </div>
-        
-        <div class="subtab-content" id="subtab-cursos">
-            <div class="kpi-grid" id="kpi-posgraduacao-curso"></div>
-            <div class="charts-container">
-                <div class="chart-row-full chart-card">
-                    <div class="chart-title">Ciclos por Situação (Programa)</div>
-                    <div class="chart-wrapper large"><canvas id="chart-posgraduacao-curso-evolucao" role="img" aria-label="Gráfico: Ciclos por Situação (Programa)"></canvas></div>
-                </div>
-                <div class="chart-row-split">
-                    <div class="chart-card">
-                        <div class="chart-title">Desfecho por Ciclo</div>
-                        <div class="chart-wrapper"><canvas id="chart-posgraduacao-curso-status" role="img" aria-label="Gráfico: Desfecho por Ciclo"></canvas></div>
-                    </div>
-                    <div class="chart-card">
-                        <div class="chart-title">Taxas (Conclusão, Evasão, Retenção)</div>
-                        <div class="chart-wrapper"><canvas id="chart-posgraduacao-curso-campus" role="img" aria-label="Gráfico: Taxas (Conclusão, Evasão, Retenção)"></canvas></div>
-                    </div>
-                </div>
+            <div class="chart-row-full chart-card">
+                <div class="chart-title" title="Os quinze programas com mais alunos no recorte atual.">Programas com Mais Alunos</div>
+                <div class="chart-wrapper large"><canvas id="chart-posgraduacao-topcursos" role="img" aria-label="Gráfico: Programas com Mais Alunos"></canvas></div>
+            </div>
+            <div class="chart-row-full chart-card">
+                <div class="chart-title" title="Ingressos por ano de entrada, separados por modalidade.">Ingressos por Ano</div>
+                <div class="chart-wrapper large"><canvas id="chart-posgraduacao-evolucao" role="img" aria-label="Gráfico: Ingressos por Ano"></canvas></div>
+            </div>
+            <div class="chart-row-full chart-card">
+                <div class="chart-title">Distribuição Geográfica</div>
+                <div class="map-container tall"><div id="map-posgraduacao" style="height: 100%; width: 100%;"></div></div>
             </div>
         </div>
-        
-        <div class="subtab-content" id="subtab-campus">
-            <div class="kpi-grid" id="kpi-posgraduacao-campus"></div>
-            <div class="charts-container">
-                <div class="chart-row-full chart-card">
-                    <div class="chart-title">Ranking de Programas por Risco</div>
-                    <div class="chart-wrapper large"><canvas id="chart-posgraduacao-campus-evolucao" role="img" aria-label="Gráfico: Ranking de Programas por Risco"></canvas></div>
-                </div>
-                <div class="chart-row-split">
-                    <div class="chart-card">
-                        <div class="chart-title">Comparativo de Campi</div>
-                        <div class="chart-wrapper"><canvas id="chart-posgraduacao-campus-cursos" role="img" aria-label="Gráfico: Comparativo de Campi"></canvas></div>
-                    </div>
-                    <div class="chart-card">
-                        <div class="chart-title">Composição por Categoria</div>
-                        <div class="chart-wrapper"><canvas id="chart-posgraduacao-campus-categorias" role="img" aria-label="Gráfico: Composição por Categoria"></canvas></div>
-                    </div>
-                </div>
+
+        <div class="table-section">
+            <div class="table-actions">
+                <button class="table-toggle-btn" onclick="toggleTable('table-posgraduacao-container', this)">Exibir Tabela Detalhada por Campus/Ano</button>
+                <button class="export-btn" onclick="exportTableToExcel('table-posgraduacao-container', 'PosGraduacao_IFBA')">Exportar para Excel</button>
             </div>
-        </div>
-        <div class="chart-card" style="margin-top: 1.5rem;">
-            <div class="chart-title">Rastreabilidade dos Indicadores</div>
-            <div id="posgrad-traceability" class="inline-help">Carregando rastreabilidade...</div>
+            <div id="table-posgraduacao-container" class="table-container">
+                <div id="table-posgraduacao-content"></div>
+            </div>
         </div>
     </section>
 
@@ -511,46 +464,17 @@
                 </div>
 
                 <div class="modal-section">
-                    <h3>Dicionário de Termos (Pós-Graduação)</h3>
-                    <p>Terminologia e indicadores conforme o <strong>Guia de Referência Metodológica da Plataforma Nilo Peçanha (PNP)</strong>, adaptados à pós-graduação do IFBA.</p>
+                    <h3>Pós-Graduação</h3>
+                    <p>A aba apresenta indicadores gerais dos programas de pós-graduação do IFBA: alunos e cursos por campus, programas com mais alunos, ingressos por ano e distribuição por situação. Cada registro do SUAP é um aluno, e o ano é o de ingresso.</p>
+                    <p><strong>Grupos de situação.</strong> As dezesseis situações do SUAP entram em cinco grupos:</p>
                     <ul>
-                        <li><strong>Ciclo de Matrícula:</strong> oferta de um curso com mesma data de início e mesma previsão de término, reunindo as matrículas para obtenção de uma mesma certificação.</li>
-                        <li><strong>Ciclo encerrado:</strong> ciclo de matrícula cujo término previsto ocorreu há 1 ano ou mais (base dos indicadores por ciclo).</li>
-                        <li><strong>Concluinte:</strong> aluno Formado (concluiu todos os componentes curriculares) ou Integralizado em fase escolar (concluiu a carga horária, pendente de Estágio/TCC/ENADE).</li>
-                        <li><strong>Evadido:</strong> aluno que perdeu o vínculo com a instituição antes da conclusão do curso (Cancelado, Desligado, Evasão, Abandono, Falecido).</li>
-                        <li><strong>Retido:</strong> aluno ainda matriculado 1 ano após o término previsto do ciclo ("retenção crítica").</li>
-                        <li><strong>Em curso:</strong> aluno matriculado dentro do prazo de integralização (ainda não retido).</li>
+                        <li><strong>Matriculado:</strong> vínculo ativo.</li>
+                        <li><strong>Concluinte:</strong> Concluído ou Formado.</li>
+                        <li><strong>Aperfeiçoado:</strong> cumpriu os créditos do curso sem obter o título de especialista. Fica em grupo próprio para não inflar a conclusão nem a evasão.</li>
+                        <li><strong>Evadido:</strong> Cancelado, Evasão, Desligado, Abandono, Falecido ou Cancelamento Compulsório.</li>
+                        <li><strong>Outros:</strong> Em Migração, Não concluído, Transferido Interno, Trancado, Trancado Voluntariamente, Matrícula Vínculo Institucional e Aguardando Colação de Grau.</li>
                     </ul>
-                    <div class="methodology-note">
-                        <strong>Regra de ciclo encerrado (PNP):</strong> Mestrado ≥ 24 + 12 meses, Doutorado ≥ 48 + 12 meses, Especialização ≥ 18 + 12 meses (lato sensu). Comparação em meses com granularidade de semestre, referência = período mais recente nos dados.
-                    </div>
-                </div>
-
-                <div class="modal-section">
-                    <h3>Regras de Cálculo (Pós-Graduação)</h3>
-                    <p><strong>Base de Avaliação:</strong> os indicadores por ciclo são calculados sobre os ciclos de matrícula com término previsto há 1 ano ou mais, evitando comparar turmas recentes ainda em formação.</p>
-                    <p><strong>Fórmulas (Plataforma Nilo Peçanha):</strong></p>
-                    <ul>
-                        <li><strong>Conclusão Ciclo (CCiclo):</strong> Concluintes / Matrículas do ciclo.</li>
-                        <li><strong>Evasão Ciclo (EvCiclo):</strong> Evadidos / Matrículas do ciclo.</li>
-                        <li><strong>Retenção Ciclo (RCiclo):</strong> Retidos / Matrículas do ciclo.</li>
-                        <li><strong>Índice de Eficiência Acadêmica (IEA):</strong> CCiclo + (CCiclo ÷ (CCiclo + EvCiclo)) × RCiclo.</li>
-                    </ul>
-                    <p>O IEA acrescenta à conclusão uma projeção dos retidos que provavelmente concluirão, proporcional à razão entre concluintes e não retidos (concluintes + evadidos).</p>
-                    <p><strong>Importante:</strong> o ano da pós-graduação representa o ano de ingresso do ciclo de matrícula, e não necessariamente o ano do evento de conclusão ou evasão.</p>
-                </div>
-
-                <div class="modal-section">
-                    <h3>Referências Normativas</h3>
-                    <ul>
-                        <li><strong>Plataforma Nilo Peçanha (PNP) — Guia de Referência Metodológica</strong> (MEC/SETEC, 2020). Define os indicadores Conclusão Ciclo (CCiclo), Evasão Ciclo (EvCiclo), Retenção Ciclo (RCiclo), Índice de Eficiência Acadêmica (IEA), Taxa de Evasão Anual (Ev), Relação de Inscritos por Vaga (RIV), Relação de Ingressantes por Matrícula (RIM), Relação de Matrículas por Professor (RAP) e Índice de Titulação do Corpo Docente (ITCD); os conceitos de ciclo de matrícula, concluinte, evadido, retido e a "retenção crítica" (1 ano após o término previsto).</li>
-                        <li><strong>Portaria CAPES nº 76, de 14 de abril de 2010</strong> — Regulamento do Programa de Demanda Social (DS), art. 10: bolsa renovável até 24 meses (mestrado) e 48 meses (doutorado).</li>
-                        <li><strong>Resolução CNE/CES nº 1, de 6 de abril de 2018</strong> (DOU 09/04/2018, Seção 1, p. 43) — pós-graduação lato sensu (especialização), art. 7º, I: carga horária mínima de 360 horas.</li>
-                        <li><strong>INEP — Metodologia de Cálculo dos Indicadores de Fluxo da Educação Superior</strong> (2017) — referência conceitual de coorte/fluxo na qual a PNP se apoia.</li>
-                    </ul>
-                    <div class="methodology-note">
-                        <strong>Nota:</strong> o prazo de 18 meses da especialização é a operacionalização institucional da carga mínima de 360 h (Resolução CNE/CES nº 1/2018). O dashboard usa "Concluído" do SUAP como equivalente de "Concluinte" (Formado + Integralizado em fase escolar).
-                    </div>
+                    <p><strong>Contagem de cursos.</strong> Um mesmo programa ofertado em dois campi conta uma vez em cada campus, porque cada campus tem a própria oferta.</p>
                 </div>
 
                 <div class="modal-section">

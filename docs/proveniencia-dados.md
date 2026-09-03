@@ -630,9 +630,14 @@ Toggle "p/ Servidor" que divide as métricas pelo número de pesquisadores ativo
 > metodologia de ciclos da PNP, que saiu do painel principal em 02/09/2026 e
 > passou a viver na página **Pós-Graduação Validação**
 > (`pos-validacao-f85b5515.html`, não listada, com senha). O código congelado
-> está em `src/pos-validacao.js`. A aba Pós-Graduação do painel principal está
-> em remodelagem, com indicadores mais simples. Ver `CLAUDE.md`, seção "Second
-> page: Pós-Graduação Validação".
+> está em `src/pos-validacao.js`.
+>
+> A aba Pós-Graduação do painel principal **não usa mais estas regras**. Ela
+> mostra indicadores gerais: alunos e cursos por campus, programas com mais
+> alunos, ingressos por ano e situação. As dezesseis situações do SUAP entram em
+> cinco grupos (Matriculado, Concluinte, Aperfeiçoado, Evadido, Outros) por
+> `POSGRAD_SITUACAO_BUCKET`, em `src/posgraduacao.js`. Ver `CLAUDE.md`, seção
+> "Second page: Pós-Graduação Validação".
 
 Regra que define se uma coorte (período de ingresso) já atingiu maturidade para avaliação de desfecho.
 A referência "hoje" é o **período (ano+semestre) mais recente presente nos dados** (ex.: 2026.1).

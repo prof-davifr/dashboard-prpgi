@@ -126,7 +126,7 @@ Campus codes cover 25 IFBA campuses (BAR, BRU, CAM, CFO, EC, EUN, FS, ILH, IRE, 
 - Tabs map to data sources roughly 1:1 (Produção Científica → `bibliografica`, Produção Técnica → `tecnica`, Inovação → `inovacao`, Grupos de Pesquisa/Pesquisadores → `grupos` + productions, Orientações → `concluidas`+`andamento`, Pós-Graduação → `posgraduacao`, IC → `ic`).
 - "p/ Servidor" (relative metrics) toggle divides KPIs/charts/map values by the count of distinct active `Servidor` IDs in the current period/campus selection.
 - Small categories (<2%) in evolution/pie charts get aggregated into "Outras" (bibliográfica types, técnica types, inovação types, IC areas).
-- Postgraduate-specific business rules (cohort maturity thresholds, situação bucketing) live in `src/posgraduacao.js` — see `docs/proveniencia-dados.md` §6.4–6.5 rather than re-deriving from code.
+- Pós-Graduação (redesigned set/2026) shows general indicators only: students and courses per campus, top programs, intake per year, situação. **One record = one student** (no duplicate matrículas), so counting rows counts students. It uses the *global* period and campus filters like every other tab, plus three tab-local selects (curso, categoria, situação). The 16 SUAP situações collapse into five buckets via `POSGRAD_SITUACAO_BUCKET` in `src/posgraduacao.js`; `Aperfeiçoado` is its own bucket on purpose (credits done, no specialist title — it is neither a concluinte nor an evadido). The old PNP cycle methodology is frozen in `src/pos-validacao.js`, not deleted.
 
 ## Second page: Pós-Graduação Validação (frozen, set/2026)
 

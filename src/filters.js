@@ -31,22 +31,19 @@ function processData() {
   const campusVal = $('campus-filter').value;
   
   // Check if post-graduation tab is active
-  const isPosGraduacaoTab = $('tab-posgraduacao') && 
+  const isPosGraduacaoTab = $('tab-posgraduacao') &&
                            $('tab-posgraduacao').classList.contains('active');
-  
-  // Post-graduation specific filters - only get values if on post-graduation tab
+
+  // Post-graduation specific filters - only get values if on post-graduation tab.
+  // Período e campus vêm da barra global, como nas outras abas.
   let categoriaVal = 'all';
-  let statusVal = 'all';
-  let posgradCampusVal = 'all';
+  let situacaoVal = 'all';
   let posgradCursoVal = 'all';
-  let maturedOnly = true;
-  
+
   if (isPosGraduacaoTab) {
     categoriaVal = $('posgrad-categoria-filter') ? $('posgrad-categoria-filter').value : 'all';
-    statusVal = $('posgrad-status-filter') ? $('posgrad-status-filter').value : 'all';
-    posgradCampusVal = $('posgrad-campus-filter') ? $('posgrad-campus-filter').value : 'all';
+    situacaoVal = $('posgrad-situacao-filter') ? $('posgrad-situacao-filter').value : 'all';
     posgradCursoVal = $('posgrad-curso-filter') ? $('posgrad-curso-filter').value : 'all';
-    maturedOnly = $('posgrad-matured-only-toggle') ? $('posgrad-matured-only-toggle').checked : true;
   }
 
   const filterPeriodAndCampus = arr => arr.filter(r => {
@@ -76,34 +73,18 @@ function processData() {
   });
 
   // Post-graduation filter function.
-  // `applyMaturedOnly = false` devolve o mesmo recorte sem o filtro de ciclo
-  // encerrado. Os KPIs de gestão (Matriculados, Em curso, Retidos) contam sobre
-  // toda a população do recorte: "Em curso" é, por definição, quem ainda não
-  // está em ciclo encerrado, então sobre o recorte filtrado daria sempre zero.
-  const filterPosGraduacao = (arr, applyMaturedOnly = true) => arr.filter(r => {
-    const status = normalizePosGraduacaoStatus(r.situacao);
-    const cohortYear = parseInt(r.ano, 10);
-    const isMature = isPosGraduacaoMature(r);
-    
-    // Campus filter (tab-local filter first, then global fallback when local is all)
-    const effectiveCampus = posgradCampusVal !== 'all' ? posgradCampusVal : campusVal;
-    if (effectiveCampus !== 'all' && r.campus !== effectiveCampus) return false;
-
-    // Program filter
+  //
+  // Período e campus já vieram de filterPeriodAndCampus, que trata `r.ano` em
+  // minúscula e `r.campus` — os mesmos campos que a pós-graduação usa. Aqui
+  // ficam só os três seletores da aba.
+  const filterPosGraduacao = arr => filterPeriodAndCampus(arr).filter(r => {
     if (posgradCursoVal !== 'all' && (r.curso || '').trim() !== posgradCursoVal) return false;
-    
-    // Categoria filter
     if (categoriaVal !== 'all' && r.categoria !== categoriaVal) return false;
-    
-    // Status filter
-    if (statusVal !== 'all' && status !== statusVal) return false;
+    if (situacaoVal !== 'all' && getPosGraduacaoBucket(r.situacao) !== situacaoVal) return false;
 
-    // Only cohorts mature enough to expect an outcome (default on)
-    if (applyMaturedOnly && maturedOnly && !isMature) return false;
+    // Guarda contra ano de coorte inválido
+    if (Number.isNaN(parseInt(r.ano, 10))) return false;
 
-    // Guard against invalid cohort year
-    if (Number.isNaN(cohortYear)) return false;
-    
     return true;
   });
 
@@ -136,7 +117,6 @@ function processData() {
     andamento: filterUnique(filterPeriodAndCampus(STATE.raw.andamento)),
     grupos: filterGroupsCampus(STATE.raw.grupos),
     posgraduacao: filterPosGraduacao(STATE.raw.posgraduacao),
-    posgraduacaoTodosCiclos: filterPosGraduacao(STATE.raw.posgraduacao, false),
     ic: filterPeriodAndCampus(STATE.raw.ic)
   };
 
@@ -155,12 +135,12 @@ function processData() {
   renderChartsOrientacoes();
   renderKPIsIC();
   renderChartsIC();
-  
+  // Desenha junto com as outras abas, mesmo escondida. A aba antiga só desenhava
+  // ao ser aberta, porque a metodologia de ciclos era pesada; a aba nova não é,
+  // e o mapa Leaflet precisa existir antes do primeiro clique. core.js chama
+  // invalidateSize() na troca de aba, como faz para os outros mapas.
+  renderChartsPosGraduacao();
+
   // Render tables
   renderTables();
-
-  // Render post-graduation if tab is active
-  if ($('tab-posgraduacao') && $('tab-posgraduacao').classList.contains('active')) {
-    renderChartsPosGraduacao();
-  }
 }
