@@ -39,6 +39,21 @@ Frontend estático (Chart.js + Leaflet + SheetJS) + pipeline ETL em `scripts/bui
       situação). `src/posgraduacao.js` reescrito; a versão antiga segue em
       `src/pos-validacao.js`.
       **Para desfazer: `git revert 49713cf`.**
+- [x] **Nomes de curso legíveis** (`ba90b53`) — os nomes do SUAP têm 79
+      caracteres na mediana e chegam a 121; truncá-los deixava oito programas de
+      "Docência para a Educação Profissional e Tecnológica" idênticos no filtro.
+      `nomeCursoCurto()` tira o código de matrícula, o nível do curso (que a
+      coluna `categoria` já diz) e o caixa alta, preservando siglas; a mediana
+      cai para 51. `construirRotulosCurso()` acrescenta o campus só nos onze
+      nomes que colidiam, e devolve 60 rótulos distintos para 60 cursos. No
+      gráfico o rótulo quebra em duas linhas e marca o corte com reticências.
+      Os vinte campi voltam a ter rótulo: classe `.alta` (620 px) e `autoSkip`
+      desligado. "Cursos por Campus" virou barra vertical com a sigla.
+- [x] **Chave do CARTO nos ladrilhos** (`c60a879`) — desde set/2026 o serviço
+      exige chave, e os sete mapas vinham com "API KEY REQUIRED" atravessado. A
+      URL, antes duplicada, virou a constante `CARTO_TILES` em `src/maps.js`.
+      Estilo passou de `light_all` para `voyager`. **A chave é de cliente e fica
+      pública** — restringir por domínio no painel do CARTO.
 - [x] **As dezesseis situações do SUAP entram em cinco grupos**
       (`POSGRAD_SITUACAO_BUCKET`): Matriculado; Concluinte (Concluído,
       Formado); Aperfeiçoado; Evadido (Cancelado, Evasão, Desligado, Abandono,
