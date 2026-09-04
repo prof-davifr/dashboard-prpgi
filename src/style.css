@@ -125,12 +125,17 @@ select:focus { border-color: var(--accent); white-space: nowrap;}
 .tip-dot { display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px; border-radius: 50%; background: #32a041; color: #fff; font-size: 0.72rem; font-weight: 700; cursor: help; margin-left: 0.25rem; }
 .chart-wrapper { position: relative; height: 320px; width: 100%; }
 .chart-wrapper.large { height: 400px; }
+/* Barras horizontais com um item por campus ou por programa. Abaixo desta
+   altura o Chart.js começa a pular rótulos do eixo, e metade das barras fica
+   sem nome. */
+.chart-wrapper.alta { height: 620px; }
 
 @media (max-width: 766px) {
   .charts-container { gap:1rem; }
   .chart-card { padding: 1rem; }
   .chart-wrapper { height: 280px; }
   .chart-wrapper.large { height: 350px; }
+  .chart-wrapper.alta { height: 520px; }
   .chart-title { font-size: 0.9rem; }
 }
 

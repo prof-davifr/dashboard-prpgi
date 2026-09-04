@@ -251,3 +251,134 @@ describe('seriesPorCategoria', () => {
     expect(chaves).toEqual(['2019', '2024', '2026']);
   });
 });
+
+// ─── Nomes de curso ──────────────────────────────────────────────────────────
+
+describe('nomeCursoCurto', () => {
+  test('tira o nível do curso, que a coluna categoria já informa', () => {
+    expect(ctx.nomeCursoCurto('MESTRADO PROFISSIONAL EM ENGENHARIA DE MATERIAIS'))
+      .toBe('Engenharia de Materiais');
+    expect(ctx.nomeCursoCurto('Doutorado em Difusão do Conhecimento'))
+      .toBe('Difusão do Conhecimento');
+    expect(ctx.nomeCursoCurto('Curso de Pós-graduação Lato Sensu em Ensino de Ciências: Ciência é 10'))
+      .toBe('Ensino de Ciências: Ciência é 10');
+  });
+
+  test('tira o código de matrícula do começo', () => {
+    expect(ctx.nomeCursoCurto('PGMP - Especialização em Ensino de Matemática'))
+      .toBe('Ensino de Matemática');
+    expect(ctx.nomeCursoCurto('EDEPTILH - Especialização em Educação a Distância - ILH'))
+      .toBe('Educação a Distância - ILH');
+  });
+
+  // Casos reais da base que a primeira versão da regra deixou passar.
+  test('aceita a vírgula e o hífen com espaços que a base traz', () => {
+    expect(ctx.nomeCursoCurto('CELER - Curso de Especialização, Lato Sensu, em Linguagem, Ensino e Representação'))
+      .toBe('Linguagem, Ensino e Representação');
+    expect(ctx.nomeCursoCurto('PGGEA - CURSO DE PÓS - GRADUAÇÃO LATO SENSU EM GESTÃO E EDUCAÇÃO AMBIENTAL- JQ'))
+      .toBe('Gestão e Educação Ambiental- JQ');
+  });
+
+  test('normaliza o CAIXA ALTA mas preserva as siglas', () => {
+    expect(ctx.nomeCursoCurto('PÓS-GRADUAÇÃO LATO SENSU EM EDUCAÇÃO E SUAS TECNOLOGIAS - VAL'))
+      .toBe('Educação e suas Tecnologias - VAL');
+  });
+
+  test('não mexe em nome que já está em caixa mista', () => {
+    expect(ctx.nomeCursoCurto('DWEB - Pós-Graduação Lato Sensu em Desenvolvimento WEB'))
+      .toBe('Desenvolvimento WEB');
+  });
+
+  // Sem esta guarda, "Doutorado" sozinho viraria string vazia, e um nome de
+  // uma palavra ficaria irreconhecível.
+  test('mantém o nome quando tirar o nível deixaria menos de oito letras', () => {
+    expect(ctx.nomeCursoCurto('Doutorado')).toBe('Doutorado');
+    expect(ctx.nomeCursoCurto('Mestrado')).toBe('Mestrado');
+    expect(ctx.nomeCursoCurto('PGMP - Especialização em Ensino')).toBe('Especialização em Ensino');
+  });
+
+  test('valor vazio devolve string vazia', () => {
+    expect(ctx.nomeCursoCurto('')).toBe('');
+    expect(ctx.nomeCursoCurto(null)).toBe('');
+  });
+});
+
+describe('construirRotulosCurso', () => {
+  // Oito programas de "Docência para a Educação Profissional e Tecnológica"
+  // encurtavam para o mesmo texto, um por campus. Sem o campus no rótulo, o
+  // filtro mostraria oito opções iguais.
+  test('acrescenta o campus quando dois cursos encurtam para o mesmo nome', () => {
+    const dados = [
+      { curso: 'DEPTSSA - Especialização em Docência', campus: 'SSA' },
+      { curso: 'DEPTVC - Especialização em Docência', campus: 'VC' },
+    ];
+    const rotulos = ctx.construirRotulosCurso(dados);
+    expect(rotulos['DEPTSSA - Especialização em Docência']).toBe('Docência · SSA');
+    expect(rotulos['DEPTVC - Especialização em Docência']).toBe('Docência · VC');
+  });
+
+  test('não acrescenta campus quando o nome curto já é único', () => {
+    const dados = [
+      { curso: 'Doutorado em Difusão do Conhecimento', campus: 'SSA' },
+      { curso: 'MESTRADO PROFISSIONAL EM ENGENHARIA DE MATERIAIS', campus: 'SSA' },
+    ];
+    const rotulos = ctx.construirRotulosCurso(dados);
+    expect(rotulos['Doutorado em Difusão do Conhecimento']).toBe('Difusão do Conhecimento');
+  });
+
+  test('resume a lista quando o curso passa de três campi', () => {
+    const nomeA = 'PGMP - Especialização em Ensino de Matemática';
+    const nomeB = 'ESMP - Especialização em Ensino de Matemática';
+    const dados = ['BAR', 'CAM', 'EUN', 'SSA', 'VAL'].map(c => ({ curso: nomeA, campus: c }));
+    dados.push({ curso: nomeB, campus: 'SF' });
+    const rotulos = ctx.construirRotulosCurso(dados);
+    expect(rotulos[nomeA]).toBe('Ensino de Matemática · BAR, CAM, EUN…');
+    expect(rotulos[nomeB]).toBe('Ensino de Matemática · SF');
+  });
+
+  // O código de uma letra só não é código: "A - Ensino" começa por uma palavra.
+  test('não confunde uma letra solta com código de matrícula', () => {
+    const rotulos = ctx.construirRotulosCurso([{ curso: 'A - Especialização em Ensino', campus: 'SSA' }]);
+    expect(rotulos['A - Especialização em Ensino']).toBe('A - Especialização em Ensino');
+  });
+
+  test('todo curso do data.json ganha rótulo distinto', () => {
+    const dados = require('../data.json').posgraduacao;
+    const rotulos = ctx.construirRotulosCurso(dados);
+    const valores = Object.values(rotulos);
+    expect(valores.length).toBeGreaterThan(0);
+    expect(new Set(valores).size).toBe(valores.length);
+  });
+});
+
+describe('quebrarRotulo', () => {
+  test('quebra por palavra, sem cortar no meio', () => {
+    expect(ctx.quebrarRotulo('Ensino de Ciências Naturais', 20, 2))
+      .toEqual(['Ensino de Ciências', 'Naturais']);
+  });
+
+  test('texto curto cabe em uma linha só', () => {
+    expect(ctx.quebrarRotulo('Engenharia', 38, 2)).toEqual(['Engenharia']);
+  });
+
+  // Sem a marca, "…Transferencia de Tecnologia para" parecia o nome inteiro e
+  // a palavra "Inovação" sumia sem deixar rastro.
+  test('marca a última linha sempre que sobra texto', () => {
+    const linhas = ctx.quebrarRotulo('Propriedade Intelectual e Transferencia de Tecnologia para Inovação', 38, 2);
+    expect(linhas).toHaveLength(2);
+    expect(linhas[1]).toMatch(/…$/);
+  });
+
+  test('não marca quando o texto coube inteiro', () => {
+    expect(ctx.quebrarRotulo('Engenharia de Materiais', 38, 2)).toEqual(['Engenharia de Materiais']);
+  });
+});
+
+describe('escaparHtml', () => {
+  // Um nome com aspas quebraria o atributo value da <option>, e o filtro
+  // pararia de casar com r.curso.
+  test('escapa aspas e sinais de marcação', () => {
+    expect(ctx.escaparHtml('Ciência é "Dez!" & Cia <b>'))
+      .toBe('Ciência é &quot;Dez!&quot; &amp; Cia &lt;b&gt;');
+  });
+});
