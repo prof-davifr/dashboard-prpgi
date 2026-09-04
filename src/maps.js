@@ -4,6 +4,15 @@
 // lookupCoords (src/shared.js); pular essa resolução deixava os grupos do DGP
 // sem marcador.
 
+
+// Basemap do CARTO. Desde set/2026 o serviço exige chave: sem ela os ladrilhos
+// vêm com a marca "API KEY REQUIRED" atravessada, em todos os sete mapas.
+//
+// A chave é de cliente e fica visível a quem abrir a página — é assim que um
+// basemap funciona num site estático. Restrinja-a por domínio no painel do
+// CARTO; não há como escondê-la aqui.
+const CARTO_TILES = 'https://basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png?key=cb1_2veb_1_cb6a9486977680fa4b9c653c';
+
 function renderGenericMap(data, mapId, color, label, pesquisadoresData = null) {
   if (STATE.leafMaps[mapId]) {
     STATE.leafMaps[mapId].remove();
@@ -18,9 +27,7 @@ function renderGenericMap(data, mapId, color, label, pesquisadoresData = null) {
     minZoom: 5,
     maxBoundsViscosity: 1.0
   }).setView([-12.50, -41.50], 6);
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-    attribution: '&copy; CARTO'
-  }).addTo(m);
+  L.tileLayer(CARTO_TILES, { attribution: '&copy; CARTO' }).addTo(m);
   STATE.leafMaps[mapId] = m;
 
   const cityCount = {};
@@ -162,9 +169,7 @@ function rebuildMapInModal(sourceMapId) {
     maxBoundsViscosity: 1.0
   }).setView([-12.50, -41.50], 5);
 
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-    attribution: '&copy; CARTO'
-  }).addTo(m);
+  L.tileLayer(CARTO_TILES, { attribution: '&copy; CARTO' }).addTo(m);
 
   // Recreate circle markers
   circles.forEach(c => {
