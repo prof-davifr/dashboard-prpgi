@@ -401,7 +401,13 @@ describe('módulos do dashboard', () => {
       'renderTables', 'generateCampusYearTable', 'exportTableToExcel',
       'createChart', 'initDashboard', 'showToast', 'updateFilterVisibility',
       'formatDateTimePtBr', 'extractServidorIds', 'getChartColors',
-      'mapUnidadeToCampus', 'lookupCoords'
+      'mapUnidadeToCampus', 'lookupCoords',
+      'baixarPastaExcel', 'abaDeObjetos', 'abaDeCapa', 'nomeArquivoComCarimbo',
+      'resumoDosFiltrosGlobais', 'matrizDeTabelaHtml', 'dataDosDados',
+      'exportarPosGraduacao', 'abasPosGraduacao', 'resumoPosGraduacao',
+      'matrizCampusAno', 'renderPosGraduacaoAlunosPorPrograma',
+      'categoriasPorCurso', 'rotuloDePrograma', 'larguraDoEixoPrograma',
+      'caracteresDoRotuloPrograma'
     ];
     for (const nome of esperadas) {
       expect(typeof ctx[nome]).toBe('function');

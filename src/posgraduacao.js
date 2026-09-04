@@ -253,20 +253,37 @@ function buildPosGraduacaoKpi(label, value, tooltip) {
   </div>`;
 }
 
-function renderKPIsPosGraduacao() {
-  const data = STATE.filtered.posgraduacao;
-  const baldes = contarPor(data, r => getPosGraduacaoBucket(r.situacao));
-  const cursos = new Set(data.map(r => (r.curso || '').trim()).filter(Boolean)).size;
-  const campi = new Set(data.map(r => r.campus).filter(Boolean)).size;
+// Os seis indicadores da faixa de KPIs, numa função pura. A aba "Resumo" do
+// Excel lê daqui também: se cada um contasse por conta própria, a planilha e a
+// tela poderiam divergir sem ninguém perceber.
+const POSGRAD_KPIS = [
+  { chave: 'alunos', rotulo: 'Alunos', ajuda: 'Alunos de pós-graduação no recorte atual. Um registro por aluno.' },
+  { chave: 'matriculados', rotulo: 'Matriculados', ajuda: 'Alunos com vínculo ativo no SUAP.' },
+  { chave: 'concluintes', rotulo: 'Concluintes', ajuda: 'Situação Concluído ou Formado no SUAP.' },
+  { chave: 'evadidos', rotulo: 'Evadidos', ajuda: 'Cancelado, Evasão, Desligado, Abandono, Falecido ou Cancelamento Compulsório.' },
+  { chave: 'cursos', rotulo: 'Cursos', ajuda: 'Programas distintos com aluno no recorte. O mesmo programa em dois campi conta uma vez.' },
+  { chave: 'campi', rotulo: 'Campi', ajuda: 'Campi com pelo menos um aluno de pós-graduação no recorte.' }
+];
 
-  $('kpi-posgraduacao').innerHTML = `
-    ${buildPosGraduacaoKpi('Alunos', data.length, 'Alunos de pós-graduação no recorte atual. Um registro por aluno.')}
-    ${buildPosGraduacaoKpi('Matriculados', baldes['Matriculado'] || 0, 'Alunos com vínculo ativo no SUAP.')}
-    ${buildPosGraduacaoKpi('Concluintes', baldes['Concluinte'] || 0, 'Situação Concluído ou Formado no SUAP.')}
-    ${buildPosGraduacaoKpi('Evadidos', baldes['Evadido'] || 0, 'Cancelado, Evasão, Desligado, Abandono, Falecido ou Cancelamento Compulsório.')}
-    ${buildPosGraduacaoKpi('Cursos', cursos, 'Programas distintos com aluno no recorte. O mesmo programa em dois campi conta uma vez.')}
-    ${buildPosGraduacaoKpi('Campi', campi, 'Campi com pelo menos um aluno de pós-graduação no recorte.')}
-  `;
+function resumoPosGraduacao(data) {
+  const registros = data || [];
+  const baldes = contarPor(registros, r => getPosGraduacaoBucket(r.situacao));
+  return {
+    alunos: registros.length,
+    matriculados: baldes['Matriculado'] || 0,
+    concluintes: baldes['Concluinte'] || 0,
+    evadidos: baldes['Evadido'] || 0,
+    cursos: new Set(registros.map(r => (r.curso || '').trim()).filter(Boolean)).size,
+    campi: new Set(registros.map(r => r.campus).filter(Boolean)).size
+  };
+}
+
+function renderKPIsPosGraduacao() {
+  const resumo = resumoPosGraduacao(STATE.filtered.posgraduacao);
+
+  $('kpi-posgraduacao').innerHTML = POSGRAD_KPIS
+    .map(k => buildPosGraduacaoKpi(k.rotulo, resumo[k.chave], k.ajuda))
+    .join('\n    ');
 }
 
 // ─── Gráficos ────────────────────────────────────────────────────────────────
@@ -377,32 +394,88 @@ function renderPosGraduacaoSituacao(data) {
   });
 }
 
-// Os 15 cursos com mais alunos.
-function renderPosGraduacaoTopCursos(data) {
-  const totais = contarPor(data, r => (r.curso || '').trim());
-  const top = Object.entries(totais).sort((a, b) => b[1] - a[1]).slice(0, 15);
-  const rotulos = construirRotulosCurso(data);
+// ─── Alunos por programa ─────────────────────────────────────────────────────
+//
+// Neste gráfico o nome do programa é a informação; a barra é só a escala. Por
+// isso o eixo fica com quase metade da largura, e o rótulo tem mais espaço que
+// nos outros gráficos da aba.
+const PROGRAMA_TOP_N = 15;
+const PROGRAMA_MAX_LINHAS = 2;
 
-  createChart('chart-posgraduacao-topcursos', 'bar', {
-    labels: top.map(([curso]) => quebrarRotulo(rotulos[curso] || curso)),
-    datasets: [{
-      label: 'Alunos',
-      data: top.map(([, n]) => n),
-      backgroundColor: '#4D90FE'
-    }]
+// Quase metade da largura vai para o eixo, com um piso para o celular e um teto
+// para a tela grande — passando disso a barra some e o gráfico deixa de comparar.
+function larguraDoEixoPrograma(larguraGrafico) {
+  return Math.min(440, Math.max(150, Math.round((larguraGrafico || 800) * 0.45)));
+}
+
+// Quantos caracteres cabem na largura reservada. Sem amarrar os dois, o rótulo
+// quebrado em 52 caracteres transbordava o eixo de 150 px do celular e saía
+// cortado pela borda esquerda do cartão.
+function caracteresDoRotuloPrograma(larguraEixo) {
+  return Math.max(20, Math.floor(larguraEixo / 6.2));
+}
+
+// Modalidades de cada programa. Quase sempre é uma só; o Set cobre o caso de um
+// mesmo nome de curso aparecer com modalidades diferentes entre campi.
+function categoriasPorCurso(data) {
+  const mapa = {};
+  (data || []).forEach(r => {
+    const curso = (r.curso || '').trim();
+    if (!curso) return;
+    if (!mapa[curso]) mapa[curso] = new Set();
+    if (r.categoria) mapa[curso].add(r.categoria);
+  });
+  return mapa;
+}
+
+// A modalidade entra numa linha própria do rótulo, além da cor da barra. A cor
+// sozinha não basta: impressa em preto e branco, ou para quem não distingue as
+// cores, o gráfico deixaria de dizer se o programa é mestrado ou especialização.
+function rotuloDePrograma(curso, rotulos, categorias, largura) {
+  const linhas = quebrarRotulo(rotulos[curso] || curso, largura, PROGRAMA_MAX_LINHAS);
+  const cats = [...(categorias[curso] || [])].sort();
+  return cats.length > 0 ? [...linhas, `(${cats.join(' / ')})`] : linhas;
+}
+
+// Os 15 programas com mais alunos, empilhados por modalidade.
+function renderPosGraduacaoAlunosPorPrograma(data) {
+  const { chaves: cursos, datasets } = seriesPorCategoria(
+    data,
+    r => (r.curso || '').trim(),
+    porChave => Object.keys(porChave)
+      .sort((a, b) => totalDaChave(porChave, b) - totalDaChave(porChave, a))
+      .slice(0, PROGRAMA_TOP_N)
+  );
+
+  const rotulos = construirRotulosCurso(data);
+  const categorias = categoriasPorCurso(data);
+
+  const canvas = $('chart-posgraduacao-programas');
+  const larguraCartao = (canvas && canvas.parentElement && canvas.parentElement.clientWidth) || 800;
+  const larguraEixo = larguraDoEixoPrograma(larguraCartao);
+  const caracteres = caracteresDoRotuloPrograma(larguraEixo);
+
+  createChart('chart-posgraduacao-programas', 'bar', {
+    labels: cursos.map(c => rotuloDePrograma(c, rotulos, categorias, caracteres)),
+    datasets
   }, {
     indexAxis: 'y',
     scales: {
-      x: { beginAtZero: true },
-      y: { ticks: { autoSkip: false } }
+      x: { stacked: true, beginAtZero: true },
+      y: {
+        stacked: true,
+        ticks: { autoSkip: false },
+        // Sem reservar a largura, o Chart.js dá ao eixo o mínimo e sobra pouco
+        // para o nome. Aqui é o contrário: o eixo primeiro, a barra no resto.
+        afterFit: escala => { escala.width = larguraEixo; }
+      }
     },
     plugins: {
-      legend: { display: false },
       tooltip: {
         callbacks: {
-          // O eixo mostra o nome curto, em duas linhas; o tooltip mostra o nome
-          // do SUAP por extenso, que é o que o usuário reconhece.
-          title: itens => top[itens[0].dataIndex][0]
+          // O eixo mostra o nome curto; o tooltip mostra o nome do SUAP por
+          // extenso, que é o que o usuário reconhece.
+          title: itens => cursos[itens[0].dataIndex]
         }
       }
     }
@@ -430,16 +503,14 @@ function renderPosGraduacaoEvolucao(data) {
 // Campus × ano de ingresso. Segue renderTableIC (src/tables.js), não
 // generateCampusYearTable: aquela lê r["Ano"] com maiúscula, e a pós-graduação
 // grava r.ano em minúscula.
-function renderTablePosGraduacao() {
-  const container = $('table-posgraduacao-content');
-  if (!container) return;
-
-  const data = STATE.filtered.posgraduacao;
+// A agregação, sem HTML: a tabela da tela e a aba "Campus x Ano" do Excel saem
+// das mesmas contagens.
+function matrizCampusAno(data) {
   const porCampusAno = {};
   const anos = new Set();
   const campi = new Set();
 
-  data.forEach(r => {
+  (data || []).forEach(r => {
     const ano = r.ano;
     const campus = r.campus;
     if (!ano || !campus) return;
@@ -449,8 +520,19 @@ function renderTablePosGraduacao() {
     porCampusAno[campus][ano] = (porCampusAno[campus][ano] || 0) + 1;
   });
 
-  const anosOrdenados = Array.from(anos).sort();
-  const campiOrdenados = Array.from(campi).sort();
+  return {
+    porCampusAno,
+    anos: Array.from(anos).sort(),
+    campi: Array.from(campi).sort()
+  };
+}
+
+function renderTablePosGraduacao() {
+  const container = $('table-posgraduacao-content');
+  if (!container) return;
+
+  const { porCampusAno, anos: anosOrdenados, campi: campiOrdenados } =
+    matrizCampusAno(STATE.filtered.posgraduacao);
 
   let html = '<table class="data-table"><caption>Alunos de pós-graduação por campus e ano de ingresso</caption><thead><tr><th scope="col">Campus</th>';
   anosOrdenados.forEach(a => { html += `<th scope="col">${a}</th>`; });
@@ -482,8 +564,250 @@ function renderChartsPosGraduacao() {
   renderPosGraduacaoPorCampus(data);
   renderPosGraduacaoCursosPorCampus(data);
   renderPosGraduacaoSituacao(data);
-  renderPosGraduacaoTopCursos(data);
+  renderPosGraduacaoAlunosPorPrograma(data);
   renderPosGraduacaoEvolucao(data);
   renderGenericMap(data, 'map-posgraduacao', '#4D90FE', 'alunos');
   renderTablePosGraduacao();
+}
+
+// ─── Exportação ──────────────────────────────────────────────────────────────
+//
+// Nove abas: a capa com os filtros, sete tabelas de indicador — as mesmas
+// contas dos KPIs, dos cinco gráficos e da tabela da tela — e os dados por
+// aluno. Cada função é pura e devolve { nome, aoa }; quem escreve o arquivo é
+// baixarPastaExcel, em src/export.js.
+//
+// LGPD: `dedupKey` fica de fora de propósito. É um pseudônimo salgado, não diz
+// nada ao usuário, e um registro já é um aluno — não há o que desduplicar.
+
+// Rótulos dos filtros locais da aba, para a capa.
+function filtrosLocaisPosGraduacao() {
+  const texto = (id, padrao) => {
+    const select = $(id);
+    if (!select) return padrao;
+    const opcao = select.options && select.options[select.selectedIndex];
+    return (opcao && opcao.textContent ? opcao.textContent : select.value || padrao).trim();
+  };
+
+  return [
+    ['Programa', texto('posgrad-curso-filter', 'Todos os Programas')],
+    ['Categoria', texto('posgrad-categoria-filter', 'Todas as Categorias')],
+    ['Situação', texto('posgrad-situacao-filter', 'Todas as Situações')]
+  ];
+}
+
+function abaFiltrosPosGraduacao(data, filtrosGlobais, filtrosLocais) {
+  const linhas = [
+    ['Exportado em', formatDateTimePtBr(new Date().toISOString())],
+    ['Dados atualizados em', dataDosDados()],
+    [null],
+    ['FILTROS APLICADOS', ''],
+    ...(filtrosGlobais || []),
+    ...(filtrosLocais || []),
+    [null],
+    ['Alunos no recorte', (data || []).length],
+    [null],
+    ['Conteúdo do arquivo', 'Resumo, Alunos por Campus, Cursos por Campus, Situação, ' +
+      'Programas, Ingressos por Ano, Campus x Ano e Dados (uma linha por aluno).'],
+    ['Como ler', 'Um registro é um aluno e o ano é o de ingresso. ' +
+      'As 16 situações do SUAP entram em cinco grupos; a aba Situação mostra as duas visões.'],
+    ['Proteção de dados', 'O arquivo não traz nome, matrícula nem e-mail. ' +
+      'A base pública data.json também não os contém.'],
+    ['Fonte', 'SUAP — Pós-Graduação (IFBA). Painel PRPGI.']
+  ];
+
+  return abaDeCapa('Filtros', 'Pós-Graduação — Relatório do painel PRPGI', linhas);
+}
+
+function abaResumoPosGraduacao(data) {
+  const resumo = resumoPosGraduacao(data);
+  return abaDeObjetos(
+    'Resumo',
+    [
+      { titulo: 'Indicador', valor: k => k.rotulo },
+      { titulo: 'Valor', valor: k => resumo[k.chave] },
+      { titulo: 'Definição', valor: k => k.ajuda }
+    ],
+    POSGRAD_KPIS
+  );
+}
+
+// Alunos por campus × categoria, as mesmas séries do gráfico empilhado.
+function abaAlunosPorCampus(data) {
+  const { chaves: campi, datasets } = seriesPorCategoria(
+    data || [],
+    r => r.campus,
+    porChave => Object.keys(porChave).sort()
+  );
+
+  const aoa = [['Campus', 'Cidade', ...datasets.map(d => d.label), 'Total']];
+  campi.forEach((campus, i) => {
+    const valores = datasets.map(d => d.data[i]);
+    aoa.push([
+      campus,
+      CAMPUS_TO_CITY[campus] || campus,
+      ...valores,
+      valores.reduce((s, n) => s + n, 0)
+    ]);
+  });
+
+  return { nome: 'Alunos por Campus', aoa };
+}
+
+function abaCursosPorCampus(data) {
+  const contagem = cursosPorCampus(data || []);
+  const campi = Object.keys(contagem).sort();
+
+  return abaDeObjetos(
+    'Cursos por Campus',
+    [
+      { titulo: 'Campus', valor: c => c },
+      { titulo: 'Cidade', valor: c => CAMPUS_TO_CITY[c] || c },
+      { titulo: 'Cursos distintos', valor: c => contagem[c] }
+    ],
+    campi
+  );
+}
+
+// Duas visões numa aba só: o grupo, que é o que a tela mostra, e a situação
+// bruta do SUAP que o alimenta. Assim a regra de agrupamento fica auditável —
+// é o ponto sensível desta aba.
+function abaSituacao(data) {
+  const registros = data || [];
+  const total = registros.length;
+  const pct = n => (total > 0 ? Number(((n / total) * 100).toFixed(1)) : 0);
+
+  const porBalde = contarPor(registros, r => getPosGraduacaoBucket(r.situacao));
+  const porSituacao = contarPor(registros, r => normalizePosGraduacaoStatus(r.situacao));
+
+  const aoa = [['Grupo', 'Alunos', '% do total']];
+  POSGRAD_BUCKETS.forEach(b => aoa.push([b, porBalde[b] || 0, pct(porBalde[b] || 0)]));
+  aoa.push(['Total', total, total > 0 ? 100 : 0]);
+
+  aoa.push([]);
+  aoa.push(['Situação no SUAP', 'Grupo', 'Alunos', '% do total']);
+  Object.keys(porSituacao)
+    .sort((a, b) => porSituacao[b] - porSituacao[a] || a.localeCompare(b, 'pt-BR'))
+    .forEach(s => aoa.push([s, getPosGraduacaoBucket(s), porSituacao[s], pct(porSituacao[s])]));
+
+  return { nome: 'Situacao', aoa };
+}
+
+// Todos os programas, não só os quinze do gráfico.
+function abaProgramas(data) {
+  const registros = data || [];
+  const rotulos = construirRotulosCurso(registros);
+  const totais = contarPor(registros, r => (r.curso || '').trim());
+
+  const campiPorCurso = {};
+  const categoriasPorCurso = {};
+  registros.forEach(r => {
+    const curso = (r.curso || '').trim();
+    if (!curso) return;
+    if (!campiPorCurso[curso]) campiPorCurso[curso] = new Set();
+    if (r.campus) campiPorCurso[curso].add(r.campus);
+    if (!categoriasPorCurso[curso]) categoriasPorCurso[curso] = new Set();
+    if (r.categoria) categoriasPorCurso[curso].add(r.categoria);
+  });
+
+  const cursos = Object.keys(totais)
+    .sort((a, b) => totais[b] - totais[a] || a.localeCompare(b, 'pt-BR'));
+
+  return abaDeObjetos(
+    'Programas',
+    [
+      { titulo: 'Programa', valor: c => rotulos[c] || nomeCursoCurto(c) },
+      { titulo: 'Nome no SUAP', valor: c => c },
+      { titulo: 'Categoria', valor: c => [...(categoriasPorCurso[c] || [])].sort().join(', ') },
+      { titulo: 'Campi', valor: c => [...(campiPorCurso[c] || [])].sort().join(', ') },
+      { titulo: 'Alunos', valor: c => totais[c] }
+    ],
+    cursos
+  );
+}
+
+function abaIngressosPorAno(data) {
+  const { chaves: anos, datasets } = seriesPorCategoria(
+    data || [],
+    r => { const a = parseInt(r.ano, 10); return Number.isNaN(a) ? '' : a; },
+    porChave => Object.keys(porChave).sort((a, b) => Number(a) - Number(b))
+  );
+
+  const aoa = [['Ano de ingresso', ...datasets.map(d => d.label), 'Total']];
+  anos.forEach((ano, i) => {
+    const valores = datasets.map(d => d.data[i]);
+    aoa.push([Number(ano), ...valores, valores.reduce((s, n) => s + n, 0)]);
+  });
+
+  return { nome: 'Ingressos por Ano', aoa };
+}
+
+function abaCampusAno(data) {
+  const { porCampusAno, anos, campi } = matrizCampusAno(data || []);
+
+  const aoa = [['Campus', 'Cidade', ...anos.map(Number), 'Total']];
+  campi.forEach(campus => {
+    const valores = anos.map(ano => porCampusAno[campus][ano] || 0);
+    aoa.push([
+      campus,
+      CAMPUS_TO_CITY[campus] || campus,
+      ...valores,
+      valores.reduce((s, n) => s + n, 0)
+    ]);
+  });
+
+  return { nome: 'Campus x Ano', aoa };
+}
+
+// Uma linha por aluno, com os cinco campos que a tela nunca mostra:
+// curso_original, polo, semestre, ano_periodo e modalidade.
+function abaDadosPosGraduacao(data) {
+  return abaDeObjetos(
+    'Dados',
+    [
+      { titulo: 'Campus', valor: r => r.campus || '' },
+      { titulo: 'Cidade', valor: r => CAMPUS_TO_CITY[r.campus] || '' },
+      { titulo: 'Programa', valor: r => nomeCursoCurto(r.curso) },
+      { titulo: 'Nome no SUAP', valor: r => r.curso || '' },
+      { titulo: 'Nome completo na origem', valor: r => r.curso_original || '' },
+      { titulo: 'Polo', valor: r => r.polo || '' },
+      { titulo: 'Categoria', valor: r => r.categoria || '' },
+      { titulo: 'Modalidade', valor: r => r.modalidade || '' },
+      { titulo: 'Situação no SUAP', valor: r => normalizePosGraduacaoStatus(r.situacao) },
+      { titulo: 'Grupo de situação', valor: r => getPosGraduacaoBucket(r.situacao) },
+      { titulo: 'Ano de ingresso', valor: r => r.ano },
+      { titulo: 'Semestre', valor: r => r.semestre },
+      { titulo: 'Ano/Período', valor: r => r.ano_periodo || '' }
+    ],
+    data || []
+  );
+}
+
+// Monta a pasta de trabalho inteira. Separada de exportarPosGraduacao para o
+// teste conferir as nove abas sem tocar no XLSX.
+function abasPosGraduacao(data, filtrosGlobais, filtrosLocais) {
+  return [
+    abaFiltrosPosGraduacao(data, filtrosGlobais, filtrosLocais),
+    abaResumoPosGraduacao(data),
+    abaAlunosPorCampus(data),
+    abaCursosPorCampus(data),
+    abaSituacao(data),
+    abaProgramas(data),
+    abaIngressosPorAno(data),
+    abaCampusAno(data),
+    abaDadosPosGraduacao(data)
+  ];
+}
+
+function exportarPosGraduacao() {
+  const data = (STATE.filtered && STATE.filtered.posgraduacao) || [];
+  if (data.length === 0) {
+    showToast('Nenhum aluno no recorte atual. Ajuste os filtros e exporte de novo.');
+    return;
+  }
+  baixarPastaExcel('PosGraduacao_IFBA', abasPosGraduacao(
+    data,
+    resumoDosFiltrosGlobais(),
+    filtrosLocaisPosGraduacao()
+  ));
 }

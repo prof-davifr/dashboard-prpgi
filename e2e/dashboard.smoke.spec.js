@@ -15,7 +15,7 @@ const TABS = [
   { btn: '#aba-grupos', panel: '#tab-grupos', canvases: ['chart-grupos-evo-combined', 'chart-grupos-pie'] },
   { btn: '#aba-pesquisadores', panel: '#tab-pesquisadores', canvases: ['chart-pesquisadores-evolucao', 'chart-pesquisadores-area'] },
   { btn: '#aba-orientacoes', panel: '#tab-orientacoes', canvases: ['chart-orientacoes-evo-1', 'chart-orientacoes-pie'] },
-  { btn: '#aba-posgraduacao', panel: '#tab-posgraduacao', canvases: ['chart-posgraduacao-campus', 'chart-posgraduacao-situacao'] },
+  { btn: '#aba-posgraduacao', panel: '#tab-posgraduacao', canvases: ['chart-posgraduacao-campus', 'chart-posgraduacao-situacao', 'chart-posgraduacao-programas'] },
   { btn: '#aba-ic', panel: '#tab-ic', canvases: ['chart-ic-evolucao', 'chart-ic-modalidade'] },
 ];
 
@@ -141,9 +141,39 @@ test('tabela detalhada expande e exporta para Excel', async ({ page }) => {
 
   const [download] = await Promise.all([
     page.waitForEvent('download', { timeout: 30_000 }),
-    page.click('.export-btn'),
+    page.click('#btn-export-cientifica'),
   ]);
-  expect(download.suggestedFilename()).toMatch(/\.xlsx$/);
+  // O carimbo de data no nome evita que duas exportações com recortes
+  // diferentes se sobrescrevam na pasta de downloads.
+  expect(download.suggestedFilename())
+    .toMatch(/^Producao_Cientifica_IFBA_\d{4}-\d{2}-\d{2}_\d{4}\.xlsx$/);
+});
+
+test('pós-graduação exporta o relatório completo', async ({ page }) => {
+  await page.click('#aba-posgraduacao');
+  await expect(page.locator('#tab-posgraduacao')).toHaveClass(/active/);
+
+  const [download] = await Promise.all([
+    page.waitForEvent('download', { timeout: 30_000 }),
+    page.click('#btn-export-posgraduacao'),
+  ]);
+  expect(download.suggestedFilename())
+    .toMatch(/^PosGraduacao_IFBA_\d{4}-\d{2}-\d{2}_\d{4}\.xlsx$/);
+
+  // As nove planilhas, na ordem, e sem coluna de dado pessoal na aba Dados.
+  const XLSX = require('xlsx');
+  const wb = XLSX.readFile(await download.path());
+  expect(wb.SheetNames).toEqual([
+    'Filtros', 'Resumo', 'Alunos por Campus', 'Cursos por Campus',
+    'Situacao', 'Programas', 'Ingressos por Ano', 'Campus x Ano', 'Dados'
+  ]);
+
+  const dados = XLSX.utils.sheet_to_json(wb.Sheets['Dados'], { header: 1 });
+  expect(dados.length).toBeGreaterThan(1);
+  const cabecalho = dados[0].join(' ').toLowerCase();
+  ['matr', 'e-mail', 'email', 'dedup'].forEach(proibido => {
+    expect(cabecalho).not.toContain(proibido);
+  });
 });
 
 test('modal de metodologia abre e fecha', async ({ page }) => {

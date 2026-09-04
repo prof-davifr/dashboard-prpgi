@@ -98,7 +98,7 @@
         <div class="table-section">
             <div class="table-actions">
             <button class="table-toggle-btn" onclick="toggleTable('table-cientifica-container', this)">Exibir Tabela Detalhada por Campus/Ano</button>
-            <button class="export-btn" onclick="exportTableToExcel('table-cientifica-container', 'Producao_Cientifica_IFBA')">Exportar para Excel</button>
+            <button id="btn-export-cientifica" class="export-btn" onclick="exportTableToExcel('table-cientifica-container', 'Producao_Cientifica_IFBA')">Exportar para Excel</button>
             </div>
             <div id="table-cientifica-container" class="table-container">
                 <div id="table-cientifica-content"></div>
@@ -128,7 +128,7 @@
         <div class="table-section">
             <div class="table-actions">
             <button class="table-toggle-btn" onclick="toggleTable('table-tecnica-container', this)">Exibir Tabela Detalhada por Campus/Ano</button>
-            <button class="export-btn" onclick="exportTableToExcel('table-tecnica-container', 'Producao_Tecnica_IFBA')">Exportar para Excel</button>
+            <button id="btn-export-tecnica" class="export-btn" onclick="exportTableToExcel('table-tecnica-container', 'Producao_Tecnica_IFBA')">Exportar para Excel</button>
             </div>
             <div id="table-tecnica-container" class="table-container">
                 <div id="table-tecnica-content"></div>
@@ -165,7 +165,7 @@
         <div class="table-section">
             <div class="table-actions">
             <button class="table-toggle-btn" onclick="toggleTable('table-inovacao-container', this)">Exibir Tabela Detalhada por Campus/Ano</button>
-            <button class="export-btn" onclick="exportTableToExcel('table-inovacao-container', 'Inovacao_IFBA')">Exportar para Excel</button>
+            <button id="btn-export-inovacao" class="export-btn" onclick="exportTableToExcel('table-inovacao-container', 'Inovacao_IFBA')">Exportar para Excel</button>
             </div>
             <div id="table-inovacao-container" class="table-container">
                 <div id="table-inovacao-content"></div>
@@ -196,7 +196,7 @@
         <div class="table-section">
             <div class="table-actions">
             <button class="table-toggle-btn" onclick="toggleTable('table-grupos-container', this)">Exibir Tabela Detalhada por Campus/Ano</button>
-            <button class="export-btn" onclick="exportTableToExcel('table-grupos-container', 'Grupos_DGP_IFBA')">Exportar para Excel</button>
+            <button id="btn-export-grupos" class="export-btn" onclick="exportTableToExcel('table-grupos-container', 'Grupos_DGP_IFBA')">Exportar para Excel</button>
             </div>
             <div id="table-grupos-container" class="table-container">
                 <div id="table-grupos-content"></div>
@@ -236,7 +236,7 @@
         <div class="table-section">
             <div class="table-actions">
             <button class="table-toggle-btn" onclick="toggleTable('table-pesquisadores-container', this)">Exibir Tabela Detalhada por Campus/Ano</button>
-            <button class="export-btn" onclick="exportTableToExcel('table-pesquisadores-container', 'Pesquisadores_IFBA')">Exportar para Excel</button>
+            <button id="btn-export-pesquisadores" class="export-btn" onclick="exportTableToExcel('table-pesquisadores-container', 'Pesquisadores_IFBA')">Exportar para Excel</button>
             </div>
             <div id="table-pesquisadores-container" class="table-container">
                 <div id="table-pesquisadores-content"></div>
@@ -273,7 +273,7 @@
         <div class="table-section">
             <div class="table-actions">
             <button class="table-toggle-btn" onclick="toggleTable('table-orientacoes-container', this)">Exibir Tabela Detalhada por Campus/Ano</button>
-            <button class="export-btn" onclick="exportTableToExcel('table-orientacoes-container', 'Orientacoes_IFBA')">Exportar para Excel</button>
+            <button id="btn-export-orientacoes" class="export-btn" onclick="exportTableToExcel('table-orientacoes-container', 'Orientacoes_IFBA')">Exportar para Excel</button>
             </div>
             <div id="table-orientacoes-container" class="table-container">
                 <div id="table-orientacoes-content"></div>
@@ -313,6 +313,9 @@
                 <em>Aperfeiçoado</em> (cumpriu os créditos, sem o título de especialista); <em>Evadido</em> (Cancelado,
                 Evasão, Desligado, Abandono, Falecido, Cancelamento Compulsório); e <em>Outros</em>.
                 Os filtros de período e de campus são os da barra do topo.
+                <br><strong>Exportação:</strong> o botão no fim da página baixa um arquivo Excel com o
+                recorte atual — capa com os filtros aplicados, uma planilha por indicador da tela e
+                uma planilha com uma linha por aluno. O arquivo não traz nome, matrícula nem e-mail.
             </div>
         </div>
 
@@ -334,8 +337,8 @@
                 </div>
             </div>
             <div class="chart-row-full chart-card">
-                <div class="chart-title" title="Os quinze programas com mais alunos no recorte atual.">Programas com Mais Alunos</div>
-                <div class="chart-wrapper alta"><canvas id="chart-posgraduacao-topcursos" role="img" aria-label="Gráfico: Programas com Mais Alunos"></canvas></div>
+                <div class="chart-title" title="Os quinze programas com mais alunos no recorte atual. A modalidade aparece na cor da barra e entre parênteses no nome.">Alunos por Programa</div>
+                <div class="chart-wrapper extra-alta"><canvas id="chart-posgraduacao-programas" role="img" aria-label="Gráfico: Alunos por Programa, separados por modalidade"></canvas></div>
             </div>
             <div class="chart-row-full chart-card">
                 <div class="chart-title" title="Ingressos por ano de entrada, separados por modalidade.">Ingressos por Ano</div>
@@ -350,7 +353,7 @@
         <div class="table-section">
             <div class="table-actions">
                 <button class="table-toggle-btn" onclick="toggleTable('table-posgraduacao-container', this)">Exibir Tabela Detalhada por Campus/Ano</button>
-                <button class="export-btn" onclick="exportTableToExcel('table-posgraduacao-container', 'PosGraduacao_IFBA')">Exportar para Excel</button>
+                <button id="btn-export-posgraduacao" class="export-btn" aria-label="Exportar o relatório completo da Pós-Graduação para Excel" onclick="exportarPosGraduacao()">Exportar Relatório (Excel)</button>
             </div>
             <div id="table-posgraduacao-container" class="table-container">
                 <div id="table-posgraduacao-content"></div>
@@ -390,7 +393,7 @@
         <div class="table-section">
             <div class="table-actions">
                 <button class="table-toggle-btn" onclick="toggleTable('table-ic-container', this)">Exibir Tabela Detalhada por Campus/Ano</button>
-                <button class="export-btn" onclick="exportTableToExcel('table-ic-container', 'IC_IFBA')">Exportar para Excel</button>
+                <button id="btn-export-ic" class="export-btn" onclick="exportTableToExcel('table-ic-container', 'IC_IFBA')">Exportar para Excel</button>
             </div>
             <div id="table-ic-container" class="table-container">
                 <div id="table-ic-content"></div>
@@ -570,6 +573,7 @@
     <script src="src/charts.js"></script>
     <script src="src/maps.js"></script>
     <script src="src/tables.js"></script>
+    <script src="src/export.js"></script>
     <script src="src/pesquisadores.js"></script>
     <script src="src/posgraduacao.js"></script>
     <script src="src/cache.js"></script>

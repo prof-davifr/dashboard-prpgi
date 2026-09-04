@@ -70,6 +70,42 @@ Frontend estático (Chart.js + Leaflet + SheetJS) + pipeline ETL em `scripts/bui
       não conhece `PSG` e a validação é bloqueante, então o build inteiro
       parava.
 
+### Etapa 3 — exportação e leitura do gráfico de programas (feita)
+- [x] **"Programas com Mais Alunos" virou "Alunos por Programa"**, e o nome do
+      programa ganhou o espaço que era da barra: o eixo fica com 45% da largura
+      (`larguraDoEixoPrograma`) e a quebra do rótulo sai dessa mesma medida
+      (`caracteresDoRotuloPrograma`). Quando as duas eram independentes, o
+      rótulo de 52 caracteres transbordava o eixo de 150 px do celular e saía
+      cortado pela borda do cartão. A modalidade aparece duas vezes de
+      propósito: na cor da barra, empilhada por `seriesPorCategoria` — o que
+      traz a legenda de graça — e numa linha própria do rótulo, entre
+      parênteses. Só a cor não serve em preto e branco nem para quem não
+      distingue as cores. Canvas renomeado para `chart-posgraduacao-programas`,
+      com a classe `.extra-alta` (780 px, também no celular).
+- [x] **Relatório completo em Excel na aba Pós-Graduação.** O botão baixava só o
+      cruzamento campus × ano da tela. Agora baixa uma pasta de trabalho com
+      nove planilhas: capa com os filtros aplicados, Resumo (os seis KPIs),
+      Alunos por Campus, Cursos por Campus, Situação, Programas, Ingressos por
+      Ano, Campus × Ano e Dados — uma linha por aluno, com os cinco campos que a
+      tela nunca mostrou (`curso_original`, `polo`, `semestre`, `ano_periodo`,
+      `modalidade`). Cada planilha de indicador reusa o agregador da tela
+      (`resumoPosGraduacao`, `matrizCampusAno`, `seriesPorCategoria`,
+      `cursosPorCampus`), então a planilha não pode discordar do painel.
+      `dedupKey` fica de fora: é pseudônimo salgado e um registro já é um aluno.
+      A planilha Situação traz o grupo **e** a situação bruta do SUAP, para a
+      regra de agrupamento ficar auditável.
+- [x] **Motor de exportação genérico** (`src/export.js`). Uma planilha é
+      `{ nome, aoa }`; só `baixarPastaExcel` toca no XLSX, então
+      `tests/export.test.js` confere o conteúdo sem SheetJS e sem DOM. Ele
+      também saneia o nome da planilha (o Excel recusa mais de 31 caracteres,
+      `: \ / ? * [ ]` e nomes repetidos), dimensiona as colunas e carimba o
+      nome do arquivo com data e hora — duas exportações de recortes diferentes
+      se sobrescreviam na pasta de downloads.
+- [x] **As outras sete abas passaram pelo motor novo** sem mudar de
+      comportamento: `exportTableToExcel` continua com a mesma assinatura, mas
+      ganha o carimbo de data e troca o `alert()` pelo `showToast()`. Os oito
+      botões ganharam `id` — o teste e2e dependia da ordem deles no documento.
+
 ---
 
 ## 🟢 Concluído

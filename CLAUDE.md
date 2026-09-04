@@ -117,7 +117,8 @@ Campus codes cover 25 IFBA campuses (BAR, BRU, CAM, CFO, EC, EUN, FS, ILH, IRE, 
 | `src/filters.js` | `processData()` — the single filtering entry point |
 | `src/charts.js` | `createChart` + every `renderKPIs*` / `renderCharts*` |
 | `src/maps.js` | `renderGenericMap` + the expanded-map modal |
-| `src/tables.js` | `generateCampusYearTable`, `renderTable*`, Excel export |
+| `src/tables.js` | `generateCampusYearTable`, `renderTable*`, `exportTableToExcel` |
+| `src/export.js` | Excel engine: `baixarPastaExcel` + the pure `aba*` sheet builders |
 | `src/pesquisadores.js`, `src/posgraduacao.js` | per-tab logic |
 | `src/cache.js` | `initDashboard` + Cache API load — last, uses all renderers |
 
@@ -126,7 +127,40 @@ Campus codes cover 25 IFBA campuses (BAR, BRU, CAM, CFO, EC, EUN, FS, ILH, IRE, 
 - Tabs map to data sources roughly 1:1 (Produção Científica → `bibliografica`, Produção Técnica → `tecnica`, Inovação → `inovacao`, Grupos de Pesquisa/Pesquisadores → `grupos` + productions, Orientações → `concluidas`+`andamento`, Pós-Graduação → `posgraduacao`, IC → `ic`).
 - "p/ Servidor" (relative metrics) toggle divides KPIs/charts/map values by the count of distinct active `Servidor` IDs in the current period/campus selection.
 - Small categories (<2%) in evolution/pie charts get aggregated into "Outras" (bibliográfica types, técnica types, inovação types, IC areas).
-- Pós-Graduação (redesigned set/2026) shows general indicators only: students and courses per campus, top programs, intake per year, situação. **One record = one student** (no duplicate matrículas), so counting rows counts students. It uses the *global* period and campus filters like every other tab, plus three tab-local selects (curso, categoria, situação). The 16 SUAP situações collapse into five buckets via `POSGRAD_SITUACAO_BUCKET` in `src/posgraduacao.js`; `Aperfeiçoado` is its own bucket on purpose (credits done, no specialist title — it is neither a concluinte nor an evadido). The old PNP cycle methodology is frozen in `src/pos-validacao.js`, not deleted.
+- Pós-Graduação (redesigned set/2026) shows general indicators only: students and courses per campus, students per program, intake per year, situação. **One record = one student** (no duplicate matrículas), so counting rows counts students. It uses the *global* period and campus filters like every other tab, plus three tab-local selects (curso, categoria, situação). The 16 SUAP situações collapse into five buckets via `POSGRAD_SITUACAO_BUCKET` in `src/posgraduacao.js`; `Aperfeiçoado` is its own bucket on purpose (credits done, no specialist title — it is neither a concluinte nor an evadido). The old PNP cycle methodology is frozen in `src/pos-validacao.js`, not deleted.
+
+"Alunos por Programa" (`renderPosGraduacaoAlunosPorPrograma`, canvas
+`chart-posgraduacao-programas`, wrapper class `.extra-alta`) is the one chart where
+the label matters more than the bar, so the y axis takes ~45% of the width
+(`larguraDoEixoPrograma`) and the wrap width is derived from it
+(`caracteresDoRotuloPrograma`) — set them independently and the label overflows the
+axis on a phone. The modalidade appears twice on purpose: as the bar colour (stacked
+via `seriesPorCategoria`, so the legend comes free) and as the label's last line, in
+parentheses — colour alone fails in greyscale and for colour-blind readers.
+
+### Excel export (`src/export.js`, set/2026)
+
+A sheet is a plain `{ nome, aoa }` object. Pure builders produce the `aoa`; only
+`baixarPastaExcel` touches `XLSX` and the browser, so `tests/export.test.js` covers
+the content without SheetJS or a DOM. It also sanitizes sheet names (Excel rejects
+over 31 chars, `: \ / ? * [ ]`, and duplicates), sizes columns, and stamps the
+filename with the date and time so two exports of different recortes do not
+overwrite each other.
+
+Pós-Graduação is the first tab to use the full form: `exportarPosGraduacao()` builds
+nine sheets — Filtros (cover with the active filters), Resumo (the six KPIs),
+Alunos por Campus, Cursos por Campus, Situacao (bucket *and* raw SUAP situação, so
+the grouping rule is auditable), Programas (all of them, not the chart's top 15),
+Ingressos por Ano, Campus x Ano, and Dados (one row per student). Every indicator
+sheet reuses the aggregator the screen uses (`resumoPosGraduacao`, `matrizCampusAno`,
+`seriesPorCategoria`, `cursosPorCampus`), so the workbook cannot disagree with the
+tab. **`dedupKey` is never exported** — it is a salted pseudonym and one record is
+already one student.
+
+The other seven tabs still call `exportTableToExcel(containerId, filename)`, which
+now routes through the same engine (one `Dados` sheet scraped from the rendered
+table). Do not add `src/export.js` to `pos-validacao-f85b5515.html`:
+`tests/acessibilidade.test.js` asserts that page loads no SheetJS.
 
 ## Second page: Pós-Graduação Validação (frozen, set/2026)
 

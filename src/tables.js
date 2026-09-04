@@ -210,18 +210,17 @@ function renderTableIC() {
   container.innerHTML = html;
 }
 
+// Exporta a tabela que está na tela. Passa pelo motor de src/export.js, então
+// o arquivo sai com carimbo de data no nome e com as colunas dimensionadas,
+// como o relatório da Pós-Graduação.
 function exportTableToExcel(tableContainerId, filename) {
   const container = document.getElementById(tableContainerId);
   if (!container) return;
   const table = container.querySelector('table');
   if (!table) {
-    alert("A tabela ainda não foi renderizada.");
+    showToast('A tabela ainda não foi renderizada. Abra a tabela e exporte de novo.');
     return;
   }
-  
-  // SheetJS: convert HTML table to workbook
-  const wb = XLSX.utils.table_to_book(table, { sheet: "Dados" });
-  
-  // Generate and download
-  XLSX.writeFile(wb, filename + ".xlsx");
+
+  baixarPastaExcel(filename, [{ nome: 'Dados', aoa: matrizDeTabelaHtml(table) }]);
 }

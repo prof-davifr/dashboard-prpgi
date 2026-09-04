@@ -130,7 +130,7 @@ function loadScript(ctx, scriptPath) {
  * shared.js fica de fora: createBrowserContext já o carrega no contexto.
  */
 const DASHBOARD_SCRIPTS = [
-  'core.js', 'filters.js', 'charts.js', 'maps.js', 'tables.js',
+  'core.js', 'filters.js', 'charts.js', 'maps.js', 'tables.js', 'export.js',
   'pesquisadores.js', 'posgraduacao.js', 'cache.js'
 ];
 

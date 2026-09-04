@@ -382,3 +382,81 @@ describe('escaparHtml', () => {
       .toBe('Ciência é &quot;Dez!&quot; &amp; Cia &lt;b&gt;');
   });
 });
+
+// ─── Rótulos do gráfico "Alunos por Programa" ────────────────────────────────
+
+describe('categoriasPorCurso', () => {
+  test('junta as modalidades de cada programa', () => {
+    const mapa = ctx.categoriasPorCurso([
+      { curso: 'A', categoria: 'Mestrado' },
+      { curso: 'A', categoria: 'Mestrado' },
+      { curso: 'B', categoria: 'Especialização' }
+    ]);
+    expect([...mapa['A']]).toEqual(['Mestrado']);
+    expect([...mapa['B']]).toEqual(['Especialização']);
+  });
+
+  // O mesmo nome de curso pode aparecer com modalidades diferentes entre campi.
+  // Escolher uma delas esconderia a outra do rótulo.
+  test('guarda as duas quando o mesmo nome tem modalidades diferentes', () => {
+    const mapa = ctx.categoriasPorCurso([
+      { curso: 'A', categoria: 'Mestrado' },
+      { curso: 'A', categoria: 'Doutorado' }
+    ]);
+    expect([...mapa['A']].sort()).toEqual(['Doutorado', 'Mestrado']);
+  });
+
+  test('ignora registro sem curso', () => {
+    expect(ctx.categoriasPorCurso([{ curso: '  ', categoria: 'Mestrado' }])).toEqual({});
+  });
+});
+
+describe('rotuloDePrograma', () => {
+  // A cor da barra sozinha não basta: impressa em preto e branco, ou para quem
+  // não distingue as cores, o gráfico deixaria de dizer qual é a modalidade.
+  test('a modalidade fica numa linha própria, depois do nome', () => {
+    const linhas = ctx.rotuloDePrograma(
+      'MESTRADO EM ENGENHARIA DE MATERIAIS',
+      { 'MESTRADO EM ENGENHARIA DE MATERIAIS': 'Engenharia de Materiais' },
+      { 'MESTRADO EM ENGENHARIA DE MATERIAIS': new Set(['Mestrado']) },
+      52
+    );
+    expect(linhas[linhas.length - 1]).toBe('(Mestrado)');
+    expect(linhas.slice(0, -1).join(' ')).toBe('Engenharia de Materiais');
+  });
+
+  test('o nome longo quebra em duas linhas antes da modalidade', () => {
+    const nome = 'Propriedade Intelectual e Transferencia de Tecnologia para Inovação';
+    const linhas = ctx.rotuloDePrograma('X', { X: nome }, { X: new Set(['Mestrado']) }, 38);
+    expect(linhas).toHaveLength(3);
+    expect(linhas[1]).toMatch(/…$/);
+    expect(linhas[2]).toBe('(Mestrado)');
+  });
+
+  test('sem categoria conhecida sobra só o nome', () => {
+    expect(ctx.rotuloDePrograma('X', { X: 'Curso X' }, {}, 52)).toEqual(['Curso X']);
+  });
+});
+
+// A largura do rótulo e a do eixo andam juntas. Quando não andavam, o rótulo
+// quebrado em 52 caracteres transbordava o eixo de 150 px do celular e saía
+// cortado pela borda esquerda do cartão.
+describe('largura do eixo e do rótulo', () => {
+  test('o eixo fica em torno de 45% da largura, com piso e teto', () => {
+    expect(ctx.larguraDoEixoPrograma(800)).toBe(360);
+    expect(ctx.larguraDoEixoPrograma(300)).toBe(150);   // piso
+    expect(ctx.larguraDoEixoPrograma(2000)).toBe(440);  // teto
+  });
+
+  test('sem largura conhecida usa a de uma tela comum', () => {
+    expect(ctx.larguraDoEixoPrograma(0)).toBe(360);
+    expect(ctx.larguraDoEixoPrograma(undefined)).toBe(360);
+  });
+
+  test('o rótulo nunca pede mais caracteres do que o eixo comporta', () => {
+    [300, 420, 800, 1440, 2000].forEach(tela => {
+      const eixo = ctx.larguraDoEixoPrograma(tela);
+      expect(ctx.caracteresDoRotuloPrograma(eixo) * 6.2).toBeLessThanOrEqual(eixo);
+    });
+  });
+});

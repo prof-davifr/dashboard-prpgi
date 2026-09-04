@@ -58,6 +58,9 @@ async function initDashboard() {
 
     // Set period labels from metadata
     if (data.meta) {
+      // Guardado em STATE porque a capa do relatório exportado precisa dizer de
+      // quando são os dados, e ela roda muito depois desta função.
+      STATE.meta = data.meta;
       STATE.minYear = data.meta.minYear;
       STATE.maxYear = data.meta.maxYear;
       const updatedText = formatDateTimePtBr(data.meta.generatedAt);

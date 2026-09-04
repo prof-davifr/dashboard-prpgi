@@ -129,6 +129,9 @@ select:focus { border-color: var(--accent); white-space: nowrap;}
    altura o Chart.js começa a pular rótulos do eixo, e metade das barras fica
    sem nome. */
 .chart-wrapper.alta { height: 620px; }
+/* Alunos por Programa: o rótulo tem até três linhas — duas do nome e uma da
+   modalidade — e são quinze barras. Na altura de .alta as linhas se tocavam. */
+.chart-wrapper.extra-alta { height: 780px; }
 
 @media (max-width: 766px) {
   .charts-container { gap:1rem; }
@@ -136,6 +139,8 @@ select:focus { border-color: var(--accent); white-space: nowrap;}
   .chart-wrapper { height: 280px; }
   .chart-wrapper.large { height: 350px; }
   .chart-wrapper.alta { height: 520px; }
+  /* .extra-alta mantém os 780 px também no celular: o rótulo tem três linhas e
+     são quinze barras, e encolher a altura faz as linhas se tocarem. */
   .chart-title { font-size: 0.9rem; }
 }
 

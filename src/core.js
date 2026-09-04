@@ -20,6 +20,7 @@ const STATE = {
     ic: []
   },
   filtered: {},
+  meta: null,
   charts: {},
   leafMaps: {},
   minYear: 1947,
