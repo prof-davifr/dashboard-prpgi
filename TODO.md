@@ -319,6 +319,7 @@ Frontend estático (Chart.js + Leaflet + SheetJS) + pipeline ETL em `scripts/bui
 
 ### 🔵 Baixa
 
+- [ ] **Número órfão no `inpi-campus.json`** — a patente `11015861`, de 2011, saiu da busca por CNPJ do INPI entre 24/08 e 03/09/2026. Duas coletas independentes (03/09 e 14/09) confirmam a ausência, então não foi falha passageira do pePI: ou o depósito foi arquivado, ou a titularidade mudou. Ela levou três linhas da aba, uma por autor. O número continua no mapa porque `refresh-inovacao.js` funde o mapa antigo com o novo e nunca esquece — o que é de propósito, já que o nível 1 da cascata se apaga sozinho. **Decisão de 14/09: manter.** Não causa dano (sobra uma entrada que ninguém consulta) e, se a patente voltar, o campus dela já está resolvido. O `refresh-inovacao.js` agora lista os órfãos a cada rodada, então o aviso não depende desta anotação. Para saber qual dos dois motivos, consultar a patente pelo número no pePI, e não pelo CNPJ
 - [ ] **Drill-down por pesquisador** — clicar num servidor e ver a produção completa (exige decisão LGPD)
 - [ ] **Comparação lado a lado entre campi** — seletor multi-campus nos gráficos
 - [ ] **Filtro por área do conhecimento** na produção científica

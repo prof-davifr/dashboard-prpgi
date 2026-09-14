@@ -515,6 +515,41 @@ function selectPosGraduacaoCsvFiles(csvFiles) {
   return { selected, ignored };
 }
 
+/**
+ * Copia a aba Inovação do data.json anterior para o resultado do build, junto
+ * com tudo o que ela implica.
+ *
+ * O build não enxerga o INPI: `SHEET_MAP` omite a aba de propósito, porque a
+ * fonte é `scripts/refresh-inovacao.js`. Preservar só o array não basta. A
+ * faixa de anos daqui vem dos dados do Lattes, que começam em 2000, e o INPI
+ * alcança 1996 — sem alargar, o filtro de período em "Todos" descarta esses
+ * registros em silêncio, e eles ficam no data.json sem aparecer na tela. A
+ * data da fonte tem o mesmo problema: sem ela o painel lista a atualização de
+ * quatro fontes e omite a quinta, sem o leitor ter como saber por quê.
+ *
+ * @returns {boolean} true quando havia o que preservar.
+ */
+function preservarInovacao(result, anterior) {
+  if (!anterior || !Array.isArray(anterior.inovacao) || anterior.inovacao.length === 0) return false;
+
+  result.inovacao = anterior.inovacao;
+
+  const anos = anterior.inovacao.map(r => parseInt(r.Ano, 10)).filter(a => !Number.isNaN(a));
+  if (anos.length) {
+    result.meta.minYear = Math.min(result.meta.minYear, ...anos);
+    result.meta.maxYear = Math.max(result.meta.maxYear, ...anos);
+  }
+
+  const metaAnterior = anterior.meta || {};
+  for (const campo of ['sourceFiles', 'sourceDates']) {
+    if (metaAnterior[campo] && metaAnterior[campo]['INPI']) {
+      result.meta[campo]['INPI'] = metaAnterior[campo]['INPI'];
+    }
+  }
+
+  return true;
+}
+
 function main() {
   console.log(' Scanning dados/ for .xlsx and .csv files recursively...');
 
@@ -977,12 +1012,11 @@ function main() {
   //
   // A saída é preservar o que o data.json já publica. O refresh seguinte
   // sobrescreve com a coleta nova; se ele não rodar, a aba continua com o
-  // último conteúdo bom em vez de esvaziar.
+  // último conteúdo bom em vez de esvaziar. Ver preservarInovacao().
   if (result.inovacao.length === 0 && fs.existsSync(OUTPUT_FILE)) {
     try {
       const anterior = JSON.parse(fs.readFileSync(OUTPUT_FILE, 'utf-8'));
-      if (Array.isArray(anterior.inovacao) && anterior.inovacao.length > 0) {
-        result.inovacao = anterior.inovacao;
+      if (preservarInovacao(result, anterior)) {
         console.log(`   Inovação preservada do data.json anterior (${anterior.inovacao.length} registros).`);
         console.log('   Rode `node scripts/refresh-inovacao.js <inpi.csv>` para atualizá-la.');
       }
@@ -1179,6 +1213,7 @@ if (require.main === module) {
 module.exports = {
   findFiles,
   parseCSV,
+  preservarInovacao,
   pseudonymize,
   shortHash,
   loadOrCreateSalt,

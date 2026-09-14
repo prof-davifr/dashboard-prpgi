@@ -302,7 +302,20 @@ function main() {
 
   fs.writeFileSync(DATA_JSON, texto);
   // O mapa só melhora quando a cascata rodou completa (com `dados/` por perto).
-  if (mapaNomes) gravarMapa({ ...mapaSalvo, ...vinculosNovos });
+  const mapaFinal = { ...mapaSalvo, ...vinculosNovos };
+  if (mapaNomes) gravarMapa(mapaFinal);
+
+  // O mapa funde o antigo com o novo e nunca esquece. Isso é de propósito: o
+  // nível 1 da cascata se apaga sozinho, e o mapa é o que sobrevive. O efeito
+  // colateral é que um número que saiu da busca do INPI fica lá, órfão, sem
+  // nada apontando para ele. Listar os órfãos é o aviso — a decisão de tirar
+  // ou manter é humana, porque o registro pode voltar.
+  const chavesColetadas = new Set(linhas.map((l) => chaveINPI(l.numeroPedido)).filter(Boolean));
+  const orfaos = Object.keys(mapaFinal).filter((k) => !chavesColetadas.has(k));
+  if (orfaos.length) {
+    console.log(`\n  ${orfaos.length} número(s) no inpi-campus.json que esta coleta não trouxe: ${orfaos.join(', ')}`);
+    console.log('  Eles saíram da busca por CNPJ do INPI (arquivamento ou troca de titularidade).');
+  }
 
   const semCampus = inovacao.filter((r) => !r.campus).length;
   console.log(`  faixa de anos: ${data.meta.minYear}-${data.meta.maxYear}`);

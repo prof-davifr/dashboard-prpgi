@@ -24,7 +24,8 @@ const {
   SOURCE_LABELS,
   extrairVinculos,
   nomeNaCitacao,
-  filtrarPorAutoria
+  filtrarPorAutoria,
+  preservarInovacao
 } = require('../scripts/build');
 
 // ─── findFiles ────────────────────────────────────────────────────────────────
@@ -919,5 +920,67 @@ describe('filtrarPorAutoria', () => {
 
   test('citação sem autores mantém a linha inteira', () => {
     expect(filtrarPorAutoria(vinculos, 'Sistema de gestao XPTO', 'tecnica')).toEqual(vinculos);
+  });
+});
+
+// ─── preservarInovacao ────────────────────────────────────────────────────────
+
+describe('preservarInovacao', () => {
+  const anterior = {
+    inovacao: [
+      { Ano: '1996', Tipo: 'Marca', dedupKey: 'a' },
+      { Ano: '2026', Tipo: 'Patente', dedupKey: 'b' }
+    ],
+    meta: {
+      sourceFiles: { INPI: ['inpi.csv'] },
+      sourceDates: { INPI: { label: 'INPI', modifiedAt: '2026-09-14T00:00:00.000Z', fileCount: 1 } }
+    }
+  };
+
+  function novoResultado() {
+    return { inovacao: [], meta: { minYear: 2000, maxYear: 2026, sourceFiles: {}, sourceDates: {} } };
+  }
+
+  test('copia o array da coleta anterior', () => {
+    const result = novoResultado();
+    expect(preservarInovacao(result, anterior)).toBe(true);
+    expect(result.inovacao).toHaveLength(2);
+  });
+
+  test('alarga a faixa de anos até o registro mais antigo do INPI', () => {
+    const result = novoResultado();
+    preservarInovacao(result, anterior);
+    expect(result.meta.minYear).toBe(1996);
+    expect(result.meta.maxYear).toBe(2026);
+  });
+
+  test('não encolhe a faixa quando o Lattes alcança mais longe', () => {
+    const result = novoResultado();
+    result.meta.minYear = 1990;
+    result.meta.maxYear = 2030;
+    preservarInovacao(result, anterior);
+    expect(result.meta.minYear).toBe(1990);
+    expect(result.meta.maxYear).toBe(2030);
+  });
+
+  test('preserva a data da fonte, senão o painel omite a quinta fonte', () => {
+    const result = novoResultado();
+    preservarInovacao(result, anterior);
+    expect(result.meta.sourceDates.INPI.modifiedAt).toBe('2026-09-14T00:00:00.000Z');
+    expect(result.meta.sourceFiles.INPI).toEqual(['inpi.csv']);
+  });
+
+  test('não faz nada quando não há coleta anterior', () => {
+    const result = novoResultado();
+    expect(preservarInovacao(result, { inovacao: [] })).toBe(false);
+    expect(preservarInovacao(result, null)).toBe(false);
+    expect(result.meta.minYear).toBe(2000);
+  });
+
+  test('tolera meta ausente no data.json anterior', () => {
+    const result = novoResultado();
+    expect(preservarInovacao(result, { inovacao: [{ Ano: '1999' }] })).toBe(true);
+    expect(result.meta.minYear).toBe(1999);
+    expect(result.meta.sourceDates.INPI).toBeUndefined();
   });
 });
