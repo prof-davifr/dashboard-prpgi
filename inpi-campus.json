@@ -1,6 +1,6 @@
 {
  "_leia_me": "Gerado por scripts/refresh-inovacao.js. Liga o número INPI ao servidor e ao campus, para que o GitHub Actions atribua campus sem os arquivos brutos de dados/, que são gitignored.",
- "geradoEm": "2026-09-03T12:59:34.504Z",
+ "geradoEm": "2026-09-14T13:49:12.749Z",
  "vinculos": {
   "117812": [
    {
@@ -1373,6 +1373,20 @@
   "5120170007691": [
    {
     "campus": ""
+   }
+  ],
+  "5120260073448": [
+   {
+    "Servidor": "1027788",
+    "campus": "SSA"
+   },
+   {
+    "Servidor": "365793",
+    "campus": "JAC"
+   },
+   {
+    "Servidor": "2161522",
+    "campus": "EUN"
    }
   ]
  }
