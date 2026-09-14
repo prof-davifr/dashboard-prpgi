@@ -80,7 +80,9 @@ const GRAFIAS_REAIS = [
   ['DEPTBAR - Especialização em Docência para a Educação Profissional e Tecnológica', 'docencia'],
   ['DEPTCAM - Especialização em Docência na Educação Profissional e Tecnológica', 'docencia'],
   ['ESDOSALV - Especialização em Docência na Educação Profissional e Tecnológica_Polo SALVADOR: SUBÚRBIO', 'docencia'],
-  ['ESPECIALIZAÇÃO EM FORMAÇÃO DE PROFESSOR DA EDUCAÇÃO PROFISSIONAL E TECNOLÓGICA - Campus Eunápolis', 'docencia'],
+
+  // Formação de Professores da EPT: a página da PRPGI a separa da Docência.
+  ['1004 - ESPECIALIZAÇÃO EM FORMAÇÃO DE PROFESSOR DA EDUCAÇÃO PROFISSIONAL E TECNOLÓGICA - Campus Eunápolis (Eunápolis)', 'formacao'],
 
   // Matem@tica na Pr@tica: prefixos diferentes, "-" e ":".
   ['20202MP - Especialização em Ensino de Matemática: Matem@tica na Pr@tica', 'matematica'],
@@ -91,14 +93,21 @@ const GRAFIAS_REAIS = [
   ['Curso de Pós-Graduação Lato Sensu em Educação a Distância na Educação Profissional e Tecnológica (EAD) - Campus Eunápolis', 'ead'],
   ['EDEPTILH - Especialização em Educação a Distância na Educação Profissional e Tecnológica - ILH', 'ead'],
 
+  // A página da PRPGI não usa a sigla CELER e escreve "aplicadas" minúsculo.
+  ['CELER - Curso de Especialização, Lato Sensu, em Linguagem, Ensino e Representação – CELER (Salvador)', 'celer'],
+  ['0006 - Curso de Pós-Graduação Lato Sensu em Leitura e Produção Textual aplicadas à Educação de Jovens e Adultos (Brumado)', 'leitura'],
+
   // Stricto sensu: o mestrado de Propriedade Intelectual chega com e sem acento.
   ['MESTRADO PROFISSIONAL EM PROPRIEDADE INTELECTUAL E TRANSFERENCIA DE TECNOLOGIA PARA INOVAÇÃO', 'pi'],
   ['MESTRADO PROFISSIONAL EM PROPRIEDADE INTELECTUAL E TRANSFERÊNCIA DE TECNOLOGIA PARA INOVAÇÃO', 'pi']
 ];
 
 const CANONICO = {
-  ciencias: 'Especialização em Ensino de Ciências Anos Finais do Ensino Fundamental - Ciências é 10!',
+  ciencias: 'Especialização em Ensino de Ciências - Ciências é 10!',
   docencia: 'Especialização em Docência na Educação Profissional e Tecnológica',
+  formacao: 'Especialização em Formação de Professores da Educação Profissional e Tecnológica',
+  celer: 'Especialização em Linguagem, Ensino e Representação',
+  leitura: 'Especialização em Leitura e Produção Textual aplicadas à Educação de Jovens e Adultos',
   matematica: 'Especialização em Ensino da Matemática - Matem@tica na Pr@tica',
   ead: 'Especialização em Educação a Distância na Educação Profissional e Tecnológica',
   pi: 'Mestrado Profissional em Propriedade Intelectual e Transferência de Tecnologia para a Inovação'
@@ -137,7 +146,19 @@ describe('canonizarCurso', () => {
   // e "Ensino da Matemática - Matem@tica na Pr@tica" a distância. Um termo
   // largo como "ensino de matematica" juntaria os dois.
   test('o Ensino da Matemática presencial não cai no Matem@tica na Pr@tica', () => {
-    expect(canonizarCurso('Especialização em Ensino da Matemática').encontrado).toBe(false);
+    expect(canonizarCurso('Especialização em Ensino de Matemática').nome)
+      .toBe('Especialização em Ensino da Matemática');
+    expect(canonizarCurso('PGMP - Especialização em Ensino de Matemática: Matem@tica na Pr@tica').nome)
+      .toBe('Especialização em Ensino da Matemática - Matem@tica na Pr@tica');
+  });
+
+  // Até 14/09/2026 a Formação de Professor de Eunápolis somava na Docência na
+  // EPT. A página da PRPGI lista os dois cursos; nenhum captura o outro.
+  test('Docência na EPT e Formação de Professores da EPT ficam separadas', () => {
+    expect(canonizarCurso('Especialização em Formação de Professores da Educação Profissional e Tecnológica').nome)
+      .toBe(CANONICO.formacao);
+    expect(canonizarCurso('Especialização em Docência na Educação Profissional e Tecnológica').nome)
+      .toBe(CANONICO.docencia);
   });
 
   test('nome desconhecido volta como veio, marcado como não encontrado', () => {
@@ -153,17 +174,24 @@ describe('canonizarCurso', () => {
 
 // ─── A grafia oficial do portal ──────────────────────────────────────────────
 
-// Consultado em 04/09/2026 em portal.ifba.edu.br/ensino/nossos-cursos/
-// pos-graduacao/{mestrados,doutorados,especializacoes}. O portal lista a oferta
-// de hoje e omite o nível; o registro guarda o nível no nome. Estes casos
-// existem para que uma edição futura não afaste o painel da grafia oficial.
+// Consultado em 14/09/2026 em portal.ifba.edu.br/prpgi/cursos/
+// {mestrados,doutorados,especializacoes}/. A página omite o nível; o registro
+// guarda o nível no nome. Estes casos existem para que uma edição futura não
+// afaste o painel da grafia oficial.
+//
+// Uma grafia da página fica de fora de propósito: "Educação à Distância na
+// Educação Profissional e Tecnológica". O registro escreve "a Distância", sem
+// crase, como pede a norma.
 const GRAFIA_DO_PORTAL = [
+  // Mestrados e doutorado
   ['Ciências e Tecnologias Ambientais', 'Mestrado Acadêmico em Ciências e Tecnologias Ambientais'],
   ['Educação Profissional e Tecnológica', 'Mestrado Profissional em Educação Profissional e Tecnológica'],
   ['Engenharia de Materiais', 'Mestrado Profissional em Engenharia de Materiais'],
   ['Engenharia de Sistemas e Produtos', 'Mestrado Profissional em Engenharia de Sistemas e Produtos'],
   ['Propriedade Intelectual e Transferência de Tecnologia para a Inovação', 'Mestrado Profissional em Propriedade Intelectual e Transferência de Tecnologia para a Inovação'],
   ['Difusão do Conhecimento', 'Doutorado em Difusão do Conhecimento'],
+
+  // Especializações presenciais
   ['Ciência e Tecnologia Ambiental', 'Especialização em Ciência e Tecnologia Ambiental'],
   ['Computação Distribuída e Ubíqua', 'Especialização em Computação Distribuída e Ubíqua'],
   ['Desenvolvimento de Aplicações e Games para Dispositivos Móveis', 'Especialização em Desenvolvimento de Aplicações e Games para Dispositivos Móveis'],
@@ -175,10 +203,36 @@ const GRAFIA_DO_PORTAL = [
   ['Educação, Cultura e Linguagens', 'Especialização em Educação, Cultura e Linguagens'],
   ['Formação Docente e Práticas Pedagógicas', 'Especialização em Formação Docente e Práticas Pedagógicas'],
   ['Estudos Étnicos e Raciais: Identidades e Representação', 'Especialização em Estudos Étnicos e Raciais: Identidades e Representação'],
+  ['Ensino da Matemática', 'Especialização em Ensino da Matemática'],
   ['Gestão e Educação Ambiental', 'Especialização em Gestão e Educação Ambiental'],
   ['Gestão Pública, Segurança contra Incêndio e Pânico e Defesa Civil', 'Especialização em Gestão Pública, Segurança contra Incêndio e Pânico e Defesa Civil'],
-  ['Ensino de Ciências Anos Finais do Ensino Fundamental - Ciências é 10!', 'Especialização em Ensino de Ciências Anos Finais do Ensino Fundamental - Ciências é 10!'],
-  ['Ensino da Matemática - Matem@tica na Pr@tica', 'Especialização em Ensino da Matemática - Matem@tica na Pr@tica']
+  ['Ensino de Ciências Naturais e Matemática', 'Especialização em Ensino de Ciências Naturais e Matemática'],
+  ['Formação de Professores da Educação Profissional e Tecnológica', 'Especialização em Formação de Professores da Educação Profissional e Tecnológica'],
+  ['Linguagem, Ensino e Representação', 'Especialização em Linguagem, Ensino e Representação'],
+  ['Leitura e Produção Textual aplicadas à Educação de Jovens e Adultos', 'Especialização em Leitura e Produção Textual aplicadas à Educação de Jovens e Adultos'],
+  ['Educação, Cultura e Relações Étnico-Raciais', 'Especialização em Educação, Cultura e Relações Étnico-Raciais'],
+  ['Tecnologias Digitais para Educação', 'Especialização em Tecnologias Digitais para Educação'],
+  ['Literatura, Ensino e Diversidade', 'Especialização em Literatura, Ensino e Diversidade'],
+  ['História e Cultura Afro-Brasileira e Indígena', 'Especialização em História e Cultura Afro-Brasileira e Indígena'],
+  ['Práticas Educacionais e Juventudes na Contemporaneidade', 'Especialização em Práticas Educacionais e Juventudes na Contemporaneidade'],
+
+  // Especializações a distância
+  ['Ensino de Ciências - Ciências é 10!', 'Especialização em Ensino de Ciências - Ciências é 10!'],
+  ['Ensino da Matemática - Matem@tica na Pr@tica', 'Especialização em Ensino da Matemática - Matem@tica na Pr@tica'],
+  ['Docência na Educação Profissional e Tecnológica', 'Especialização em Docência na Educação Profissional e Tecnológica'],
+  ['Gestão na Educação Profissional e Tecnológica', 'Especialização em Gestão na Educação Profissional e Tecnológica'],
+  ['Energias Renováveis e Mobilidade Elétrica', 'Especialização em Energias Renováveis e Mobilidade Elétrica'],
+  ['Línguas Indígenas de Sinais', 'Especialização em Línguas Indígenas de Sinais'],
+  ['Ensino de Língua Estrangeira na Educação Profissional e Tecnológica', 'Especialização em Ensino de Língua Estrangeira na Educação Profissional e Tecnológica']
+];
+
+// Especializações encerradas, informadas pela Pró-Reitoria em 14/09/2026. Não
+// estão na página e não têm aluno na base do SUAP; a grafia é a da lista.
+const ENCERRADAS = [
+  'Especialização em Educação Profissional Integrada à Educação Básica na Modalidade EJA',
+  'Especialização em Gestão de Instituições Públicas de Ensino',
+  'Especialização em Gestão de Tecnologias em Saúde com ênfases em: Engenharia Clínica e em Gestão de Equipamentos Médico-Hospitalares',
+  'Especialização em Técnica em Segurança, Meio Ambiente e Saúde'
 ];
 
 // O teste é sobre a GRAFIA, não sobre a resolução. Vários nomes do portal são
@@ -192,6 +246,21 @@ describe('grafia oficial do portal do IFBA', () => {
     expect(canonico.endsWith(doPortal)).toBe(true);
     expect(canonico.slice(0, canonico.length - doPortal.length))
       .toMatch(/^(Mestrado (Acadêmico|Profissional)|Doutorado|Especialização) em $/);
+  });
+
+  test.each(ENCERRADAS)('encerrada: %s', nome => {
+    expect(NOMES_CANONICOS).toContain(nome);
+  });
+
+  // Toda entrada do registro vem da página da PRPGI ou da lista de encerradas.
+  // Um nome que não esteja em nenhuma das duas se afastou da grafia oficial.
+  test('o registro não tem nome fora da página nem da lista de encerradas', () => {
+    const conhecidos = new Set([
+      ...GRAFIA_DO_PORTAL.map(([, canonico]) => canonico),
+      'Especialização em Educação a Distância na Educação Profissional e Tecnológica',
+      ...ENCERRADAS
+    ]);
+    expect(NOMES_CANONICOS.filter(n => !conhecidos.has(n))).toEqual([]);
   });
 });
 

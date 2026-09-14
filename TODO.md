@@ -120,6 +120,18 @@ Frontend estático (Chart.js + Leaflet + SheetJS) + pipeline ETL em `scripts/bui
       abrem. A saída não é `-k`: baixar o intermediário pela URI de AIA do
       próprio certificado, juntar ao pacote do sistema e passar em `--cacert`.
       A receita está em `docs/proveniencia-dados.md` §6.8.
+- [x] **Nomes canônicos alinhados com a página de cursos da PRPGI**
+      (14/09/2026). A página lista 31 especializações, contra as 17 do portal
+      de ensino. Quatro nomes mudaram: `… Anos Finais do Ensino Fundamental -
+      Ciências é 10!` → `Ensino de Ciências - Ciências é 10!`, `Linguagem,
+      Ensino e Representação (CELER)` perdeu a sigla, `Aplicadas` →
+      `aplicadas`, e a `Formação de Professor da EPT` de Eunápolis (22 alunos)
+      saiu da Docência na EPT, porque a página lista os dois cursos. Entraram as
+      sete especializações novas da página, ainda sem aluno, e as quatro encerradas que a
+      Pró-Reitoria informou. `Educação a Distância` fica sem crase, contra a
+      página. O `data.json` recebeu os nomes novos sem build completo: o
+      registro foi reaplicado sobre `curso_original`, que dá o mesmo resultado
+      e preserva a aba Inovação.
 - [ ] **Limpar o campo `polo`.** Os valores vêm do SUAP como
       `EspDoc_UAB_CAMAÇARI (UBA)`, `Pólo Eunápolis - UAB`, `Irecê  UAB`. Aparecem
       na planilha `Dados` da exportação. Mesmo tipo de problema dos nomes de

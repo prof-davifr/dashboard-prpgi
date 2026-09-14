@@ -113,16 +113,19 @@ words).
   `tests/programas-pos.test.js` fails until the entry exists. Without that
   guard, the next SUAP collection silently re-splits a program.
 - Merge decisions taken with the Pró-Reitoria (04/09/2026): all 11 `Ciência é
-  Dez!` spellings are one program; all 18 `Docência na EPT` are one, including
-  Eunápolis' `Formação de Professor da EPT` and the seven Ubaitaba entries whose
-  name carried `_Polo Camaçari` — the `polo` field already holds that, so it
-  leaves the name.
-- The canonical spelling follows the IFBA portal (`/ensino/nossos-cursos/
-  pos-graduacao/{mestrados,doutorados,especializacoes}`, read 04/09/2026), with
-  the level prefixed. `tests/programas-pos.test.js` pins each portal string.
-  The portal lists today's offering, so eight closed programs in the registry
-  are not there (their spelling comes from the data), and two portal courses
-  have no student yet but are registered anyway.
+  Dez!` spellings are one program; all 17 `Docência na EPT` are one, including
+  the seven Ubaitaba entries whose name carried `_Polo Camaçari` — the `polo`
+  field already holds that, so it leaves the name. On 14/09/2026 Eunápolis'
+  `Formação de Professor da EPT` (22 students) left the Docência entry: the
+  PRPGI page lists `Formação de Professores da EPT` as a separate course.
+- The canonical spelling follows the PRPGI course pages (`/prpgi/cursos/
+  {mestrados,doutorados,especializacoes}/`, read 14/09/2026), with the level
+  prefixed. `tests/programas-pos.test.js` pins each page string and fails if
+  the registry holds a name that is neither on the page nor in the closed list.
+  One deliberate deviation: the page writes `Educação à Distância`; the registry
+  keeps `a Distância`, without crase. Four closed specializations (list from the
+  Pró-Reitoria, not on the page, no student in SUAP) are registered too, as are
+  the page courses with no student yet.
 - **The portal serves an incomplete certificate chain** (leaf only, missing
   `GlobalSign RSA OV SSL CA 2018`), so `curl` and WebFetch both refuse it. Do
   not reach for `-k`. Fetch the intermediate from the leaf's AIA URI, append it

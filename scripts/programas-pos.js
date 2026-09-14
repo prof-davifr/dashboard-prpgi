@@ -14,17 +14,18 @@
 // isso aqui não há normalização de texto, e sim um registro: cada programa
 // declara os termos que o identificam, e o nome canônico sai do registro.
 //
-// Os nomes canônicos seguem a grafia do portal do IFBA (consultado em
-// 04/09/2026):
+// Os nomes canônicos seguem a grafia das páginas de cursos da PRPGI
+// (consultadas em 14/09/2026):
 //
-//   https://portal.ifba.edu.br/ensino/nossos-cursos/pos-graduacao/mestrados
-//   https://portal.ifba.edu.br/ensino/nossos-cursos/pos-graduacao/doutorados
-//   https://portal.ifba.edu.br/ensino/nossos-cursos/pos-graduacao/especializacoes
+//   https://portal.ifba.edu.br/prpgi/cursos/mestrados/
+//   https://portal.ifba.edu.br/prpgi/cursos/doutorados/
+//   https://portal.ifba.edu.br/prpgi/cursos/especializacoes/
 //
-// O portal lista a oferta de hoje, e o SUAP entrega 2000–2026. Oito programas
-// do registro não estão no portal porque já encerraram; a grafia deles vem dos
-// próprios dados. O portal também traz dois cursos sem nenhum aluno na base —
-// entram aqui assim mesmo, para casarem na primeira coleta que os trouxer.
+// A PRPGI lista 5 mestrados, 1 doutorado e 31 especializações. Uma única
+// grafia do portal não foi seguida: "Educação à Distância" fica sem crase,
+// como pede a norma. Vários cursos da página ainda não têm aluno na base, e a
+// Pró-Reitoria informou quatro especializações já encerradas, fora da página.
+// Todos entram aqui assim mesmo, para casarem na primeira coleta que os trouxer.
 //
 // O nível ("Especialização em", "Mestrado Profissional em") fica no nome
 // canônico, embora o portal o omita: `nomeCursoCurto()` o remove do rótulo do
@@ -87,6 +88,13 @@ const PROGRAMAS_POS = [
 
   // ── Lato sensu: entradas específicas, antes das famílias ───────────────────
   {
+    // A página da PRPGI lista este curso presencial à parte da Docência na
+    // EPT, que é a distância. Até 14/09/2026 os alunos de Eunápolis somavam na
+    // Docência; o SUAP os traz como "Formação de Professor da EPT".
+    nome: 'Especialização em Formação de Professores da Educação Profissional e Tecnológica',
+    termos: [['formacao de professor'], ['educacao profissional']]
+  },
+  {
     // Precisa vir antes do Ciência é Dez: o nome contém "ensino de ciencias",
     // mas é outro programa, de Lauro de Freitas.
     nome: 'Especialização em Ensino de Ciências Naturais e Matemática',
@@ -102,18 +110,18 @@ const PROGRAMAS_POS = [
     // Onze grafias, dez campi. "Séries Finais" (SEA), "Ciência é 10" (BRU) e
     // "Ensino em Ciências: Ciências é Dez" (SSA) são o mesmo programa nacional.
     // Os dois nomes de Brumado são duas turmas: 2020 e 2025.
-    nome: 'Especialização em Ensino de Ciências Anos Finais do Ensino Fundamental - Ciências é 10!',
+    nome: 'Especialização em Ensino de Ciências - Ciências é 10!',
     termos: [['ensino de ciencias', 'ensino em ciencias']],
     exceto: ['naturais e matematica']
   },
   {
-    // Dezoito grafias. "na" e "para a" convivem, e Ubaitaba põe o polo no nome
-    // ("_Polo Camaçari"). O polo já vem no campo `polo`, então sai do nome.
-    // "Formação de Professor da EPT" (Eunápolis) é o mesmo curso.
+    // Dezessete grafias. "na" e "para a" convivem, e Ubaitaba põe o polo no
+    // nome ("_Polo Camaçari"). O polo já vem no campo `polo`, então sai do nome.
     nome: 'Especialização em Docência na Educação Profissional e Tecnológica',
-    termos: [['docencia', 'formacao de professor'], ['educacao profissional']]
+    termos: [['docencia'], ['educacao profissional']]
   },
   {
+    // A página da PRPGI escreve "à Distância"; aqui fica sem crase.
     nome: 'Especialização em Educação a Distância na Educação Profissional e Tecnológica',
     termos: [['educacao a distancia'], ['educacao profissional']]
   },
@@ -123,6 +131,13 @@ const PROGRAMAS_POS = [
     // O @ vira espaço na chave normalizada.
     nome: 'Especialização em Ensino da Matemática - Matem@tica na Pr@tica',
     termos: [['matem tica na pr tica', 'matematica na pratica']]
+  },
+  {
+    // O presencial. O `exceto` o separa do Matem@tica na Pr@tica, que também
+    // chega como "Ensino de Matemática".
+    nome: 'Especialização em Ensino da Matemática',
+    termos: [['ensino da matematica', 'ensino de matematica']],
+    exceto: ['matem tica na pr tica', 'matematica na pratica']
   },
 
   // ── Lato sensu: um campus cada ─────────────────────────────────────────────
@@ -175,11 +190,11 @@ const PROGRAMAS_POS = [
     termos: [['gestao na educacao profissional']]
   },
   {
-    nome: 'Especialização em Leitura e Produção Textual Aplicadas à Educação de Jovens e Adultos',
+    nome: 'Especialização em Leitura e Produção Textual aplicadas à Educação de Jovens e Adultos',
     termos: [['leitura e producao textual']]
   },
   {
-    nome: 'Especialização em Linguagem, Ensino e Representação (CELER)',
+    nome: 'Especialização em Linguagem, Ensino e Representação',
     termos: [['linguagem ensino e representacao']]
   },
   {
@@ -187,14 +202,57 @@ const PROGRAMAS_POS = [
     termos: [['tecnologias digitais']]
   },
 
-  // ── No portal, ainda sem aluno na base do SUAP ─────────────────────────────
+  // ── Na página da PRPGI, ainda sem aluno na base do SUAP ────────────────────
   {
     nome: 'Especialização em Computação Distribuída e Ubíqua',
     termos: [['computacao distribuida']]
   },
   {
+    nome: 'Especialização em Energias Renováveis e Mobilidade Elétrica',
+    termos: [['energias renovaveis']]
+  },
+  {
+    nome: 'Especialização em Ensino de Língua Estrangeira na Educação Profissional e Tecnológica',
+    termos: [['lingua estrangeira']]
+  },
+  {
     nome: 'Especialização em Gestão Pública, Segurança contra Incêndio e Pânico e Defesa Civil',
     termos: [['seguranca contra incendio']]
+  },
+  {
+    nome: 'Especialização em História e Cultura Afro-Brasileira e Indígena',
+    termos: [['historia e cultura afro']]
+  },
+  {
+    nome: 'Especialização em Línguas Indígenas de Sinais',
+    termos: [['linguas indigenas de sinais']]
+  },
+  {
+    nome: 'Especialização em Literatura, Ensino e Diversidade',
+    termos: [['literatura ensino e diversidade']]
+  },
+  {
+    nome: 'Especialização em Práticas Educacionais e Juventudes na Contemporaneidade',
+    termos: [['praticas educacionais e juventudes']]
+  },
+
+  // ── Encerradas, fora da página da PRPGI ────────────────────────────────────
+  // Lista da Pró-Reitoria (14/09/2026). Nenhuma tem aluno na base do SUAP.
+  {
+    nome: 'Especialização em Educação Profissional Integrada à Educação Básica na Modalidade EJA',
+    termos: [['integrada a educacao basica', 'proeja']]
+  },
+  {
+    nome: 'Especialização em Gestão de Instituições Públicas de Ensino',
+    termos: [['instituicoes publicas de ensino']]
+  },
+  {
+    nome: 'Especialização em Gestão de Tecnologias em Saúde com ênfases em: Engenharia Clínica e em Gestão de Equipamentos Médico-Hospitalares',
+    termos: [['tecnologias em saude']]
+  },
+  {
+    nome: 'Especialização em Técnica em Segurança, Meio Ambiente e Saúde',
+    termos: [['seguranca meio ambiente e saude']]
   }
 ];
 

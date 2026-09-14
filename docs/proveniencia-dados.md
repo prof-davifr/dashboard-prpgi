@@ -717,18 +717,32 @@ mas o build imprime um bloco `ATENÇÃO` com os nomes, e
 `tests/programas-pos.test.js` falha até a entrada existir. Sem esse guarda, a
 coleta seguinte volta a partir o programa em dois, em silêncio.
 
-A grafia canônica segue o portal do IFBA, consultado em 04/09/2026:
+A grafia canônica segue as páginas de cursos da PRPGI, consultadas em
+14/09/2026:
 
-- `https://portal.ifba.edu.br/ensino/nossos-cursos/pos-graduacao/mestrados`
-- `https://portal.ifba.edu.br/ensino/nossos-cursos/pos-graduacao/doutorados`
-- `https://portal.ifba.edu.br/ensino/nossos-cursos/pos-graduacao/especializacoes`
+- `https://portal.ifba.edu.br/prpgi/cursos/mestrados/`
+- `https://portal.ifba.edu.br/prpgi/cursos/doutorados/`
+- `https://portal.ifba.edu.br/prpgi/cursos/especializacoes/`
 
-O portal lista 5 mestrados, 1 doutorado e 17 especializações — a oferta de hoje.
-O SUAP entrega 2000–2026, então oito programas do registro não estão no portal
-porque já encerraram, e a grafia deles vem dos próprios dados. Dois cursos do
-portal ainda não têm aluno na base e estão registrados assim mesmo, para casarem
-na primeira coleta que os trouxer. O nível fica no nome canônico, embora o
-portal o omita, e `tests/programas-pos.test.js` prende cada grafia oficial.
+A PRPGI lista 5 mestrados, 1 doutorado e 31 especializações (23 presenciais e 8
+a distância; duas se repetem nas listas). Nove delas ainda não têm aluno na base
+e estão registradas assim mesmo, para casarem na primeira coleta que as trouxer.
+O nível fica no nome canônico, embora a página o omita, e
+`tests/programas-pos.test.js` prende cada grafia oficial.
+
+Uma grafia da página não foi seguida: `Educação à Distância na Educação
+Profissional e Tecnológica`. O registro escreve `a Distância`, sem crase, como
+pede a norma.
+
+A Pró-Reitoria informou quatro especializações encerradas que não estão na
+página. Nenhuma tem aluno na base; entram no registro com a grafia da lista:
+
+- Gestão de Instituições Públicas de Ensino (Salvador)
+- Gestão de Tecnologias em Saúde com ênfases em: Engenharia Clínica e em Gestão
+  de Equipamentos Médico-Hospitalares (Salvador)
+- Técnica em Segurança, Meio Ambiente e Saúde (Salvador)
+- Educação Profissional Integrada à Educação Básica na Modalidade EJA
+  (Salvador/Barreiras e Eunápolis)
 
 **O portal serve a cadeia de certificados incompleta** — só a folha, sem o
 intermediário `GlobalSign RSA OV SSL CA 2018`. O `curl` e os buscadores recusam.
@@ -750,9 +764,13 @@ Decisões de fusão tomadas em 04/09/2026:
 - As 11 grafias do `Ciência é Dez!` são um programa só, inclusive
   `Séries Finais do Ensino Fundamental` (Seabra) e `Ciência é 10` (Brumado) —
   os dois nomes de Brumado são as turmas de 2020 e de 2025.
-- As 18 grafias da `Docência na EPT` são um programa só, inclusive a
-  `Formação de Professor da EPT` de Eunápolis e as sete de Ubaitaba que traziam
-  `_Polo Camaçari` no nome. O campo `polo` já guarda o polo.
+- As 17 grafias da `Docência na EPT` são um programa só, inclusive as sete de
+  Ubaitaba que traziam `_Polo Camaçari` no nome. O campo `polo` já guarda o
+  polo.
+- Em 14/09/2026 a `Formação de Professor da EPT` de Eunápolis (22 alunos) saiu
+  da Docência na EPT e virou `Especialização em Formação de Professores da
+  Educação Profissional e Tecnológica`. A página da PRPGI lista os dois cursos
+  em separado: este presencial, a Docência a distância.
 
 ## 7. Estrutura dos Arquivos de Saída
 
