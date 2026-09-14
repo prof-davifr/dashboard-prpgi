@@ -47,11 +47,16 @@ describe('getPosGraduacaoBucket', () => {
       .forEach(s => expect(ctx.getPosGraduacaoBucket(s)).toBe('Evadido'));
   });
 
-  test('o que não está no mapa cai em Outros', () => {
+  // As seis situações de trânsito da base: não dizem se o aluno concluiu ou
+  // saiu, então não cabem em nenhum dos outros quatro grupos.
+  test('as seis situações de trânsito caem em Outros', () => {
     ['Em Migração', 'Não concluído', 'Transferido Interno', 'Trancado',
-     'Trancado Voluntariamente', 'Matrícula Vínculo Institucional',
-     'Aguardando Colação de Grau', 'Situação Inventada']
+     'Trancado Voluntariamente', 'Matrícula Vínculo Institucional']
       .forEach(s => expect(ctx.getPosGraduacaoBucket(s)).toBe('Outros'));
+  });
+
+  test('uma situação que o SUAP nunca mandou também cai em Outros', () => {
+    expect(ctx.getPosGraduacaoBucket('Situação Inventada')).toBe('Outros');
   });
 
   test('valor vazio, nulo ou indefinido cai em Outros', () => {
@@ -371,6 +376,42 @@ describe('quebrarRotulo', () => {
 
   test('não marca quando o texto coube inteiro', () => {
     expect(ctx.quebrarRotulo('Engenharia de Materiais', 38, 2)).toEqual(['Engenharia de Materiais']);
+  });
+});
+
+// ─── A base contra a documentação ────────────────────────────────────────────
+
+// O modal "Sobre os Dados e Metodologia" lista, uma a uma, as situações que
+// caem em "Outros". A lista trazia "Aguardando Colação de Grau", que nunca
+// apareceu na base — dezessete nomes para dezesseis situações. Este teste
+// prende a lista aos dados publicados.
+describe('situações do SUAP no data.json', () => {
+  const fs = require('fs');
+  const path = require('path');
+  const data = JSON.parse(
+    fs.readFileSync(path.join(__dirname, '..', 'data.json'), 'utf-8')
+  );
+  const situacoes = [...new Set(
+    data.posgraduacao.map(r => (r.situacao || '').trim()).filter(Boolean)
+  )].sort();
+
+  const OUTROS_DOCUMENTADOS = [
+    'Em Migração', 'Matrícula Vínculo Institucional', 'Não concluído',
+    'Trancado', 'Trancado Voluntariamente', 'Transferido Interno'
+  ];
+
+  test('são dezesseis situações distintas', () => {
+    expect(situacoes).toHaveLength(16);
+  });
+
+  test('o grupo Outros é exatamente o documentado no modal', () => {
+    const emOutros = situacoes.filter(s => ctx.getPosGraduacaoBucket(s) === 'Outros').sort();
+    expect(emOutros).toEqual(OUTROS_DOCUMENTADOS);
+  });
+
+  test('nenhuma situação da base fica sem grupo', () => {
+    const baldes = require('vm').runInContext('POSGRAD_BUCKETS', ctx);
+    situacoes.forEach(s => expect(baldes).toContain(ctx.getPosGraduacaoBucket(s)));
   });
 });
 

@@ -8,6 +8,7 @@ const path = require('path');
 const crypto = require('crypto');
 const os = require('os');
 const { validate } = require('./validate-data');
+const { canonizarCurso } = require('./programas-pos');
 
 const DADOS_DIR = path.join(__dirname, '..', 'dados');
 const OUTPUT_FILE = path.join(__dirname, '..', 'data.json');
@@ -20,6 +21,11 @@ const CAMPUS_CODE_FIX = {
   'PAF': 'PA',   // Paulo Afonso (typo)
   'PSG': 'PS',   // Porto Seguro — o SUAP trocou PS por PSG entre ago e set/2026
 };
+
+// Nomes de curso da pós que nenhuma entrada de PROGRAMAS_POS reconheceu. O
+// build não para por causa disso — o aluno continua no painel —, mas avisa no
+// fim, porque um nome fora do registro volta a duplicar o programa no gráfico.
+const cursosPosSemRegistro = new Set();
 
 function normalizeCampusCode(raw) {
   const upper = (raw || '').toString().trim().toUpperCase();
@@ -760,15 +766,25 @@ function main() {
              else categoria = 'Outro'; // Fallback
            }
            
-           // Simplify curso name
+           // Nome do programa.
+           //
+           // O SUAP não tem cadastro único de curso: em set/2026 eram 60 nomes
+           // para 27 programas, porque cada campus digita o seu. O registro de
+           // scripts/programas-pos.js resolve o nome canônico; a limpeza abaixo
+           // (código de matrícula no começo, campus entre parênteses no fim) só
+           // vale para o que o registro ainda não conhece.
            let curso_simplificado = curso;
            if (curso_simplificado) {
-             // Remove leading numbers and dash
-             curso_simplificado = curso_simplificado.replace(/^\d+\s*-\s*/, '');
-             // Remove campus in parentheses at the end
-             curso_simplificado = curso_simplificado.replace(/\s*\([^)]*\)$/, '');
-             // Trim extra spaces
-             curso_simplificado = curso_simplificado.trim();
+             const canonico = canonizarCurso(curso_simplificado);
+             if (canonico.encontrado) {
+               curso_simplificado = canonico.nome;
+             } else {
+               if (curso_simplificado.trim()) cursosPosSemRegistro.add(curso_simplificado.trim());
+               curso_simplificado = curso_simplificado
+                 .replace(/^\d+\s*-\s*/, '')
+                 .replace(/\s*\([^)]*\)$/, '')
+                 .trim();
+             }
            }
            
            // Normalize campus code
@@ -1001,6 +1017,13 @@ function main() {
   console.log(`   Period: ${result.meta.minYear}-${result.meta.maxYear}`);
   console.log(`   Updated at (UTC): ${result.meta.generatedAt}`);
   console.log(`   Campuses: ${result.meta.campuses.join(', ')}`);
+
+  if (cursosPosSemRegistro.size > 0) {
+    console.log(`\n   ATENÇÃO: ${cursosPosSemRegistro.size} nome(s) de curso da pós fora de PROGRAMAS_POS.`);
+    console.log('   Enquanto não entrarem em scripts/programas-pos.js, o mesmo programa');
+    console.log('   aparece duas vezes no filtro e no gráfico:');
+    [...cursosPosSemRegistro].sort().forEach(c => console.log(`     - ${c}`));
+  }
 
   // ─── Build data-groups.json (detailed — for relatorio-gp) ──────────────────
   console.log('\n Building data-groups.json (detailed)...');

@@ -681,6 +681,79 @@ Servidor do IFBA com ao menos um registro em qualquer das bases Lattes (bibliogr
 
 ---
 
+### 6.8 Nome Canônico de Programa (Pós-Graduação)
+
+O SUAP não tem cadastro único de curso. Cada campus digita o nome do programa do
+seu jeito, e o mesmo curso chega em muitas grafias. Em setembro de 2026 eram
+**60 nomes distintos para 27 programas**. Exemplos reais do mesmo programa
+nacional de Ensino de Ciências:
+
+```
+C10 - Especialização em Ensino de Ciências - Anos Finais ... - "Ciência e Dez!"
+Curso de Pós-Graduação Lato Sensu em Ensino de Ciências: Ciência é 10
+Especialização em Ensino em Ciências: Ciências é Dez
+Curso de Especialização em Ensino de Ciências: Séries Finais do Ensino Fundamental
+```
+
+Tirar acento e pontuação não resolve: o que muda é a redação inteira. Por isso
+`scripts/programas-pos.js` é um **registro**, não um normalizador. Cada entrada
+declara:
+
+| Campo | O que é |
+|---|---|
+| `nome` | a forma canônica, que vai para `curso` no `data.json` |
+| `termos` | grupos de alternativas. Todos os grupos casam; dentro do grupo, basta um |
+| `exceto` | se qualquer um aparecer, a entrada não serve |
+
+**A ordem das entradas importa: vale a primeira que casa.** Programas
+específicos vêm antes dos de termos largos — `Ensino de Ciências Naturais e
+Matemática` precisa vir antes da família `Ciência é Dez!`, que contém as mesmas
+palavras.
+
+`build.js` chama `canonizarCurso()` no ramo da pós. O campo `curso` recebe o
+nome canônico; `curso_original` guarda a string bruta do SUAP como prova. Um
+nome fora do registro **não** derruba o build — o aluno continua no painel —,
+mas o build imprime um bloco `ATENÇÃO` com os nomes, e
+`tests/programas-pos.test.js` falha até a entrada existir. Sem esse guarda, a
+coleta seguinte volta a partir o programa em dois, em silêncio.
+
+A grafia canônica segue o portal do IFBA, consultado em 04/09/2026:
+
+- `https://portal.ifba.edu.br/ensino/nossos-cursos/pos-graduacao/mestrados`
+- `https://portal.ifba.edu.br/ensino/nossos-cursos/pos-graduacao/doutorados`
+- `https://portal.ifba.edu.br/ensino/nossos-cursos/pos-graduacao/especializacoes`
+
+O portal lista 5 mestrados, 1 doutorado e 17 especializações — a oferta de hoje.
+O SUAP entrega 2000–2026, então oito programas do registro não estão no portal
+porque já encerraram, e a grafia deles vem dos próprios dados. Dois cursos do
+portal ainda não têm aluno na base e estão registrados assim mesmo, para casarem
+na primeira coleta que os trouxer. O nível fica no nome canônico, embora o
+portal o omita, e `tests/programas-pos.test.js` prende cada grafia oficial.
+
+**O portal serve a cadeia de certificados incompleta** — só a folha, sem o
+intermediário `GlobalSign RSA OV SSL CA 2018`. O `curl` e os buscadores recusam.
+Não use `-k`: baixe o intermediário pela URI de AIA do próprio certificado,
+junte-o ao pacote do sistema e passe em `--cacert`. A verificação passa
+(`ssl_verify_result=0`).
+
+```
+openssl s_client -connect portal.ifba.edu.br:443 -servername portal.ifba.edu.br \
+  </dev/null 2>/dev/null | openssl x509 -noout -text | grep 'CA Issuers'
+curl -sS -o gs.crt http://secure.globalsign.com/cacert/gsrsaovsslca2018.crt
+openssl x509 -inform DER -in gs.crt -out gs.pem
+cat /etc/ssl/certs/ca-certificates.crt gs.pem > ca-ifba.pem
+curl --cacert ca-ifba.pem https://portal.ifba.edu.br/...
+```
+
+Decisões de fusão tomadas em 04/09/2026:
+
+- As 11 grafias do `Ciência é Dez!` são um programa só, inclusive
+  `Séries Finais do Ensino Fundamental` (Seabra) e `Ciência é 10` (Brumado) —
+  os dois nomes de Brumado são as turmas de 2020 e de 2025.
+- As 18 grafias da `Docência na EPT` são um programa só, inclusive a
+  `Formação de Professor da EPT` de Eunápolis e as sete de Ubaitaba que traziam
+  `_Polo Camaçari` no nome. O campo `polo` já guarda o polo.
+
 ## 7. Estrutura dos Arquivos de Saída
 
 ### 7.1 `data.json` (~31 MB)
@@ -763,9 +836,10 @@ Destinado ao relatório de grupos de pesquisa (não ao dashboard principal).
 
 | Mapeamento | Arquivo | Função/Variável |
 |---|---|---|
-| Código de campus → Cidade | `src/script.js` | `CAMPUS_TO_CITY` |
-| Cidade → Coordenadas | `src/script.js` | `IFBA_COORDS` |
+| Código de campus → Cidade | `src/shared.js` | `CAMPUS_TO_CITY` |
+| Cidade → Coordenadas | `src/shared.js` | `IFBA_COORDS` |
 | Cidade → Código (IC) | `scripts/build.js` | `campusMap` |
+| Nome de curso da pós → Programa canônico | `scripts/programas-pos.js` | `PROGRAMAS_POS` |
 | Nome de sheet → Chave interna | `scripts/build.js` | `SHEET_MAP` |
 | Rótulo de fonte → Nome legível | `scripts/build.js` | `SOURCE_LABELS` |
 

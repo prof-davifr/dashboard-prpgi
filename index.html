@@ -307,25 +307,11 @@
                     <option value="Outros">Outros</option>
                 </select>
             </div>
-            <div class="inline-help">
-                <strong>Como ler:</strong> um registro é um aluno, e o ano é o de ingresso.
-                As situações do SUAP entram em cinco grupos: <em>Matriculado</em>; <em>Concluinte</em> (Concluído, Formado);
-                <em>Aperfeiçoado</em> (cumpriu os créditos, sem o título de especialista); <em>Evadido</em> (Cancelado,
-                Evasão, Desligado, Abandono, Falecido, Cancelamento Compulsório); e <em>Outros</em>.
-                Os filtros de período e de campus são os da barra do topo.
-                <br><strong>Exportação:</strong> o botão no fim da página baixa um arquivo Excel com o
-                recorte atual — capa com os filtros aplicados, uma planilha por indicador da tela e
-                uma planilha com uma linha por aluno. O arquivo não traz nome, matrícula nem e-mail.
-            </div>
         </div>
 
         <div class="kpi-grid" id="kpi-posgraduacao"></div>
 
         <div class="charts-container">
-            <div class="chart-row-full chart-card">
-                <div class="chart-title" title="Alunos por campus, separados por modalidade do programa.">Alunos por Campus</div>
-                <div class="chart-wrapper alta"><canvas id="chart-posgraduacao-campus" role="img" aria-label="Gráfico: Alunos por Campus"></canvas></div>
-            </div>
             <div class="chart-row-split">
                 <div class="chart-card">
                     <div class="chart-title" title="Quantidade de programas distintos com aluno em cada campus.">Cursos por Campus</div>
@@ -339,6 +325,10 @@
             <div class="chart-row-full chart-card">
                 <div class="chart-title" title="Os quinze programas com mais alunos no recorte atual. A modalidade aparece na cor da barra e entre parênteses no nome.">Alunos por Programa</div>
                 <div class="chart-wrapper extra-alta"><canvas id="chart-posgraduacao-programas" role="img" aria-label="Gráfico: Alunos por Programa, separados por modalidade"></canvas></div>
+            </div>
+            <div class="chart-row-full chart-card">
+                <div class="chart-title" title="Alunos por campus, separados por modalidade do programa.">Alunos por Campus</div>
+                <div class="chart-wrapper alta"><canvas id="chart-posgraduacao-campus" role="img" aria-label="Gráfico: Alunos por Campus"></canvas></div>
             </div>
             <div class="chart-row-full chart-card">
                 <div class="chart-title" title="Ingressos por ano de entrada, separados por modalidade.">Ingressos por Ano</div>
@@ -468,16 +458,19 @@
 
                 <div class="modal-section">
                     <h3>Pós-Graduação</h3>
-                    <p>A aba apresenta indicadores gerais dos programas de pós-graduação do IFBA: alunos e cursos por campus, programas com mais alunos, ingressos por ano e distribuição por situação. Cada registro do SUAP é um aluno, e o ano é o de ingresso.</p>
+                    <p>A aba apresenta indicadores gerais dos programas de pós-graduação do IFBA, nesta ordem: cursos por campus, situação dos alunos, alunos por programa, alunos por campus, ingressos por ano e distribuição geográfica. Cada registro do SUAP é um aluno, e o ano é o de ingresso.</p>
                     <p><strong>Grupos de situação.</strong> As dezesseis situações do SUAP entram em cinco grupos:</p>
                     <ul>
                         <li><strong>Matriculado:</strong> vínculo ativo.</li>
                         <li><strong>Concluinte:</strong> Concluído ou Formado.</li>
                         <li><strong>Aperfeiçoado:</strong> cumpriu os créditos do curso sem obter o título de especialista. Fica em grupo próprio para não inflar a conclusão nem a evasão.</li>
                         <li><strong>Evadido:</strong> Cancelado, Evasão, Desligado, Abandono, Falecido ou Cancelamento Compulsório.</li>
-                        <li><strong>Outros:</strong> Em Migração, Não concluído, Transferido Interno, Trancado, Trancado Voluntariamente, Matrícula Vínculo Institucional e Aguardando Colação de Grau.</li>
+                        <li><strong>Outros:</strong> Em Migração, Não concluído, Transferido Interno, Trancado, Trancado Voluntariamente e Matrícula Vínculo Institucional. São situações de trânsito, que não dizem se o aluno concluiu ou saiu.</li>
                     </ul>
                     <p><strong>Contagem de cursos.</strong> Um mesmo programa ofertado em dois campi conta uma vez em cada campus, porque cada campus tem a própria oferta.</p>
+                    <p><strong>Nome do programa.</strong> O SUAP não tem cadastro único de curso: cada campus digita o nome do seu jeito. Em setembro de 2026, os mesmos 27 programas chegavam com 60 nomes diferentes — o curso de Ensino de Ciências aparecia como <em>"Ciência e Dez!"</em>, <em>"Ciência é Dez!"</em>, <em>Ciência é 10</em> e <em>Séries Finais do Ensino Fundamental</em>. O painel resolve cada nome para uma forma única, com a grafia do <a href="https://portal.ifba.edu.br/ensino/nossos-cursos/pos-graduacao" target="_blank" rel="noopener">portal do IFBA</a>. Um nome novo que o painel ainda não conheça aparece como está, e não é somado ao programa.</p>
+                    <p><strong>Filtros.</strong> Período e campus vêm da barra do topo, como nas outras abas. Programa, categoria e situação são os três seletores da própria aba.</p>
+                    <p><strong>Exportação.</strong> O botão no fim da aba baixa um arquivo Excel do recorte atual: uma capa com os filtros aplicados, uma planilha por indicador da tela e uma planilha com uma linha por aluno. A planilha de situação traz o grupo e a situação de origem do SUAP, para a regra de agrupamento poder ser conferida. O arquivo não traz nome, matrícula nem e-mail.</p>
                 </div>
 
                 <div class="modal-section">

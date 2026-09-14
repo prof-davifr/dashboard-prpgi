@@ -40,9 +40,11 @@ const POSGRAD_SITUACAO_BUCKET = {
   'Cancelamento Compulsório': 'Evadido'
 };
 
-// O resto cai em "Outros": Em Migração, Não concluído, Transferido Interno,
-// Trancado, Trancado Voluntariamente, Matrícula Vínculo Institucional,
-// Aguardando Colação de Grau.
+// O resto cai em "Outros", seis situações de trânsito: Em Migração, Não
+// concluído, Transferido Interno, Trancado, Trancado Voluntariamente e
+// Matrícula Vínculo Institucional. São 16 situações no SUAP, não 17: houve
+// "Aguardando Colação de Grau" nesta lista por engano até set/2026, e ela
+// nunca apareceu na base.
 const POSGRAD_BUCKETS = ['Matriculado', 'Concluinte', 'Aperfeiçoado', 'Evadido', 'Outros'];
 
 const POSGRAD_BUCKET_COLOR = {
@@ -561,10 +563,11 @@ function renderChartsPosGraduacao() {
 
   populateCourseSelector();
   renderKPIsPosGraduacao();
-  renderPosGraduacaoPorCampus(data);
+  // Na ordem em que os gráficos aparecem no index.html.
   renderPosGraduacaoCursosPorCampus(data);
   renderPosGraduacaoSituacao(data);
   renderPosGraduacaoAlunosPorPrograma(data);
+  renderPosGraduacaoPorCampus(data);
   renderPosGraduacaoEvolucao(data);
   renderGenericMap(data, 'map-posgraduacao', '#4D90FE', 'alunos');
   renderTablePosGraduacao();

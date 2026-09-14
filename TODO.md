@@ -70,6 +70,61 @@ Frontend estático (Chart.js + Leaflet + SheetJS) + pipeline ETL em `scripts/bui
       não conhece `PSG` e a validação é bloqueante, então o build inteiro
       parava.
 
+### Etapa 5 — ordem dos gráficos e texto de apoio (feita)
+- [x] **"Alunos por Campus" foi para depois de "Alunos por Programa".** A ordem
+      da aba agora é: cursos por campus e situação lado a lado, alunos por
+      programa, alunos por campus, ingressos por ano e mapa. As chamadas em
+      `renderChartsPosGraduacao` seguem a mesma ordem da página.
+- [x] **O bloco "Como ler" saiu da aba e foi para o modal.** Regras de leitura,
+      filtros, nome do programa e exportação ficam em "Sobre os Dados e
+      Metodologia", na seção de Pós-Graduação.
+- [x] **Corrigido um fantasma na lista de situações.** O modal dizia que
+      "Outros" incluía `Aguardando Colação de Grau` — dezessete nomes para
+      dezesseis situações. Essa situação nunca apareceu na base. `Outros` tem
+      seis, todas de trânsito, e agora `tests/posgraduacao.test.js` prende a
+      lista ao `data.json` publicado.
+
+### Etapa 4 — nome único por programa (feita)
+- [x] **60 nomes de curso viraram 27 programas.** O SUAP não tem cadastro único
+      de curso: cada campus digita o nome do seu jeito. O mesmo programa de
+      Ensino de Ciências chegava como `"Ciência e Dez!"`, `“Ciência é Dez!”`,
+      `Ciência é 10`, `Séries Finais do Ensino Fundamental` e `Ensino em
+      Ciências: Ciências é Dez`; a Docência na EPT vinha com `na` e com
+      `para a`, com prefixo de código (`DEPTBAR`, `ESDOSALV`) e com o polo
+      dentro do nome. Tirar acento e pontuação não resolvia — muda a redação
+      inteira. `scripts/programas-pos.js` é um registro, não um normalizador:
+      cada programa declara os termos que o identificam, e o nome canônico sai
+      dali. A ordem das entradas importa; vale a primeira que casa.
+- [x] **Decisões de fusão (04/09/2026).** As 11 grafias do Ciência é Dez são um
+      programa só. As 18 da Docência na EPT também, incluindo a `Formação de
+      Professor da EPT` de Eunápolis e as sete de Ubaitaba que traziam
+      `_Polo Camaçari` no nome — o campo `polo` já guarda o polo, e nenhum
+      registro perdeu essa informação.
+- [x] **Guarda contra o retorno do problema.** O build não para com um nome
+      novo, mas lista em `ATENÇÃO` os que ficaram fora do registro, e
+      `tests/programas-pos.test.js` falha enquanto o nome não for registrado.
+      Sem isso a coleta seguinte volta a partir o programa em silêncio.
+- [x] **Nomes canônicos alinhados com o portal do IFBA** (04/09/2026). O portal
+      lista 5 mestrados, 1 doutorado e 17 especializações. Cinco nomes mudaram:
+      `para Inovação` → `para a Inovação`, `Desenvolvimento WEB` →
+      `Desenvolvimento Web`, `Estudos Étnicos e Raciais` ganhou
+      `: Identidades e Representação`, `Ensino de Ciências: Anos Finais … (Ciência
+      é Dez!)` → `… - Ciências é 10!` e `Ensino de Matemática:` →
+      `Ensino da Matemática -`. Como o portal separa o `Ensino da Matemática`
+      presencial do `Matem@tica na Pr@tica` a distância, o termo desta entrada
+      passou a ser a marca do curso, não `ensino de matematica`. Entraram os dois
+      cursos do portal ainda sem aluno na base. Oito programas do registro não
+      estão no portal porque já encerraram.
+- [x] **O portal serve a cadeia de certificados incompleta** — só a folha, sem o
+      intermediário `GlobalSign RSA OV SSL CA 2018`. Nem `curl` nem buscador
+      abrem. A saída não é `-k`: baixar o intermediário pela URI de AIA do
+      próprio certificado, juntar ao pacote do sistema e passar em `--cacert`.
+      A receita está em `docs/proveniencia-dados.md` §6.8.
+- [ ] **Limpar o campo `polo`.** Os valores vêm do SUAP como
+      `EspDoc_UAB_CAMAÇARI (UBA)`, `Pólo Eunápolis - UAB`, `Irecê  UAB`. Aparecem
+      na planilha `Dados` da exportação. Mesmo tipo de problema dos nomes de
+      curso, em escala menor.
+
 ### Etapa 3 — exportação e leitura do gráfico de programas (feita)
 - [x] **"Programas com Mais Alunos" virou "Alunos por Programa"**, e o nome do
       programa ganhou o espaço que era da barra: o eixo fica com 45% da largura

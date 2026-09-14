@@ -88,6 +88,47 @@ someone else's intellectual property. The source is now the INPI itself.
 Full endpoint details, pePI quirks, and the two bases the INPI does not let
 anyone query live in `docs/proveniencia-dados.md` §2.5.
 
+## Program-name registry — `scripts/programas-pos.js` (set/2026)
+
+SUAP has no single course registry: each campus types the program name its own
+way. In set/2026 the same 27 programs arrived as **60 distinct strings** —
+`"Ciência e Dez!"`, `“Ciência é Dez!”`, `Ciência é 10`, `Séries Finais`,
+`Ensino em Ciências: Ciências é Dez` were all one national program, and
+`Docência **na**` vs `Docência **para a** EPT` split one course into eighteen.
+Stripping accents and punctuation does **not** fix this — the whole wording
+differs.
+
+`scripts/programas-pos.js` is therefore a *registry*, not a normalizer. Each
+entry declares `nome` (the canonical form written to `data.json`), `termos`
+(groups of alternatives; every group must match, any term inside a group
+suffices) and optional `exceto`. **Order matters — first match wins**, so
+specific programs come before broad ones (`Ensino de Ciências Naturais e
+Matemática` must precede the `Ciência é Dez!` family, which contains the same
+words).
+
+- `build.js` calls `canonizarCurso()` in the pós branch. `curso` becomes the
+  canonical name; `curso_original` keeps the raw SUAP string as evidence.
+- An unmatched name does **not** break the build — the student stays in the
+  dashboard — but the build prints a loud `ATENÇÃO` block listing the names, and
+  `tests/programas-pos.test.js` fails until the entry exists. Without that
+  guard, the next SUAP collection silently re-splits a program.
+- Merge decisions taken with the Pró-Reitoria (04/09/2026): all 11 `Ciência é
+  Dez!` spellings are one program; all 18 `Docência na EPT` are one, including
+  Eunápolis' `Formação de Professor da EPT` and the seven Ubaitaba entries whose
+  name carried `_Polo Camaçari` — the `polo` field already holds that, so it
+  leaves the name.
+- The canonical spelling follows the IFBA portal (`/ensino/nossos-cursos/
+  pos-graduacao/{mestrados,doutorados,especializacoes}`, read 04/09/2026), with
+  the level prefixed. `tests/programas-pos.test.js` pins each portal string.
+  The portal lists today's offering, so eight closed programs in the registry
+  are not there (their spelling comes from the data), and two portal courses
+  have no student yet but are registered anyway.
+- **The portal serves an incomplete certificate chain** (leaf only, missing
+  `GlobalSign RSA OV SSL CA 2018`), so `curl` and WebFetch both refuse it. Do
+  not reach for `-k`. Fetch the intermediate from the leaf's AIA URI, append it
+  to the system bundle, and pass `--cacert` — verification then succeeds
+  (`ssl_verify_result=0`).
+
 ## Campus code mapping — `src/shared.js` is the single source
 
 | Mapping | Name |
@@ -127,7 +168,7 @@ Campus codes cover 25 IFBA campuses (BAR, BRU, CAM, CFO, EC, EUN, FS, ILH, IRE, 
 - Tabs map to data sources roughly 1:1 (Produção Científica → `bibliografica`, Produção Técnica → `tecnica`, Inovação → `inovacao`, Grupos de Pesquisa/Pesquisadores → `grupos` + productions, Orientações → `concluidas`+`andamento`, Pós-Graduação → `posgraduacao`, IC → `ic`).
 - "p/ Servidor" (relative metrics) toggle divides KPIs/charts/map values by the count of distinct active `Servidor` IDs in the current period/campus selection.
 - Small categories (<2%) in evolution/pie charts get aggregated into "Outras" (bibliográfica types, técnica types, inovação types, IC areas).
-- Pós-Graduação (redesigned set/2026) shows general indicators only: students and courses per campus, students per program, intake per year, situação. **One record = one student** (no duplicate matrículas), so counting rows counts students. It uses the *global* period and campus filters like every other tab, plus three tab-local selects (curso, categoria, situação). The 16 SUAP situações collapse into five buckets via `POSGRAD_SITUACAO_BUCKET` in `src/posgraduacao.js`; `Aperfeiçoado` is its own bucket on purpose (credits done, no specialist title — it is neither a concluinte nor an evadido). The old PNP cycle methodology is frozen in `src/pos-validacao.js`, not deleted.
+- Pós-Graduação (redesigned set/2026) shows general indicators only, in this order: courses per campus, situação, students per program, students per campus, intake per year, map. **One record = one student** (no duplicate matrículas), so counting rows counts students. It uses the *global* period and campus filters like every other tab, plus three tab-local selects (curso, categoria, situação). The 16 SUAP situações collapse into five buckets via `POSGRAD_SITUACAO_BUCKET` in `src/posgraduacao.js`; `Aperfeiçoado` is its own bucket on purpose (credits done, no specialist title — it is neither a concluinte nor an evadido). `Outros` holds exactly six trânsito situações; `tests/posgraduacao.test.js` pins that list against the committed `data.json`, because the methodology modal enumerates them and drifted once (it listed a seventh, `Aguardando Colação de Grau`, that the SUAP never sent). The tab itself carries no help text — the reading rules, the filters and the export live in the "Sobre os Dados e Metodologia" modal. The old PNP cycle methodology is frozen in `src/pos-validacao.js`, not deleted.
 
 "Alunos por Programa" (`renderPosGraduacaoAlunosPorPrograma`, canvas
 `chart-posgraduacao-programas`, wrapper class `.extra-alta`) is the one chart where
