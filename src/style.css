@@ -52,7 +52,15 @@ h1, h2, h3 { margin-top: 0; }
 /* Filters */
 .controls { display: flex; justify-content: center; gap: 0.75rem; padding: 0.75rem; flex-wrap: wrap; background: #ffffff; border-bottom: 1px solid var(--border-color); }
 select { background: #fafafa; color: #333; border: 1px solid #ccc; padding: 0.4rem 0.8rem; border-radius: 6px; font-family: inherit; font-size: 0.9rem; outline: none; transition: border-color 0.2s; }
-select:focus { border-color: var(--accent); white-space: nowrap;}
+/* Só a cor da borda muda no foco. Havia também `white-space: nowrap` aqui, e
+   ela vinha do commit inicial, sem propósito registrado: o `select` do Chrome
+   já nasce com `white-space: pre`, e o anel de foco do teclado vem de
+   `:focus-visible`, não daqui.
+   O efeito era este: o clique dá foco no mesmo instante em que a lista abre, a
+   propriedade muda, o leiaute do `select` é recalculado e o Chromium descarta a
+   lista aberta. O `mouseup` seguinte caía sobre a opção que estivesse sob o
+   cursor. A lista parecia sumir e escolher sozinha. */
+select:focus { border-color: var(--accent); }
 
 @media (max-width: 766px) {
   .controls { gap: 0.5rem; padding: 0.5rem; }
