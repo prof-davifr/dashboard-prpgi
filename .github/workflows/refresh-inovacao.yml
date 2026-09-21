@@ -27,7 +27,7 @@ jobs:
     timeout-minutes: 30
     steps:
       - name: Checkout do dashboard
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       # O scraper-INPI é privado, e este repositório é público: o GITHUB_TOKEN
       # padrão não alcança outro repositório. É preciso um Personal Access Token
@@ -38,13 +38,13 @@ jobs:
       # que quebra. O robô continua rodando na máquina local, e o CSV vale o
       # mesmo nos dois caminhos.
       - name: Checkout do scraper-INPI (privado)
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           repository: prof-davifr/scraper-INPI
           path: scraper-INPI
           token: ${{ secrets.SCRAPER_INPI_TOKEN }}
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: 22
           cache: npm
