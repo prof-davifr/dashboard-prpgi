@@ -13,6 +13,7 @@ const {
   selectDgpGroupsCsvFiles,
   selectPosGraduacaoCsvFiles,
   normalizeCampusCode,
+  normalizePolo,
   CAMPUS_CODE_FIX,
   pseudonymize,
   shortHash,
@@ -221,6 +222,60 @@ describe('normalizeCampusCode', () => {
     Object.values(CAMPUS_CODE_FIX).forEach(destino => {
       expect(Object.keys(CAMPUS_TO_CITY)).toContain(destino);
     });
+  });
+});
+
+// ─── normalizePolo ───────────────────────────────────────────────────────────
+
+describe('normalizePolo', () => {
+  test('tira o prefixo EspDoc_UAB_ e o sufixo (UBA)', () => {
+    expect(normalizePolo('EspDoc_UAB_CAMAÇARI (UBA)')).toBe('Camaçari');
+    expect(normalizePolo('EspDoc_UAB_FEIRA DE SANTANA (UBA)')).toBe('Feira de Santana');
+    expect(normalizePolo('EspDoc_UAB_VITÓRIA DA CONQUISTA (UBA)')).toBe('Vitória da Conquista');
+  });
+
+  test('tira o prefixo Pólo e o sufixo - UAB', () => {
+    expect(normalizePolo('Pólo Eunápolis - UAB')).toBe('Eunápolis');
+    expect(normalizePolo('Pólo Lauro de Freitas - UAB')).toBe('Lauro de Freitas');
+    expect(normalizePolo('Itaberaba - UAB')).toBe('Itaberaba');
+    expect(normalizePolo('Simões Filho - UAB')).toBe('Simões Filho');
+  });
+
+  test('trata o UAB solto e o espaço dobrado', () => {
+    expect(normalizePolo('Irecê  UAB')).toBe('Irecê');
+  });
+
+  test('a caixa alta vira nome de cidade, com os conectivos em minúscula', () => {
+    expect(normalizePolo('MATA DE SÃO JOÃO')).toBe('Mata de São João');
+  });
+
+  test('preserva o que distingue dois polos da mesma cidade', () => {
+    expect(normalizePolo('EspDoc_UAB_SALVADOR: SUBÚRBIO (UBA)')).toBe('Salvador: Subúrbio');
+  });
+
+  test('o nome já correto passa intacto', () => {
+    expect(normalizePolo('Salvador')).toBe('Salvador');
+    expect(normalizePolo('Bom Jesus da Lapa')).toBe('Bom Jesus da Lapa');
+  });
+
+  test('vazio continua vazio', () => {
+    expect(normalizePolo('')).toBe('');
+    expect(normalizePolo(null)).toBe('');
+    expect(normalizePolo(undefined)).toBe('');
+    expect(normalizePolo('   ')).toBe('');
+  });
+
+  // As 51 grafias do SUAP descrevem 30 lugares. O teste prende a redução, para
+  // que uma grafia nova não volte a duplicar o polo na tabela.
+  test('as grafias do SUAP colapsam nos mesmos nomes', () => {
+    const grafias = [
+      'Salvador', 'Pólo Salvador - UAB',
+      'Camaçari', 'EspDoc_UAB_CAMAÇARI (UBA)',
+      'Eunápolis', 'Pólo Eunápolis - UAB',
+      'Itaberaba', 'Pólo Itaberaba - UAB', 'Itaberaba - UAB',
+    ];
+    const nomes = new Set(grafias.map(normalizePolo));
+    expect([...nomes].sort()).toEqual(['Camaçari', 'Eunápolis', 'Itaberaba', 'Salvador']);
   });
 });
 

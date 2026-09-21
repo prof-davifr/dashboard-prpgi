@@ -132,10 +132,17 @@ Frontend estático (Chart.js + Leaflet + SheetJS) + pipeline ETL em `scripts/bui
       página. O `data.json` recebeu os nomes novos sem build completo: o
       registro foi reaplicado sobre `curso_original`, que dá o mesmo resultado
       e preserva a aba Inovação.
-- [ ] **Limpar o campo `polo`.** Os valores vêm do SUAP como
-      `EspDoc_UAB_CAMAÇARI (UBA)`, `Pólo Eunápolis - UAB`, `Irecê  UAB`. Aparecem
-      na planilha `Dados` da exportação. Mesmo tipo de problema dos nomes de
-      curso, em escala menor.
+- [x] **Limpar o campo `polo`.** Feito em 20/09/2026: `normalizePolo()` em
+      `scripts/build.js` tira o prefixo `EspDoc_UAB_`, o prefixo `Pólo`, o
+      sufixo `(UBA)` e o sufixo `- UAB`, colapsa espaço dobrado e passa a caixa
+      alta para nome de cidade (`MATA DE SÃO JOÃO` → `Mata de São João`), com os
+      conectivos em minúscula. O que distingue dois polos da mesma cidade fica
+      (`SALVADOR: SUBÚRBIO` → `Salvador: Subúrbio`). Eram 51 grafias para cerca
+      de 30 lugares; oito testes em `tests/build.test.js` prendem a redução.
+      **O `data.json` publicado só muda no próximo `npm run build`** — lembre de
+      rodar `scripts/refresh-inovacao.js` logo depois. Texto original: os valores
+      vêm do SUAP como `EspDoc_UAB_CAMAÇARI (UBA)`, `Pólo Eunápolis - UAB`,
+      `Irecê  UAB`, e aparecem na planilha `Dados` da exportação.
 
 ### Etapa 3 — exportação e leitura do gráfico de programas (feita)
 - [x] **"Programas com Mais Alunos" virou "Alunos por Programa"**, e o nome do

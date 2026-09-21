@@ -32,6 +32,38 @@ function normalizeCampusCode(raw) {
   return CAMPUS_CODE_FIX[upper] || upper;
 }
 
+// Palavras que ficam em minúscula dentro de um nome de cidade, exceto na
+// primeira posição: "Mata de São João", "Bom Jesus da Lapa".
+const CONECTIVOS_POLO = new Set(['de', 'da', 'do', 'das', 'dos', 'e']);
+
+// O campo `polo` chega do SUAP em 51 grafias para as mesmas cidades:
+// `EspDoc_UAB_CAMAÇARI (UBA)`, `Pólo Eunápolis - UAB`, `Irecê  UAB`,
+// `MATA DE SÃO JOÃO`. Todas viram o nome da cidade, do jeito que a tabela do
+// painel mostra. O que sobra depois da limpeza é preservado: o sufixo de
+// `SALVADOR: SUBÚRBIO` distingue dois polos da mesma cidade.
+function normalizePolo(raw) {
+  let s = (raw || '').toString().replace(/\s+/g, ' ').trim();
+  if (!s) return '';
+
+  s = s.replace(/^EspDoc[_\s]*UAB[_\s]*/i, '');
+  s = s.replace(/\s*\((?:UAB|UBA)\)\s*$/i, '');
+  s = s.replace(/^P[óo]lo\s+/i, '');
+  s = s.replace(/\s*[-–]\s*UAB\s*$/i, '');
+  s = s.replace(/\s+UAB\s*$/i, '');
+  s = s.trim();
+  if (!s) return '';
+
+  // Só reescreve a caixa quando a fonte mandou tudo em maiúscula. Um nome que
+  // já veio bem escrito passa intacto.
+  if (s === s.toUpperCase()) {
+    s = s.toLowerCase().split(' ').map((palavra, i) => {
+      if (i > 0 && CONECTIVOS_POLO.has(palavra)) return palavra;
+      return palavra.charAt(0).toUpperCase() + palavra.slice(1);
+    }).join(' ');
+  }
+  return s;
+}
+
 // Erros de grafia que vêm da fonte (Lattes/SUAP) e chegam ao painel como rótulo
 // de gráfico. Corrigidos aqui para que data.json já saia certo.
 // `scripts/comparar_pi.js` continua aceitando a grafia antiga da planilha DINOV.
@@ -887,7 +919,7 @@ function main() {
              curso: curso_simplificado,
              curso_original: curso,
              campus: campus,
-             polo: r["polo"],
+             polo: normalizePolo(r["polo"]),
              situacao: situacao,
              ano: ano,
              semestre: semestre,
@@ -1223,6 +1255,7 @@ module.exports = {
   registerSourceFile,
   splitCsvRecords,
   normalizeCampusCode,
+  normalizePolo,
   CAMPUS_CODE_FIX,
   isPostGraduationCsv,
   isDgpGroupsCsv,
