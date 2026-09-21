@@ -440,8 +440,12 @@ function renderChartsOrientacoes() {
   // Pie: Nível
   processTipos([...concluidas, ...andamento], "chart-orientacoes-pie");
 
-  // Map - Using grupos data for researcher distribution
-  renderGenericMap(STATE.filtered.grupos, 'map-orientacoes', "#E91E63", "Pesquisadores (aprox.)");
+  // Map - as próprias orientações, pelo campus do orientador. Usar os grupos do
+  // DGP aqui deixava o mapa vazio nos campi sem grupo certificado, como Itabuna,
+  // e contava grupo onde o card promete orientação.
+  const orientacoes = [...concluidas, ...andamento];
+  const orientacoesPesquisadores = getServidoresPerCampus(orientacoes);
+  renderGenericMap(orientacoes, 'map-orientacoes', "#E91E63", "Orientações", orientacoesPesquisadores);
 }
 
 function renderKPIsOrientacoes() {
