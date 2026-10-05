@@ -8,7 +8,7 @@
 
 const {
   TIPO_POR_BASE, anoDe, chaveINPI, normalizeName,
-  indexarLattes, resolverVinculos, converter, conferirLGPD,
+  indexarLattes, resolverVinculos, converter, conferirLGPD, lerEstruturaNit,
 } = require('../scripts/refresh-inovacao');
 
 // ─── utilidades ──────────────────────────────────────────────────────────────
@@ -166,8 +166,43 @@ describe('converter', () => {
       { base: 'patente', numeroPedido: 'BR 10 2022 024466 0', dataDeposito: '30/11/2022' },
       { base: 'marca', numeroPedido: '942841395', dataDeposito: '25/02/2026' },
     ];
-    const { porNivel } = converter(linhas, contexto);
-    expect(porNivel[1] + porNivel[2] + porNivel[3]).toBe(linhas.length);
+    const { porNivel } = converter(linhas, { ...contexto, estruturaNit: { '942841395': 'SSA' } });
+    expect(porNivel[0]).toBe(1);
+    expect(porNivel[0] + porNivel[1] + porNivel[2] + porNivel[3]).toBe(linhas.length);
+  });
+
+  // ─── nível 0: estrutura do NIT ──────────────────────────────────────────────
+
+  test('nível 0: a estrutura do NIT põe todos os autores no mesmo campus', () => {
+    // Sem o NIT, o ativo contava uma vez em cada campus dos autores: 161 ativos
+    // somavam 190 no mapa. Com ele, cada ativo fica numa estrutura só, e o
+    // SIAPE de cada autor continua lá para o KPI "p/ Servidor".
+    const mapaNomes = new Map([
+      ['ana carolina', { Servidor: '111', campus: 'SSA' }],
+      ['joao silva', { Servidor: '222', campus: 'VC' }],
+    ]);
+    const { inovacao, vinculosNovos } = converter(
+      [{ base: 'programa', numeroPedido: 'BR 51 2026 000001 0', dataDeposito: '13/08/2026',
+         autores: 'ANA CAROLINA / JOÃO SILVA' }],
+      { idxLattes: new Map(), mapaNomes, mapaSalvo: {}, estruturaNit: { '5120260000010': 'REI' } });
+    expect(inovacao.map((r) => [r.Servidor, r.campus])).toEqual([['111', 'REI'], ['222', 'REI']]);
+    // O mapa versionado guarda o campus dos autores, para a cascata valer sem o NIT.
+    expect(vinculosNovos['5120260000010'].map((v) => v.campus)).toEqual(['SSA', 'VC']);
+  });
+
+  test('nível 0: ativo sem autor identificado recebe o campus do NIT', () => {
+    const { inovacao } = converter(
+      [{ base: 'marca', numeroPedido: '942841395', dataDeposito: '25/02/2026' }],
+      { idxLattes: new Map(), mapaNomes: null, mapaSalvo: {}, estruturaNit: { '942841395': 'SAM' } });
+    expect(inovacao).toEqual([{ Ano: '2026', Tipo: 'Marca', dedupKey: '942841395', campus: 'SAM' }]);
+  });
+
+  test('nível 0: lerEstruturaNit cobre todos os números do inovacao publicado', () => {
+    const estrutura = lerEstruturaNit();
+    const publicados = new Set(require('../data.json').inovacao.map((r) => r.dedupKey));
+    const cobertos = [...publicados].filter((k) => estrutura[k]);
+    // Três marcas trazem situação, não campus, na coluna de estrutura.
+    expect(cobertos.length).toBeGreaterThanOrEqual(publicados.size - 3);
   });
 
   test('base desconhecida no CSV aborta em vez de sumir com a linha', () => {

@@ -34,6 +34,8 @@ Always run `npm run build`, `npm run validate` and `npm test` after touching the
 - **`dados/scraper-SUAPPos/`** — postgraduate students CSV, timestamped filename (`alunos_pos_*.csv`).
 - **`dados/ic/`** — IC/ICT projects Excel (PNP/SETEC-MEC), one sheet per cycle (`Ciclo YYYY-YYYY`), processed separately from per-campus files (fixed column indices, not headers).
 - **INPI (`scraper-INPI`)** — the `inovacao` array does **not** come from `dados/` at all. It comes from a CSV produced by the sibling `scraper-INPI` repo, applied by `scripts/refresh-inovacao.js`. `SHEET_MAP` deliberately omits `'registros e patentes'`, so `npm run build` emits `inovacao: []`.
+- **`dados/nit/`** — `preenchimento_NIT.xlsx`, filled in by the PRPGI sector responsible for intellectual property (received 30/09/2026). The only source that gives each INPI asset its campus (`estrutura`). `node scripts/extrair-nit.js` keeps just number → tipo/situação/estrutura/campus in the committed `nit-estrutura.json`; the other sheets carry CPF, names and matrículas and never leave `dados/`. It is level 0 of the Inovação campus cascade — see `docs/proveniencia-dados.md` §2.6.
+- **Only `scraper-SUAPCNPQ/` and `old/` spreadsheets are read as Lattes** (`isLattesXls`). Any other `.xlsx` under `dados/` used to become a fake campus named after the file, and `validate()` aborted the build.
 - **`data.json`** (~32 MB, tracked in git — required for GitHub Pages) — lightweight arrays consumed by the dashboard: `bibliografica`, `tecnica`, `inovacao`, `concluidas`, `andamento`, `grupos`, `posgraduacao`, `ic`, plus `meta` (campuses, year range, source file dates). **Public — must never contain personal data** (see below).
 - **`data-groups.json`** (~64 MB, **gitignored**) — detailed re-processing with resolved servidor names/IDs and group memberships, used only by the separate `relatorio-grupos-pesquisa` project, not the main dashboard. Contains names and contacts, so it is regenerated locally with `npm run build` rather than committed.
 
@@ -76,7 +78,10 @@ someone else's intellectual property. The source is now the INPI itself.
 - **Automated by**: `.github/workflows/refresh-inovacao.yml`, monthly.
 - **`npm run build` leaves `inovacao` empty.** Always follow it with
   `refresh-inovacao.js`, or the tab ships blank.
-- **Campus cascade**: the INPI never gives a campus. Level 1 matches the INPI
+- **Campus cascade**: the INPI never gives a campus. Level 0 takes the
+  `estrutura` the PRPGI intellectual-property sector registered
+  (`nit-estrutura.json`) and puts every record of the asset there — levels 1–2
+  then only supply each author's SIAPE. Level 1 matches the INPI
   number against the Lattes record; level 2 resolves the author's name to a
   SIAPE; level 3 omits `campus` entirely (never invent an `NA` code —
   `CODIGOS_VALIDOS` in `scripts/validate-data.js` would reject it).

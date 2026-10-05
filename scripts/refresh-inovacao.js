@@ -14,8 +14,13 @@
  * ─── campus: o INPI não informa ─────────────────────────────────────────────
  *
  * O INPI dá o titular (a instituição) e os autores (pessoas), nunca o campus.
- * A cascata tem três níveis, do mais confiável ao menos:
+ * A cascata tem quatro níveis, do mais confiável ao menos:
  *
+ *   0. estrutura NIT — o campus que o setor de propriedade intelectual da PRPGI
+ *                     registrou para o ativo (`nit-estrutura.json`, gerado por
+ *                     `extrair-nit.js`). Vale para o ativo inteiro: todos os
+ *                     registros dele ficam nesse campus, e os níveis 1 e 2 só
+ *                     dão o SIAPE de cada autor;
  *   1. número INPI  — casa com o registro que o pesquisador declarou no Lattes,
  *                     e herda dele o campus e o SIAPE;
  *   2. nome do autor — resolve o SIAPE pelo nome, contra a base do SUAP;
@@ -47,6 +52,7 @@ const { normalizeINPI, extractDashboardNumber } = require('./comparar_pi');
 const RAIZ = path.resolve(__dirname, '..');
 const DATA_JSON = path.join(RAIZ, 'data.json');
 const MAPA_JSON = path.join(RAIZ, 'inpi-campus.json');
+const NIT_JSON = path.join(RAIZ, 'nit-estrutura.json');
 const DIR_LATTES = path.join(RAIZ, 'dados', 'scraper-SUAPCNPQ');
 
 /** Rótulo do CSV do robô → `Tipo` que a aba Inovação exibe. */
@@ -146,6 +152,20 @@ function gravarMapa(vinculos) {
   fs.writeFileSync(MAPA_JSON, JSON.stringify(conteudo, null, 1) + '\n');
 }
 
+// ─── nível 0: a estrutura que o NIT registrou ────────────────────────────────
+
+/** `chaveINPI -> campus` a partir do nit-estrutura.json; vazio se ele não existe. */
+function lerEstruturaNit() {
+  if (!fs.existsSync(NIT_JSON)) return {};
+  const { ativos = {} } = JSON.parse(fs.readFileSync(NIT_JSON, 'utf-8'));
+  const campusPorChave = {};
+  for (const [numero, ativo] of Object.entries(ativos)) {
+    const chave = chaveINPI(numero);
+    if (chave && ativo.campus) campusPorChave[chave] = ativo.campus;
+  }
+  return campusPorChave;
+}
+
 // ─── a cascata ───────────────────────────────────────────────────────────────
 
 /**
@@ -182,7 +202,8 @@ function resolverVinculos(registro, { idxLattes, mapaNomes, mapaSalvo }) {
 function converter(linhas, contexto) {
   const inovacao = [];
   const vinculosNovos = {};
-  const porNivel = { 1: 0, 2: 0, 3: 0 };
+  const porNivel = { 0: 0, 1: 0, 2: 0, 3: 0 };
+  const estruturaNit = contexto.estruturaNit || {};
 
   for (const linha of linhas) {
     const tipo = TIPO_POR_BASE[linha.base];
@@ -191,15 +212,21 @@ function converter(linhas, contexto) {
     const chave = chaveINPI(linha.numeroPedido);
     if (!chave) throw new Error(`número de pedido ilegível: "${linha.numeroPedido}"`);
 
-    const { vinculos, nivel } = resolverVinculos(linha, contexto);
-    porNivel[nivel]++;
-    if (vinculos.length) vinculosNovos[chave] = vinculos;
+    const { vinculos: porAutor, nivel } = resolverVinculos(linha, contexto);
+    // O mapa versionado guarda o campus dos autores, não o do NIT: se o NIT
+    // sair, a cascata volta a valer sozinha.
+    if (porAutor.length) vinculosNovos[chave] = porAutor;
+
+    const campusNit = estruturaNit[chave];
+    porNivel[campusNit ? 0 : nivel]++;
+    const vinculos = campusNit ? porAutor.map((v) => ({ ...v, campus: campusNit })) : porAutor;
 
     const base = { Ano: anoDe(linha.dataDeposito), Tipo: tipo, dedupKey: chave };
     if (linha.situacao) base.Situacao = linha.situacao;
+    if (campusNit && !vinculos.length) base.campus = campusNit;
 
     if (!vinculos.length) {
-      inovacao.push(base); // sem campus e sem servidor — conta no total, sai do mapa
+      inovacao.push(base); // sem servidor; sem campus também, salvo pelo NIT
       continue;
     }
     for (const v of vinculos) {
@@ -262,8 +289,10 @@ function main() {
   const mapaNomes = mapearNomesDoSuap(console.log);
   const mapaSalvo = lerMapa().vinculos || {};
   console.log(`  ${Object.keys(mapaSalvo).length} números no inpi-campus.json`);
+  const estruturaNit = lerEstruturaNit();
+  console.log(`  ${Object.keys(estruturaNit).length} números com estrutura no nit-estrutura.json`);
 
-  const { inovacao, vinculosNovos, porNivel } = converter(linhas, { idxLattes, mapaNomes, mapaSalvo });
+  const { inovacao, vinculosNovos, porNivel } = converter(linhas, { idxLattes, mapaNomes, mapaSalvo, estruturaNit });
 
   conferirLGPD(inovacao);
 
@@ -320,7 +349,7 @@ function main() {
   const semCampus = inovacao.filter((r) => !r.campus).length;
   console.log(`  faixa de anos: ${data.meta.minYear}-${data.meta.maxYear}`);
   console.log(`\ninovacao: ${antes} → ${inovacao.length} (fonte: ${path.basename(csv)})`);
-  console.log(`  campus por número INPI: ${porNivel[1]} | por nome do autor: ${porNivel[2]} | sem atribuição: ${porNivel[3]}`);
+  console.log(`  campus pela estrutura NIT: ${porNivel[0]} | por número INPI: ${porNivel[1]} | por nome do autor: ${porNivel[2]} | sem atribuição: ${porNivel[3]}`);
   console.log(`  ${semCampus} registros sem campus (${(semCampus / inovacao.length * 100).toFixed(1)}%)`);
   console.log(`  data.json: ${(Buffer.byteLength(texto) / 1024 / 1024).toFixed(2)} MB`);
 }
@@ -329,6 +358,6 @@ if (require.main === module) main();
 
 module.exports = {
   TIPO_POR_BASE, anoDe, chaveINPI, normalizeName,
-  indexarLattes, resolverVinculos, converter, conferirLGPD,
-  MAPA_JSON, DATA_JSON,
+  indexarLattes, resolverVinculos, converter, conferirLGPD, lerEstruturaNit,
+  MAPA_JSON, DATA_JSON, NIT_JSON,
 };

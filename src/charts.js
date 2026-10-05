@@ -237,9 +237,10 @@ function renderKPIsTecnica() {
 function renderKPIsInovacao() {
   const data = STATE.filtered.inovacao;
   const total = data.length;
-  // A fonte é o INPI, que dá o titular e os autores mas nunca o campus. Quando
-  // nenhum autor casa com a base do SUAP, o registro fica sem campus: some do
-  // mapa e da tabela por campus, mas continua no total. O KPI abaixo torna essa
+  // A fonte é o INPI, que dá o titular e os autores mas nunca o campus. O campus
+  // vem da estrutura registrada pelo setor de PI da PRPGI e, na falta dela, dos
+  // autores. Sem nenhum dos dois, o registro fica sem campus: some do mapa e da
+  // tabela por campus, mas continua no total. O KPI abaixo torna essa
   // diferença visível, em vez de deixar a soma do mapa parecer errada.
   const semCampus = data.filter(r => !r["campus"]).length;
   $('kpi-inovacao').innerHTML = `

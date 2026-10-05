@@ -1,0 +1,970 @@
+{
+ "_leia_me": "Gerado por scripts/extrair-nit.js a partir da planilha preenchida pelo setor de propriedade intelectual da PRPGI. Liga o número INPI à estrutura (campus) do IFBA. Sem dado pessoal.",
+ "planilha": "preenchimento_NIT.xlsx",
+ "planilhaModificadaEm": "2026-09-30",
+ "ativos": {
+  "117812": {
+   "tipo": "Programa de Computador",
+   "situacao": "Pedido em análise",
+   "estrutura": "REI",
+   "campus": "REI"
+  },
+  "133456": {
+   "tipo": "Programa de Computador",
+   "situacao": "Pedido em análise",
+   "estrutura": "SSA",
+   "campus": "SSA"
+  },
+  "11015861": {
+   "tipo": "Patente de Invenção",
+   "situacao": "Ativo",
+   "estrutura": "SSA",
+   "campus": "SSA"
+  },
+  "11066121": {
+   "tipo": "Patente de Invenção",
+   "situacao": "Ativo",
+   "estrutura": "SSA",
+   "campus": "SSA"
+  },
+  "90027523": {
+   "tipo": "Patente de Modelo de Utilidade",
+   "situacao": "Inativo",
+   "estrutura": "SSA",
+   "campus": "SSA"
+  },
+  "819210110": {
+   "tipo": "Marca",
+   "situacao": "Inativo",
+   "estrutura": "INDEFERIDA"
+  },
+  "821444689": {
+   "tipo": "Marca",
+   "situacao": "Inativo",
+   "estrutura": "ARQUIVADO"
+  },
+  "901437174": {
+   "tipo": "Marca",
+   "situacao": "Inativo",
+   "estrutura": "ARQUIVADO"
+  },
+  "942841395": {
+   "tipo": "Marca",
+   "situacao": "Pedido em análise",
+   "estrutura": "LF",
+   "campus": "LF"
+  },
+  "08057230": {
+   "tipo": "Patente de Invenção",
+   "situacao": "Ativo",
+   "estrutura": "SSA",
+   "campus": "SSA"
+  },
+  "09254234": {
+   "tipo": "Patente de Invenção",
+   "situacao": "Ativo",
+   "estrutura": "EUN",
+   "campus": "EUN"
+  },
+  "1020120077639": {
+   "tipo": "Patente de Invenção",
+   "situacao": "Ativo",
+   "estrutura": "SSA",
+   "campus": "SSA"
+  },
+  "1020120192306": {
+   "tipo": "Patente de Invenção",
+   "situacao": "Ativo",
+   "estrutura": "SSA",
+   "campus": "SSA"
+  },
+  "1020130288519": {
+   "tipo": "Patente de Invenção",
+   "situacao": "Ativo",
+   "estrutura": "SSA",
+   "campus": "SSA"
+  },
+  "1020140185003": {
+   "tipo": "Patente de Invenção",
+   "situacao": "Ativo",
+   "estrutura": "SF",
+   "campus": "SF"
+  },
+  "1020140193898": {
+   "tipo": "Patente de Invenção",
+   "situacao": "Ativo",
+   "estrutura": "SF",
+   "campus": "SF"
+  },
+  "1020150197748": {
+   "tipo": "Patente de Invenção",
+   "situacao": "Ativo",
+   "estrutura": "SSA",
+   "campus": "SSA"
+  },
+  "1020150262019": {
+   "tipo": "Patente de Invenção",
+   "situacao": "Ativo",
+   "estrutura": "SSA",
+   "campus": "SSA"
+  },
+  "1020150331754": {
+   "tipo": "Patente de Invenção",
+   "situacao": "Ativo",
+   "estrutura": "SF",
+   "campus": "SF"
+  },
+  "1020160124727": {
+   "tipo": "Patente de Invenção",
+   "situacao": "Ativo",
+   "estrutura": "SSA",
+   "campus": "SSA"
+  },
+  "1020190001399": {
+   "tipo": "Patente de Invenção",
+   "situacao": "Ativo",
+   "estrutura": "SSA",
+   "campus": "SSA"
+  },
+  "1020200139959": {
+   "tipo": "Patente de Invenção",
+   "situacao": "Ativo",
+   "estrutura": "SSA",
+   "campus": "SSA"
+  },
+  "1020200155067": {
+   "tipo": "Patente de Invenção",
+   "situacao": "Ativo",
+   "estrutura": "SSA",
+   "campus": "SSA"
+  },
+  "1020220133204": {
+   "tipo": "Patente de Invenção",
+   "situacao": "Ativo",
+   "estrutura": "SF",
+   "campus": "SF"
+  },
+  "1020220244669": {
+   "tipo": "Patente de Invenção",
+   "situacao": "Ativo",
+   "estrutura": "SSA",
+   "campus": "SSA"
+  },
+  "1020240100972": {
+   "tipo": "Patente de Invenção",
+   "situacao": "Ativo",
+   "estrutura": "SSA",
+   "campus": "SSA"
+  },
+  "2020190141129": {
+   "tipo": "Patente de Modelo de Utilidade",
+   "situacao": "Ativo",
+   "estrutura": "SSA",
+   "campus": "SSA"
+  },
+  "3020150047291": {
+   "tipo": "Desenho Industrial",
+   "situacao": "Pedido em análise",
+   "estrutura": "SF",
+   "campus": "SF"
+  },
+  "3020230003827": {
+   "tipo": "Desenho Industrial",
+   "situacao": "Pedido em análise",
+   "estrutura": "SF",
+   "campus": "SF"
+  },
+  "3020230016287": {
+   "tipo": "Desenho Industrial",
+   "situacao": "Pedido em análise",
+   "estrutura": "SF",
+   "campus": "SF"
+  },
+  "3020250087228": {
+   "tipo": "Desenho Industrial",
+   "situacao": "Pedido em análise",
+   "estrutura": "SF",
+   "campus": "SF"
+  },
+  "3020260006042": {
+   "tipo": "Desenho Industrial",
+   "situacao": "Pedido em análise",
+   "estrutura": "SF",
+   "campus": "SF"
+  },
+  "5120130012031": {
+   "tipo": "Programa de Computador",
+   "situacao": "Pedido em análise",
+   "estrutura": "SSA",
+   "campus": "SSA"
+  },
+  "5120130012066": {
+   "tipo": "Programa de Computador",
+   "situacao": "Pedido em análise",
+   "estrutura": "SSA",
+   "campus": "SSA"
+  },
+  "5120130012074": {
+   "tipo": "Programa de Computador",
+   "situacao": "Pedido em análise",
+   "estrutura": "SSA",
+   "campus": "SSA"
+  },
+  "5120140012557": {
+   "tipo": "Programa de Computador",
+   "situacao": "Pedido em análise",
+   "estrutura": "SSA",
+   "campus": "SSA"
+  },
+  "5120150001256": {
+   "tipo": "Programa de Computador",
+   "situacao": "Pedido em análise",
+   "estrutura": "SSA",
+   "campus": "SSA"
+  },
+  "5120150009281": {
+   "tipo": "Programa de Computador",
+   "situacao": "Pedido em análise",
+   "estrutura": "SSA",
+   "campus": "SSA"
+  },
+  "5120150011839": {
+   "tipo": "Programa de Computador",
+   "situacao": "Pedido em análise",
+   "estrutura": "EUN",
+   "campus": "EUN"
+  },
+  "5120160005653": {
+   "tipo": "Programa de Computador",
+   "situacao": "Pedido em análise",
+   "estrutura": "CAM",
+   "campus": "CAM"
+  },
+  "5120160009632": {
+   "tipo": "Programa de Computador",
+   "situacao": "Pedido em análise",
+   "estrutura": "SSA",
+   "campus": "SSA"
+  },
+  "5120160011165": {
+   "tipo": "Programa de Computador",
+   "situacao": "Pedido em análise",
+   "estrutura": "SSA",
+   "campus": "SSA"
+  },
+  "5120170001383": {
+   "tipo": "Programa de Computador",
+   "situacao": "Pedido em análise",
+   "estrutura": "IRE",
+   "campus": "IRE"
+  },
+  "5120170007691": {
+   "tipo": "Programa de Computador",
+   "situacao": "Pedido em análise",
+   "estrutura": "SSA",
+   "campus": "SSA"
+  },
+  "5120180002048": {
+   "tipo": "Programa de Computador",
+   "situacao": "Pedido em análise",
+   "estrutura": "SAM",
+   "campus": "SAM"
+  },
+  "5120180002498": {
+   "tipo": "Programa de Computador",
+   "situacao": "Pedido em análise",
+   "estrutura": "SAM",
+   "campus": "SAM"
+  },
+  "5120180002544": {
+   "tipo": "Programa de Computador",
+   "situacao": "Pedido em análise",
+   "estrutura": "SSA",
+   "campus": "SSA"
+  },
+  "5120180003176": {
+   "tipo": "Programa de Computador",
+   "situacao": "Pedido em análise",
+   "estrutura": "SSA",
+   "campus": "SSA"
+  },
+  "5120180005640": {
+   "tipo": "Programa de Computador",
+   "situacao": "Pedido em análise",
+   "estrutura": "SSA",
+   "campus": "SSA"
+  },
+  "5120180010504": {
+   "tipo": "Programa de Computador",
+   "situacao": "Pedido em análise",
+   "estrutura": "SAM",
+   "campus": "SAM"
+  },
+  "5120190008430": {
+   "tipo": "Programa de Computador",
+   "situacao": "Pedido em análise",
+   "estrutura": "SSA",
+   "campus": "SSA"
+  },
+  "5120190016076": {
+   "tipo": "Programa de Computador",
+   "situacao": "Pedido em análise",
+   "estrutura": "SSA",
+   "campus": "SSA"
+  },
+  "5120190021576": {
+   "tipo": "Programa de Computador",
+   "situacao": "Pedido em análise",
+   "estrutura": "SF",
+   "campus": "SF"
+  },
+  "5120190023358": {
+   "tipo": "Programa de Computador",
+   "situacao": "Pedido em análise",
+   "estrutura": "SSA",
+   "campus": "SSA"
+  },
+  "5120190024230": {
+   "tipo": "Programa de Computador",
+   "situacao": "Pedido em análise",
+   "estrutura": "SSA",
+   "campus": "SSA"
+  },
+  "5120190026357": {
+   "tipo": "Programa de Computador",
+   "situacao": "Pedido em análise",
+   "estrutura": "SSA",
+   "campus": "SSA"
+  },
+  "5120190026365": {
+   "tipo": "Programa de Computador",
+   "situacao": "Pedido em análise",
+   "estrutura": "SSA",
+   "campus": "SSA"
+  },
+  "5120200002528": {
+   "tipo": "Programa de Computador",
+   "situacao": "Pedido em análise",
+   "estrutura": "SSA",
+   "campus": "SSA"
+  },
+  "5120200002820": {
+   "tipo": "Programa de Computador",
+   "situacao": "Pedido em análise",
+   "estrutura": "CAM",
+   "campus": "CAM"
+  },
+  "5120200002838": {
+   "tipo": "Programa de Computador",
+   "situacao": "Pedido em análise",
+   "estrutura": "CAM",
+   "campus": "CAM"
+  },
+  "5120200006370": {
+   "tipo": "Programa de Computador",
+   "situacao": "Pedido em análise",
+   "estrutura": "SSA",
+   "campus": "SSA"
+  },
+  "5120200019102": {
+   "tipo": "Programa de Computador",
+   "situacao": "Pedido em análise",
+   "estrutura": "SSA",
+   "campus": "SSA"
+  },
+  "5120200020682": {
+   "tipo": "Programa de Computador",
+   "situacao": "Pedido em análise",
+   "estrutura": "SAM",
+   "campus": "SAM"
+  },
+  "5120200022936": {
+   "tipo": "Programa de Computador",
+   "situacao": "Pedido em análise",
+   "estrutura": "SSA",
+   "campus": "SSA"
+  },
+  "5120200027954": {
+   "tipo": "Programa de Computador",
+   "situacao": "Pedido em análise",
+   "estrutura": "LF",
+   "campus": "LF"
+  },
+  "5120210011074": {
+   "tipo": "Programa de Computador",
+   "situacao": "Pedido em análise",
+   "estrutura": "SSA",
+   "campus": "SSA"
+  },
+  "5120210012143": {
+   "tipo": "Programa de Computador",
+   "situacao": "Pedido em análise",
+   "estrutura": "SSA",
+   "campus": "SSA"
+  },
+  "5120210018753": {
+   "tipo": "Programa de Computador",
+   "situacao": "Pedido em análise",
+   "estrutura": "SSA",
+   "campus": "SSA"
+  },
+  "5120210023366": {
+   "tipo": "Programa de Computador",
+   "situacao": "Pedido em análise",
+   "estrutura": "SSA",
+   "campus": "SSA"
+  },
+  "5120210025440": {
+   "tipo": "Programa de Computador",
+   "situacao": "Pedido em análise",
+   "estrutura": "SSA",
+   "campus": "SSA"
+  },
+  "5120210027035": {
+   "tipo": "Programa de Computador",
+   "situacao": "Pedido em análise",
+   "estrutura": "SSA",
+   "campus": "SSA"
+  },
+  "5120210031296": {
+   "tipo": "Programa de Computador",
+   "situacao": "Pedido em análise",
+   "estrutura": "SSA",
+   "campus": "SSA"
+  },
+  "5120220002728": {
+   "tipo": "Programa de Computador",
+   "situacao": "Pedido em análise",
+   "estrutura": "REI",
+   "campus": "REI"
+  },
+  "5120220002736": {
+   "tipo": "Programa de Computador",
+   "situacao": "Pedido em análise",
+   "estrutura": "REI",
+   "campus": "REI"
+  },
+  "5120220002752": {
+   "tipo": "Programa de Computador",
+   "situacao": "Pedido em análise",
+   "estrutura": "REI",
+   "campus": "REI"
+  },
+  "5120220002779": {
+   "tipo": "Programa de Computador",
+   "situacao": "Pedido em análise",
+   "estrutura": "REI",
+   "campus": "REI"
+  },
+  "5120220007770": {
+   "tipo": "Programa de Computador",
+   "situacao": "Pedido em análise",
+   "estrutura": "SSA",
+   "campus": "SSA"
+  },
+  "5120220008513": {
+   "tipo": "Programa de Computador",
+   "situacao": "Pedido em análise",
+   "estrutura": "SSA",
+   "campus": "SSA"
+  },
+  "5120220009110": {
+   "tipo": "Programa de Computador",
+   "situacao": "Pedido em análise",
+   "estrutura": "SSA",
+   "campus": "SSA"
+  },
+  "5120220012375": {
+   "tipo": "Programa de Computador",
+   "situacao": "Pedido em análise",
+   "estrutura": "SSA",
+   "campus": "SSA"
+  },
+  "5120220019809": {
+   "tipo": "Programa de Computador",
+   "situacao": "Pedido em análise",
+   "estrutura": "SSA",
+   "campus": "SSA"
+  },
+  "5120220025779": {
+   "tipo": "Programa de Computador",
+   "situacao": "Pedido em análise",
+   "estrutura": "SSA",
+   "campus": "SSA"
+  },
+  "5120220031795": {
+   "tipo": "Programa de Computador",
+   "situacao": "Pedido em análise",
+   "estrutura": "SSA",
+   "campus": "SSA"
+  },
+  "5120230002259": {
+   "tipo": "Programa de Computador",
+   "situacao": "Pedido em análise",
+   "estrutura": "LF",
+   "campus": "LF"
+  },
+  "5120230002275": {
+   "tipo": "Programa de Computador",
+   "situacao": "Pedido em análise",
+   "estrutura": "SSA",
+   "campus": "SSA"
+  },
+  "5120230007927": {
+   "tipo": "Programa de Computador",
+   "situacao": "Pedido em análise",
+   "estrutura": "SSA",
+   "campus": "SSA"
+  },
+  "5120230011347": {
+   "tipo": "Programa de Computador",
+   "situacao": "Pedido em análise",
+   "estrutura": "SSA",
+   "campus": "SSA"
+  },
+  "5120230011908": {
+   "tipo": "Programa de Computador",
+   "situacao": "Pedido em análise",
+   "estrutura": "LF",
+   "campus": "LF"
+  },
+  "5120230019950": {
+   "tipo": "Programa de Computador",
+   "situacao": "Pedido em análise",
+   "estrutura": "SSA",
+   "campus": "SSA"
+  },
+  "5120230024376": {
+   "tipo": "Programa de Computador",
+   "situacao": "Pedido em análise",
+   "estrutura": "SSA",
+   "campus": "SSA"
+  },
+  "5120230024430": {
+   "tipo": "Programa de Computador",
+   "situacao": "Pedido em análise",
+   "estrutura": "SSA",
+   "campus": "SSA"
+  },
+  "5120230030252": {
+   "tipo": "Programa de Computador",
+   "situacao": "Pedido em análise",
+   "estrutura": "SSA",
+   "campus": "SSA"
+  },
+  "5120230036030": {
+   "tipo": "Programa de Computador",
+   "situacao": "Pedido em análise",
+   "estrutura": "LF",
+   "campus": "LF"
+  },
+  "5120230036048": {
+   "tipo": "Programa de Computador",
+   "situacao": "Pedido em análise",
+   "estrutura": "SSA",
+   "campus": "SSA"
+  },
+  "5120230040088": {
+   "tipo": "Programa de Computador",
+   "situacao": "Pedido em análise",
+   "estrutura": "LF",
+   "campus": "LF"
+  },
+  "5120230040096": {
+   "tipo": "Programa de Computador",
+   "situacao": "Pedido em análise",
+   "estrutura": "SSA",
+   "campus": "SSA"
+  },
+  "5120240002260": {
+   "tipo": "Programa de Computador",
+   "situacao": "Pedido em análise",
+   "estrutura": "EC",
+   "campus": "EC"
+  },
+  "5120240003606": {
+   "tipo": "Programa de Computador",
+   "situacao": "Pedido em análise",
+   "estrutura": "SSA",
+   "campus": "SSA"
+  },
+  "5120240008306": {
+   "tipo": "Programa de Computador",
+   "situacao": "Pedido em análise",
+   "estrutura": "SSA",
+   "campus": "SSA"
+  },
+  "5120240012095": {
+   "tipo": "Programa de Computador",
+   "situacao": "Pedido em análise",
+   "estrutura": "SSA",
+   "campus": "SSA"
+  },
+  "5120240016970": {
+   "tipo": "Programa de Computador",
+   "situacao": "Pedido em análise",
+   "estrutura": "SSA",
+   "campus": "SSA"
+  },
+  "5120240018131": {
+   "tipo": "Programa de Computador",
+   "situacao": "Pedido em análise",
+   "estrutura": "CAM",
+   "campus": "CAM"
+  },
+  "5120240027386": {
+   "tipo": "Programa de Computador",
+   "situacao": "Pedido em análise",
+   "estrutura": "LF",
+   "campus": "LF"
+  },
+  "5120240035613": {
+   "tipo": "Programa de Computador",
+   "situacao": "Pedido em análise",
+   "estrutura": "SSA",
+   "campus": "SSA"
+  },
+  "5120240038507": {
+   "tipo": "Programa de Computador",
+   "situacao": "Pedido em análise",
+   "estrutura": "ILH",
+   "campus": "ILH"
+  },
+  "5120240039783": {
+   "tipo": "Programa de Computador",
+   "situacao": "Pedido em análise",
+   "estrutura": "FSA",
+   "campus": "FS"
+  },
+  "5120240045830": {
+   "tipo": "Programa de Computador",
+   "situacao": "Pedido em análise",
+   "estrutura": "ILH",
+   "campus": "ILH"
+  },
+  "5120240046003": {
+   "tipo": "Programa de Computador",
+   "situacao": "Pedido em análise",
+   "estrutura": "Seabra",
+   "campus": "SEA"
+  },
+  "5120240046046": {
+   "tipo": "Programa de Computador",
+   "situacao": "Pedido em análise",
+   "estrutura": "EUN",
+   "campus": "EUN"
+  },
+  "5120240046291": {
+   "tipo": "Programa de Computador",
+   "situacao": "Pedido em análise",
+   "estrutura": "FSA",
+   "campus": "FS"
+  },
+  "5120240047352": {
+   "tipo": "Programa de Computador",
+   "situacao": "Pedido em análise",
+   "estrutura": "SSA",
+   "campus": "SSA"
+  },
+  "5120240048103": {
+   "tipo": "Programa de Computador",
+   "situacao": "Pedido em análise",
+   "estrutura": "SSA",
+   "campus": "SSA"
+  },
+  "5120240048677": {
+   "tipo": "Programa de Computador",
+   "situacao": "Pedido em análise",
+   "estrutura": "SSA",
+   "campus": "SSA"
+  },
+  "5120240051384": {
+   "tipo": "Programa de Computador",
+   "situacao": "Pedido em análise",
+   "estrutura": "SSA",
+   "campus": "SSA"
+  },
+  "5120250017570": {
+   "tipo": "Programa de Computador",
+   "situacao": "Pedido em análise",
+   "estrutura": "REI",
+   "campus": "REI"
+  },
+  "5120250021542": {
+   "tipo": "Programa de Computador",
+   "situacao": "Pedido em análise",
+   "estrutura": "LF",
+   "campus": "LF"
+  },
+  "5120250023634": {
+   "tipo": "Programa de Computador",
+   "situacao": "Pedido em análise",
+   "estrutura": "REI",
+   "campus": "REI"
+  },
+  "5120250030053": {
+   "tipo": "Programa de Computador",
+   "situacao": "Pedido em análise",
+   "estrutura": "LF",
+   "campus": "LF"
+  },
+  "5120250030363": {
+   "tipo": "Programa de Computador",
+   "situacao": "Pedido em análise",
+   "estrutura": "VDC",
+   "campus": "VC"
+  },
+  "5120250039727": {
+   "tipo": "Programa de Computador",
+   "situacao": "Pedido em análise",
+   "estrutura": "LF",
+   "campus": "LF"
+  },
+  "5120250041381": {
+   "tipo": "Programa de Computador",
+   "situacao": "Pedido em análise",
+   "estrutura": "ILH",
+   "campus": "ILH"
+  },
+  "5120250044739": {
+   "tipo": "Programa de Computador",
+   "situacao": "Pedido em análise",
+   "estrutura": "SSA",
+   "campus": "SSA"
+  },
+  "5120250044755": {
+   "tipo": "Programa de Computador",
+   "situacao": "Pedido em análise",
+   "estrutura": "LF",
+   "campus": "LF"
+  },
+  "5120250045204": {
+   "tipo": "Programa de Computador",
+   "situacao": "Pedido em análise",
+   "estrutura": "ILH",
+   "campus": "ILH"
+  },
+  "5120250047347": {
+   "tipo": "Programa de Computador",
+   "situacao": "Pedido em análise",
+   "estrutura": "VAL",
+   "campus": "VAL"
+  },
+  "5120250047363": {
+   "tipo": "Programa de Computador",
+   "situacao": "Pedido em análise",
+   "estrutura": "VAL",
+   "campus": "VAL"
+  },
+  "5120250047410": {
+   "tipo": "Programa de Computador",
+   "situacao": "Pedido em análise",
+   "estrutura": "VAL",
+   "campus": "VAL"
+  },
+  "5120250047436": {
+   "tipo": "Programa de Computador",
+   "situacao": "Pedido em análise",
+   "estrutura": "VAL",
+   "campus": "VAL"
+  },
+  "5120250048912": {
+   "tipo": "Programa de Computador",
+   "situacao": "Pedido em análise",
+   "estrutura": "VAL",
+   "campus": "VAL"
+  },
+  "5120250049790": {
+   "tipo": "Programa de Computador",
+   "situacao": "Pedido em análise",
+   "estrutura": "VAL",
+   "campus": "VAL"
+  },
+  "5120250049803": {
+   "tipo": "Programa de Computador",
+   "situacao": "Pedido em análise",
+   "estrutura": "VAL",
+   "campus": "VAL"
+  },
+  "5120250049820": {
+   "tipo": "Programa de Computador",
+   "situacao": "Pedido em análise",
+   "estrutura": "SAM",
+   "campus": "SAM"
+  },
+  "5120250051310": {
+   "tipo": "Programa de Computador",
+   "situacao": "Pedido em análise",
+   "estrutura": "SSA",
+   "campus": "SSA"
+  },
+  "5120250051352": {
+   "tipo": "Programa de Computador",
+   "situacao": "Pedido em análise",
+   "estrutura": "VAL",
+   "campus": "VAL"
+  },
+  "5120250054661": {
+   "tipo": "Programa de Computador",
+   "situacao": "Pedido em análise",
+   "estrutura": "LF",
+   "campus": "LF"
+  },
+  "5120250058365": {
+   "tipo": "Programa de Computador",
+   "situacao": "Pedido em análise",
+   "estrutura": "VAL",
+   "campus": "VAL"
+  },
+  "5120250058381": {
+   "tipo": "Programa de Computador",
+   "situacao": "Pedido em análise",
+   "estrutura": "VAL",
+   "campus": "VAL"
+  },
+  "5120250058420": {
+   "tipo": "Programa de Computador",
+   "situacao": "Pedido em análise",
+   "estrutura": "VAL",
+   "campus": "VAL"
+  },
+  "5120250058438": {
+   "tipo": "Programa de Computador",
+   "situacao": "Pedido em análise",
+   "estrutura": "VAL",
+   "campus": "VAL"
+  },
+  "5120250065507": {
+   "tipo": "Programa de Computador",
+   "situacao": "Pedido em análise",
+   "estrutura": "VDC",
+   "campus": "VC"
+  },
+  "5120250065558": {
+   "tipo": "Programa de Computador",
+   "situacao": "Pedido em análise",
+   "estrutura": "FSA",
+   "campus": "FS"
+  },
+  "5120250065566": {
+   "tipo": "Programa de Computador",
+   "situacao": "Pedido em análise",
+   "estrutura": "FSA",
+   "campus": "FS"
+  },
+  "5120250066490": {
+   "tipo": "Programa de Computador",
+   "situacao": "Pedido em análise",
+   "estrutura": "VAL",
+   "campus": "VAL"
+  },
+  "5120250070012": {
+   "tipo": "Programa de Computador",
+   "situacao": "Pedido em análise",
+   "estrutura": "VAL",
+   "campus": "VAL"
+  },
+  "5120250070039": {
+   "tipo": "Programa de Computador",
+   "situacao": "Pedido em análise",
+   "estrutura": "VAL",
+   "campus": "VAL"
+  },
+  "5120250070047": {
+   "tipo": "Programa de Computador",
+   "situacao": "Pedido em análise",
+   "estrutura": "LF",
+   "campus": "LF"
+  },
+  "5120250070098": {
+   "tipo": "Programa de Computador",
+   "situacao": "Pedido em análise",
+   "estrutura": "CAM",
+   "campus": "CAM"
+  },
+  "5120250070950": {
+   "tipo": "Programa de Computador",
+   "situacao": "Pedido em análise",
+   "estrutura": "Seabra",
+   "campus": "SEA"
+  },
+  "5120260021383": {
+   "tipo": "Programa de Computador",
+   "situacao": "Pedido em análise",
+   "estrutura": "LF",
+   "campus": "LF"
+  },
+  "5120260035090": {
+   "tipo": "Programa de Computador",
+   "situacao": "Pedido em análise",
+   "estrutura": "CAM",
+   "campus": "CAM"
+  },
+  "5120260035252": {
+   "tipo": "Programa de Computador",
+   "situacao": "Pedido em análise",
+   "estrutura": "SSA",
+   "campus": "SSA"
+  },
+  "5120260046505": {
+   "tipo": "Programa de Computador",
+   "situacao": "Pedido em análise",
+   "estrutura": "SSA",
+   "campus": "SSA"
+  },
+  "5120260046513": {
+   "tipo": "Programa de Computador",
+   "situacao": "Pedido em análise",
+   "estrutura": "SSA",
+   "campus": "SSA"
+  },
+  "5120260046530": {
+   "tipo": "Programa de Computador",
+   "situacao": "Pedido em análise",
+   "estrutura": "SSA",
+   "campus": "SSA"
+  },
+  "5120260049610": {
+   "tipo": "Programa de Computador",
+   "situacao": "Pedido em análise",
+   "estrutura": "FSA",
+   "campus": "FS"
+  },
+  "5120260057418": {
+   "tipo": "Programa de Computador",
+   "situacao": "Pedido em análise",
+   "estrutura": "VDC",
+   "campus": "VC"
+  },
+  "5120260057523": {
+   "tipo": "Programa de Computador",
+   "situacao": "Pedido em análise",
+   "estrutura": "VDC",
+   "campus": "VC"
+  },
+  "5120260057558": {
+   "tipo": "Programa de Computador",
+   "situacao": "Pedido em análise",
+   "estrutura": "VAL",
+   "campus": "VAL"
+  },
+  "5120260065364": {
+   "tipo": "Programa de Computador",
+   "situacao": "Pedido em análise",
+   "estrutura": "FSA",
+   "campus": "FS"
+  },
+  "5120260065976": {
+   "tipo": "Programa de Computador",
+   "situacao": "Pedido em análise",
+   "estrutura": "FSA",
+   "campus": "FS"
+  },
+  "5120260073448": {
+   "tipo": "Programa de Computador",
+   "situacao": "Pedido em análise",
+   "estrutura": "SSA",
+   "campus": "SSA"
+  }
+ }
+}

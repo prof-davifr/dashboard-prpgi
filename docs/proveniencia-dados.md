@@ -34,6 +34,7 @@
 │   ├── scraper-SUAPCNPQ/   # Lattes por campus (25 .xlsx)
 │   ├── scraper-DGP/        # Grupos de pesquisa (.csv)
 │   ├── scraper-SUAPPos/    # Pós-graduação (.csv)
+│   ├── nit/                # Planilha do setor de PI da PRPGI (.xlsx, §2.6)
 │   └── ic/                 # Iniciação Científica (.xlsx)
 ├── src/
 │   ├── script.js         # Lógica principal do dashboard
@@ -346,10 +347,11 @@ Nenhuma das duas tinha registro no dashboard, então nada se perdeu.
 #### Atribuição de campus
 
 O INPI dá o titular (a instituição) e os autores (pessoas), **nunca o campus**.
-`scripts/refresh-inovacao.js` resolve numa cascata de três níveis:
+`scripts/refresh-inovacao.js` resolve numa cascata de quatro níveis:
 
 | Nível | Como | Resultado |
 |---|---|---|
+| 0 | O número INPI está no `nit-estrutura.json` (§2.6) | Todos os registros do ativo recebem a estrutura do NIT; os níveis 1 e 2 dão só o `Servidor` |
 | 1 | O número INPI casa com o registro declarado no Lattes | Herda `campus` e `Servidor` |
 | 2 | O nome do autor casa com a base do SUAP | Resolve o SIAPE e o campus |
 | 3 | Nenhum dos dois | O campo `campus` não é emitido |
@@ -360,6 +362,11 @@ código como `NA`**: `CODIGOS_VALIDOS` em `scripts/validate-data.js` o recusaria
 
 Um registro com vários autores vira **um registro por autor**, o mesmo fan-out
 de coautoria de `build.js`. É o que mantém o KPI "p/ Servidor" correto.
+
+Sem o nível 0, cada registro levava o campus do seu autor, e um ativo com
+autores de campi diferentes contava em todos eles: os 161 ativos somavam 190 no
+mapa. Com o nível 0, cada ativo fica numa estrutura só. O `inpi-campus.json`
+continua com o campus dos autores, para a cascata valer sozinha se o NIT sair.
 
 #### `inpi-campus.json` — por que existe
 
@@ -393,6 +400,89 @@ o checkout. É preciso um Personal Access Token com leitura em
 `prof-davifr/scraper-INPI`, guardado nos segredos deste repositório. Sem ele o
 passo de checkout falha com "Repository not found" — e é só isso que quebra: a
 coleta local continua valendo.
+
+---
+
+### 2.6 Planilha do NIT — Estrutura dos Ativos de Propriedade Intelectual
+
+#### Origem
+
+Planilha `preenchimento_NIT.xlsx`, preenchida pelo setor da PRPGI responsável
+pela propriedade intelectual e recebida em 30/09/2026. Fica em
+`dados/nit/` (gitignored).
+
+**É a única fonte que diz a que campus pertence cada ativo.** O INPI nunca
+informa campus, e a cascata de `refresh-inovacao.js` (§2.5) só o deduz pelo
+Lattes ou pelo nome do autor.
+
+#### O que entra no repositório
+
+Só a aba `ativos_pesquisa`, e só três colunas dela, mais o número. `scripts/extrair-nit.js`
+gera `nit-estrutura.json` (versionado), com uma entrada por número INPI:
+
+| Campo | Coluna da planilha | Observação |
+|---|---|---|
+| chave | `num_inpi_ativo_pesq` | só os dígitos, igual ao `dedupKey` de `inovacao` |
+| `tipo` | `tipo_ativo_pesq` | |
+| `situacao` | `sit_registro_ativo_pesq` | Ativo, Inativo, Pedido em análise |
+| `estrutura` | `estrutura` | valor bruto, como o setor escreveu |
+| `campus` | `estrutura` | código do painel; ausente quando a célula não traz campus |
+
+Conversões: `FSA`→`FS` e `VDC`→`VC` (via `normalizeCampusCode`), `Seabra`→`SEA`.
+`REI` (Reitoria) fica como está, porque já é código válido no painel. Três marcas
+trazem `INDEFERIDA` ou `ARQUIVADO` na coluna de estrutura e ficam sem `campus`.
+
+Para atualizar, depois de receber uma planilha nova:
+
+```bash
+node scripts/extrair-nit.js dados/nit/<planilha>.xlsx
+```
+
+#### O que fica fora
+
+As outras abas não entram no repositório nem no painel:
+
+| Aba | Conteúdo | Motivo |
+|---|---|---|
+| `producao_intelectual` | 4.117 produções de 2025 | CPF e matrícula; repete o Lattes |
+| `projetos_pesquisa` | 913 projetos | nome do orientador |
+| `pessoas_envolvidas_projeto_76e8` | 1.773 participantes | CPF, nome, matrícula |
+| `_listas` | listas de valores do formulário | sem dado |
+
+#### Volume e conferência (out/2026)
+
+- 161 ativos: 131 programas de computador, 19 patentes de invenção, 2 modelos de
+  utilidade, 5 desenhos industriais, 4 marcas.
+- Os 161 números coincidem com os 161 do INPI no `data.json`.
+- Campus: 119 coincidiam com a cascata por autor, 35 divergiam, 4 o painel não
+  atribuía e 3 a planilha não atribui.
+
+**Desde out/2026 a planilha é o nível 0 da cascata de campus** (§2.5). Nos
+casos de divergência, prevalece a estrutura do NIT. Ativos distintos por
+estrutura, antes e depois:
+
+| Estrutura | Antes | Depois |
+|---|---:|---:|
+| SSA | 65 | 78 |
+| VAL | 16 | 16 |
+| LF | 28 | 14 |
+| SF | 9 | 10 |
+| FS | 16 | 7 |
+| REI | 1 | 7 |
+| CAM | 11 | 6 |
+| SAM | 1 | 5 |
+| ILH | 3 | 4 |
+| VC | 2 | 4 |
+| EUN | 5 | 3 |
+| SEA | 2 | 2 |
+| IRE | 3 | 1 |
+| EC | 1 | 1 |
+| JAC | 10 | 0 |
+| BAR | 6 | 0 |
+| BRU | 3 | 0 |
+| JAG | 1 | 0 |
+| sem campus | 7 | 3 |
+| **soma** | **190** | **161** |
 
 ---
 
@@ -441,7 +531,8 @@ coleta local continua valendo.
 #### Etapa 1: Escaneamento de Arquivos
 - Função `findFiles(dir, extension)` — recursão em subdiretórios
 - Ignora arquivos de lock (prefixo `.~lock`)
-- Separa XLSX (excluindo diretório `ic/`) e CSV
+- Separa XLSX e CSV
+- Só lê como Lattes as planilhas de `scraper-SUAPCNPQ/` e `old/` (`isLattesXls`). As outras são listadas e ignoradas — antes, `dados/preenchimento_NIT.xlsx` virava o campus `PREENCHIMENTO_NIT` e o build abortava
 
 #### Etapa 2: Seleção do CSV DGP
 - Função `selectDgpGroupsCsvFiles`
