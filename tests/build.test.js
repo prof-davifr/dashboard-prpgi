@@ -7,6 +7,7 @@ const {
   findFiles,
   parseCSV,
   getSourceKey,
+  isLattesXls,
   registerSourceFile,
   isPostGraduationCsv,
   isDgpGroupsCsv,
@@ -746,6 +747,26 @@ describe('seleção de CSV por fonte (regressão)', () => {
     };
     expect(isDgpGroupsCsv(dgp.filePath, dgp.fileName)).toBe(true);
     expect(isPostGraduationCsv('alunos_pos_20260721_111724.csv')).toBe(true);
+  });
+});
+
+// ─── Seleção de planilhas do Lattes ──────────────────────────────────────────
+
+describe('isLattesXls (regressão)', () => {
+  // Toda planilha sob dados/ era lida como exportação do Lattes, com o nome do
+  // arquivo no papel de código de campus. A planilha do NIT virou o campus
+  // `PREENCHIMENTO_NIT` e o validate() abortou o build.
+  const DADOS = path.join(__dirname, '..', 'dados');
+
+  test('aceita as planilhas por campus do scraper e da pasta old/', () => {
+    expect(isLattesXls(path.join(DADOS, 'scraper-SUAPCNPQ', 'SSA.xlsx'))).toBe(true);
+    expect(isLattesXls(path.join(DADOS, 'old', 'PA-2000-2026.xls'))).toBe(true);
+  });
+
+  test('recusa planilhas de outras fontes, na raiz ou em subpasta', () => {
+    expect(isLattesXls(path.join(DADOS, 'preenchimento_NIT.xlsx'))).toBe(false);
+    expect(isLattesXls(path.join(DADOS, 'nit', 'preenchimento_NIT.xlsx'))).toBe(false);
+    expect(isLattesXls(path.join(DADOS, 'validacao', 'controle.xlsx'))).toBe(false);
   });
 });
 

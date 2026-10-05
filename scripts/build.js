@@ -425,6 +425,16 @@ function getSourceKey(filePath) {
   return parts[0] || 'desconhecido';
 }
 
+// Pastas cujas planilhas são exportações do Lattes, uma por campus, com o código
+// do campus no nome do arquivo. Qualquer outra planilha sob dados/ era lida como
+// campus por eliminação: `dados/preenchimento_NIT.xlsx` virava o campus
+// `PREENCHIMENTO_NIT` e o validate() abortava o build.
+const PASTAS_LATTES = ['scraper-SUAPCNPQ', 'old'];
+
+function isLattesXls(filePath) {
+  return PASTAS_LATTES.includes(getSourceKey(filePath));
+}
+
 function registerSourceFile(meta, filePath, fileName) {
   const sourceKey = getSourceKey(filePath);
   if (!meta.sourceFiles[sourceKey]) {
@@ -587,10 +597,16 @@ function main() {
 
   SALT = loadOrCreateSalt();
 
-  const xlsFiles = [
+  const todasPlanilhas = [
     ...findFiles(DADOS_DIR, '.xlsx'),
     ...findFiles(DADOS_DIR, '.xls')
   ].filter(f => getSourceKey(f.filePath) !== 'ic');
+  const xlsFiles = todasPlanilhas.filter(f => isLattesXls(f.filePath));
+
+  const xlsIgnorados = todasPlanilhas.filter(f => !isLattesXls(f.filePath));
+  if (xlsIgnorados.length > 0) {
+    console.log(`   Ignorando ${xlsIgnorados.length} planilha(s) fora das fontes do Lattes: ${xlsIgnorados.map(f => path.relative(DADOS_DIR, f.filePath)).join(', ')}`);
+  }
 
   // ─── Dedup XLS files by campus: prefer scraper .xlsx with real data,
   //      fall back to .xls from old/ if scraper file is empty (just "vazio") ──
@@ -1252,6 +1268,8 @@ module.exports = {
   SALT_FILE,
   SALT_BACKUP_FILE,
   getSourceKey,
+  isLattesXls,
+  PASTAS_LATTES,
   registerSourceFile,
   splitCsvRecords,
   normalizeCampusCode,
