@@ -1,0 +1,13 @@
+[Unit]
+Description=Verificação diária das coletas do SUAP (pós-graduação e Lattes)
+
+[Timer]
+# Verifica todo dia. O próprio script respeita a cadência de 30 dias por fonte
+# e sai cedo quando as coletas estão recentes ou quando o SUAP não responde.
+# Assim, um dia com a máquina desligada não perde a rodada do mês.
+OnCalendar=*-*-* 08:00:00
+RandomizedDelaySec=30min
+Persistent=true
+
+[Install]
+WantedBy=timers.target

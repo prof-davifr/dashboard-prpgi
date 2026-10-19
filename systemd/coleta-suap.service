@@ -1,0 +1,18 @@
+[Unit]
+Description=Atualiza pós-graduação e produção Lattes (SUAP) no dashboard
+Documentation=file://%h/projetos/repos-independentes/dashboard-prpgi/docs/proveniencia-dados.md
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=%h/projetos/repos-independentes/dashboard-prpgi
+# O serviço não herda o PATH do terminal. O node vem do nvm; ajuste a versão
+# aqui se ela mudar. O python da pós é achado pelo script; o do Lattes é o
+# .venv do scraper-SUAPCNPQ.
+Environment=PATH=%h/.nvm/versions/node/v22.23.2/bin:/usr/local/bin:/usr/bin:/bin
+ExecStart=%h/projetos/repos-independentes/dashboard-prpgi/scripts/atualizar-suap.sh
+# A coleta do Lattes leva horas. O teto evita que uma sessão pendurada no SUAP
+# segure o serviço indefinidamente.
+TimeoutStartSec=8h
+Nice=10

@@ -63,7 +63,7 @@ Produção acadêmica (bibliográfica, técnica, inovação e orientações) dos
 
 #### Origem
 - **Sistema de origem**: SUAP/IFBA, módulo de integração com CNPq
-- **Forma de extração**: Exportação manual pelo setor de Gestão de Pesquisa, organizada por campus
+- **Forma de extração**: Coleta automática por campus (`scraper-SUAPCNPQ`, modo CLI), disparada por `scripts/atualizar-suap.sh` — ver §2.1.1
 - **Responsável**: PRPGI/IFBA
 
 #### Formato e estrutura
@@ -99,7 +99,38 @@ O pipeline extrai o **ID numérico** (mín. 7 dígitos) e o **nome completo** pa
 | Orientações em Andamento | ~2.200 | 2000–2026 |
 
 #### Frequência de atualização
-Manual, conforme exportação do SUAP. Sem periodicidade fixa estabelecida.
+Mensal e automática, desde 19/10/2026 — ver §2.1.1.
+
+#### 2.1.1 Coleta automática do SUAP (Lattes e Pós-Graduação)
+
+O SUAP exige login institucional e o runner público do GitHub não o alcança. Por
+isso a coleta roda na máquina do assessor, como a do INPI (§2.5) e a da lista de
+grupos do DGP:
+
+- **Script**: `scripts/atualizar-suap.sh`. Chama os dois coletores irmãos
+  (`scraper-SUAPPos` e `scraper-SUAPCNPQ`), roda `npm run build`, `npm test` e
+  `npm run validate` e, se o `data.json` mudou, faz commit e push.
+- **Agendamento**: `systemd/coleta-suap.timer` verifica todo dia às 08:00. Cada
+  fonte é coletada quando o arquivo mais novo dela em `dados/` tem 30 dias ou
+  mais. Uma coleta que falha não avança essa data e é repetida no dia seguinte.
+- **Lattes**: incremental, ano anterior e ano corrente
+  (`coletar-suap.py --anos A-1 A --sincronizar`). O coletor mescla com a base
+  acumulada e deduplica.
+- **Pós-graduação**: snapshot completo das três modalidades. O CSV só entra em
+  `dados/` se tiver pelo menos 90% dos alunos já publicados.
+- **Guardas**: sai sem erro com o SUAP fora de alcance; para se o `data.json`
+  tiver alteração local ou se houver commit local fora do remoto.
+- **Grupos**: o build preserva os grupos do `data.json` quando o CSV do DGP em
+  `dados/` é mais antigo que eles (`preservarGrupos()`), porque o
+  `refresh-grupos.yml` os atualiza direto no `data.json`.
+
+Instalação do timer:
+
+```bash
+cp systemd/coleta-suap.{service,timer} ~/.config/systemd/user/
+systemctl --user daemon-reload
+systemctl --user enable --now coleta-suap.timer
+```
 
 ---
 
@@ -162,7 +193,7 @@ Registros de alunos de pós-graduação (stricto e lato sensu) do IFBA, extraíd
 
 #### Origem
 - **Sistema de origem**: SUAP/IFBA, módulo acadêmico
-- **Forma de extração**: Exportação CSV pelo setor de Pós-Graduação
+- **Forma de extração**: Coleta automática (`scraper-SUAPPos`), disparada por `scripts/atualizar-suap.sh` — ver §2.1.1
 - **Responsável**: PRPGI/IFBA — Coordenação de Pós-Graduação
 
 #### Formato e estrutura
@@ -202,7 +233,7 @@ inflaria os totais em ~3x (bug corrigido em ago/2026: 7.477 → 2.521 registros)
 - **Período**: Conforme `ano/periodo_letivo` (2016.1–2026.1 no snapshot atual)
 
 #### Frequência de atualização
-Manual, conforme exportação do SUAP.
+Mensal e automática, desde 19/10/2026 — ver §2.1.1.
 
 ---
 

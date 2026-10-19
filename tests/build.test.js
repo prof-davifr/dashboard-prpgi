@@ -27,7 +27,8 @@ const {
   extrairVinculos,
   nomeNaCitacao,
   filtrarPorAutoria,
-  preservarInovacao
+  preservarInovacao,
+  preservarGrupos
 } = require('../scripts/build');
 
 // ─── findFiles ────────────────────────────────────────────────────────────────
@@ -1058,5 +1059,51 @@ describe('preservarInovacao', () => {
     expect(preservarInovacao(result, { inovacao: [{ Ano: '1999' }] })).toBe(true);
     expect(result.meta.minYear).toBe(1999);
     expect(result.meta.sourceDates.INPI).toBeUndefined();
+  });
+});
+
+// ─── preservarGrupos ──────────────────────────────────────────────────────────
+
+describe('preservarGrupos', () => {
+  const meta = (data) => ({
+    sourceFiles: { 'scraper-DGP': ['coletor.csv'] },
+    sourceDates: { 'scraper-DGP': { label: 'DGP', modifiedAt: data, fileCount: 1 } }
+  });
+  const anterior = { grupos: [{ Unidade: 'Salvador' }, { Unidade: 'Barreiras' }], meta: meta('2026-10-12T14:12:00.000Z') };
+
+  function resultadoCom(data) {
+    const m = meta(data);
+    m.sourceFiles['scraper-DGP'] = ['coletor_dgp_2026-08-21.csv'];
+    return { grupos: [{ Unidade: 'Salvador' }], meta: m };
+  }
+
+  test('mantém os grupos publicados quando o CSV local é mais antigo', () => {
+    const result = resultadoCom('2026-08-21T14:15:00.000Z');
+    expect(preservarGrupos(result, anterior)).toBe(true);
+    expect(result.grupos).toHaveLength(2);
+    expect(result.meta.sourceFiles['scraper-DGP']).toEqual(['coletor.csv']);
+    expect(result.meta.sourceDates['scraper-DGP'].modifiedAt).toBe('2026-10-12T14:12:00.000Z');
+  });
+
+  test('usa o CSV local quando ele é mais novo ou da mesma data', () => {
+    for (const data of ['2026-10-19T10:00:00.000Z', '2026-10-12T14:12:00.000Z']) {
+      const result = resultadoCom(data);
+      expect(preservarGrupos(result, anterior)).toBe(false);
+      expect(result.grupos).toHaveLength(1);
+    }
+  });
+
+  test('mantém os grupos publicados quando dados/ não tem CSV do DGP', () => {
+    const result = { grupos: [], meta: { sourceFiles: {}, sourceDates: {} } };
+    expect(preservarGrupos(result, anterior)).toBe(true);
+    expect(result.grupos).toHaveLength(2);
+  });
+
+  test('não faz nada sem grupos ou sem data no data.json anterior', () => {
+    const result = resultadoCom('2026-08-21T14:15:00.000Z');
+    expect(preservarGrupos(result, null)).toBe(false);
+    expect(preservarGrupos(result, { grupos: [], meta: anterior.meta })).toBe(false);
+    expect(preservarGrupos(result, { grupos: anterior.grupos })).toBe(false);
+    expect(result.grupos).toHaveLength(1);
   });
 });

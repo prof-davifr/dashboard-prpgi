@@ -592,6 +592,40 @@ function preservarInovacao(result, anterior) {
   return true;
 }
 
+/**
+ * Mantém os grupos do data.json anterior quando eles são mais novos que o CSV
+ * do DGP que o build achou em `dados/`.
+ *
+ * O refresh-grupos.yml atualiza os grupos toda semana direto no data.json, sem
+ * passar por `dados/`. O CSV local fica para trás, e um `npm run build` — o da
+ * coleta automática do SUAP, por exemplo — trocaria os grupos publicados por
+ * uma coleta de semanas antes. Compara a data registrada no meta de cada lado.
+ *
+ * @returns {boolean} true quando os grupos anteriores foram mantidos.
+ */
+function preservarGrupos(result, anterior) {
+  const CHAVE = 'scraper-DGP';
+  if (!anterior || !Array.isArray(anterior.grupos) || anterior.grupos.length === 0) return false;
+
+  const dataDe = (meta) => {
+    const d = meta && meta.sourceDates && meta.sourceDates[CHAVE];
+    const t = d ? Date.parse(d.modifiedAt || d.createdAt) : NaN;
+    return Number.isNaN(t) ? null : t;
+  };
+  const dataAnterior = dataDe(anterior.meta);
+  const dataAtual = dataDe(result.meta);
+  if (dataAnterior === null) return false;
+  if (dataAtual !== null && dataAtual >= dataAnterior) return false;
+
+  result.grupos = anterior.grupos;
+  for (const campo of ['sourceFiles', 'sourceDates']) {
+    if (anterior.meta[campo] && anterior.meta[campo][CHAVE]) {
+      result.meta[campo][CHAVE] = anterior.meta[campo][CHAVE];
+    }
+  }
+  return true;
+}
+
 function main() {
   console.log(' Scanning dados/ for .xlsx and .csv files recursively...');
 
@@ -1061,15 +1095,22 @@ function main() {
   // A saída é preservar o que o data.json já publica. O refresh seguinte
   // sobrescreve com a coleta nova; se ele não rodar, a aba continua com o
   // último conteúdo bom em vez de esvaziar. Ver preservarInovacao().
-  if (result.inovacao.length === 0 && fs.existsSync(OUTPUT_FILE)) {
+  //
+  // Os grupos têm o problema inverso: o build os lê de dados/scraper-DGP/, mas
+  // quem os mantém em dia é o refresh-grupos.yml, que escreve direto no
+  // data.json. Ver preservarGrupos().
+  if (fs.existsSync(OUTPUT_FILE)) {
     try {
       const anterior = JSON.parse(fs.readFileSync(OUTPUT_FILE, 'utf-8'));
-      if (preservarInovacao(result, anterior)) {
+      if (result.inovacao.length === 0 && preservarInovacao(result, anterior)) {
         console.log(`   Inovação preservada do data.json anterior (${anterior.inovacao.length} registros).`);
         console.log('   Rode `node scripts/refresh-inovacao.js <inpi.csv>` para atualizá-la.');
       }
+      if (preservarGrupos(result, anterior)) {
+        console.log(`   Grupos preservados do data.json anterior (${anterior.grupos.length}): o CSV do DGP em dados/ é mais antigo.`);
+      }
     } catch (e) {
-      console.warn(`   Não consegui ler a Inovação do data.json anterior: ${e.message}`);
+      console.warn(`   Não consegui ler o data.json anterior: ${e.message}`);
     }
   }
 
@@ -1262,6 +1303,7 @@ module.exports = {
   findFiles,
   parseCSV,
   preservarInovacao,
+  preservarGrupos,
   pseudonymize,
   shortHash,
   loadOrCreateSalt,
