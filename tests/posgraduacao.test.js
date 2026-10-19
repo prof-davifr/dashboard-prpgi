@@ -396,12 +396,12 @@ describe('situações do SUAP no data.json', () => {
   )].sort();
 
   const OUTROS_DOCUMENTADOS = [
-    'Em Migração', 'Matrícula Vínculo Institucional', 'Não concluído',
+    'Em Migração', 'Não concluído',
     'Trancado', 'Trancado Voluntariamente', 'Transferido Interno'
   ];
 
-  test('são dezesseis situações distintas', () => {
-    expect(situacoes).toHaveLength(16);
+  test('são quinze situações distintas', () => {
+    expect(situacoes).toHaveLength(15);
   });
 
   test('o grupo Outros é exatamente o documentado no modal', () => {

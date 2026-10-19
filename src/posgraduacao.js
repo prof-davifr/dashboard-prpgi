@@ -40,11 +40,11 @@ const POSGRAD_SITUACAO_BUCKET = {
   'Cancelamento Compulsório': 'Evadido'
 };
 
-// O resto cai em "Outros", seis situações de trânsito: Em Migração, Não
-// concluído, Transferido Interno, Trancado, Trancado Voluntariamente e
-// Matrícula Vínculo Institucional. São 16 situações no SUAP, não 17: houve
-// "Aguardando Colação de Grau" nesta lista por engano até set/2026, e ela
-// nunca apareceu na base.
+// O resto cai em "Outros", cinco situações de trânsito: Em Migração, Não
+// concluído, Transferido Interno, Trancado e Trancado Voluntariamente. São 15
+// situações no SUAP. Houve "Aguardando Colação de Grau" nesta lista por engano
+// até set/2026, e ela nunca apareceu na base. "Matrícula Vínculo Institucional"
+// saiu em out/2026: o único aluno nela mudou de situação.
 const POSGRAD_BUCKETS = ['Matriculado', 'Concluinte', 'Aperfeiçoado', 'Evadido', 'Outros'];
 
 const POSGRAD_BUCKET_COLOR = {
