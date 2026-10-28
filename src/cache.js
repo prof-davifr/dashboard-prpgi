@@ -1,8 +1,46 @@
 // cache.js — carga do data.json e inicialização do dashboard.
 //
 // Estratégia stale-while-revalidate sobre a Cache API: entrega o que está em
-// cache e revalida em segundo plano, com fallback para fetch direto.
+// cache e revalida em segundo plano, com fallback para fetch direto. Quando a
+// revalidação traz uma versão nova, a tela passa a usá-la na hora.
 // Último script carregado — depende de todos os renderizadores.
+
+// Põe um data.json em STATE e no seletor de período. Roda na carga e de novo
+// quando a revalidação traz uma versão nova; por isso guarda o período escolhido.
+function aplicarDados(data) {
+  STATE.raw.bibliografica = data.bibliografica || [];
+  STATE.raw.tecnica = data.tecnica || [];
+  STATE.raw.inovacao = data.inovacao || [];
+  STATE.raw.concluidas = data.concluidas || [];
+  STATE.raw.andamento = data.andamento || [];
+  STATE.raw.grupos = data.grupos || [];
+  STATE.raw.posgraduacao = data.posgraduacao || [];
+  STATE.raw.ic = data.ic || [];
+
+  // Set period labels from metadata
+  if (data.meta) {
+    // Guardado em STATE porque a capa do relatório exportado precisa dizer de
+    // quando são os dados, e ela roda muito depois desta função.
+    STATE.meta = data.meta;
+    STATE.minYear = data.meta.minYear;
+    STATE.maxYear = data.meta.maxYear;
+    const updatedText = formatDateTimePtBr(data.meta.generatedAt);
+    if ($('last-update-display')) $('last-update-display').textContent = updatedText;
+    if ($('last-update-modal')) $('last-update-modal').textContent = updatedText;
+    renderSourceUpdates(data.meta);
+    const currentYear = STATE.maxYear;
+    const select = $('period-filter');
+    const escolhido = select.value;
+    select.innerHTML = `
+      <option value="all">Todo o Período (${data.meta.minYear}-${data.meta.maxYear})</option>
+      <option value="0">Ano Atual (${currentYear})</option>
+      <option value="1">Último Ano (${currentYear - 1})</option>
+      <option value="5">Últimos 5 Anos (${currentYear - 4}-${currentYear})</option>
+      <option value="10">Últimos 10 Anos (${currentYear - 9}-${currentYear})</option>
+    `;
+    if (escolhido) select.value = escolhido;
+  }
+}
 
 async function initDashboard() {
   try {
@@ -23,7 +61,12 @@ async function initDashboard() {
             const networkData = await networkResp.clone().json();
             if (networkData.meta && data.meta && networkData.meta.generatedAt !== data.meta.generatedAt) {
               await cache.put(jsonUrl, networkResp);
-              showToast('Dados atualizados em segundo plano. Recarregue a página para ver as novidades.');
+              // Antes só avisava e pedia para recarregar: até lá a tela mostrava
+              // a versão velha, e um campo novo aparecia zerado (TAE 0,0% nos
+              // grupos, 28/10/2026).
+              aplicarDados(networkData);
+              processData();
+              showToast('Dados atualizados.');
             }
           }
         }).catch(err => console.log('Background fetch failed', err));
@@ -46,37 +89,7 @@ async function initDashboard() {
       }
       data = await resp.json();
     }
-    // Populate raw state from pre-built JSON
-    STATE.raw.bibliografica = data.bibliografica || [];
-    STATE.raw.tecnica = data.tecnica || [];
-    STATE.raw.inovacao = data.inovacao || [];
-    STATE.raw.concluidas = data.concluidas || [];
-    STATE.raw.andamento = data.andamento || [];
-    STATE.raw.grupos = data.grupos || [];
-    STATE.raw.posgraduacao = data.posgraduacao || [];
-    STATE.raw.ic = data.ic || [];
-
-    // Set period labels from metadata
-    if (data.meta) {
-      // Guardado em STATE porque a capa do relatório exportado precisa dizer de
-      // quando são os dados, e ela roda muito depois desta função.
-      STATE.meta = data.meta;
-      STATE.minYear = data.meta.minYear;
-      STATE.maxYear = data.meta.maxYear;
-      const updatedText = formatDateTimePtBr(data.meta.generatedAt);
-      if ($('last-update-display')) $('last-update-display').textContent = updatedText;
-      if ($('last-update-modal')) $('last-update-modal').textContent = updatedText;
-      renderSourceUpdates(data.meta);
-      const currentYear = STATE.maxYear;
-      const select = $('period-filter');
-      select.innerHTML = `
-        <option value="all">Todo o Período (${data.meta.minYear}-${data.meta.maxYear})</option>
-        <option value="0">Ano Atual (${currentYear})</option>
-        <option value="1">Último Ano (${currentYear - 1})</option>
-        <option value="5">Últimos 5 Anos (${currentYear - 4}-${currentYear})</option>
-        <option value="10">Últimos 10 Anos (${currentYear - 9}-${currentYear})</option>
-      `;
-    }
+    aplicarDados(data);
 
     $('period-filter').addEventListener('change', processData);
     $('campus-filter').addEventListener('change', processData);

@@ -311,6 +311,13 @@ Frontend estático (Chart.js + Leaflet + SheetJS) + pipeline ETL em `scripts/bui
       45,7% em 28/10. `build.js` e `refresh-grupos.js` passaram a emitir
       `Tecnicos`; `tests/grupos-composicao.test.js` acusa se um dos dois perder
       o campo
+- [x] **Cache do `data.json`: versão nova aplicada sem recarregar** — 28/10/2026.
+      Depois da publicação, o site mostrou TAE 0,0%: o navegador entregava o
+      `data.json` de 26/10 do cache (sem `Tecnicos`) e só avisava "Recarregue a
+      página". Agora `src/cache.js` (`aplicarDados`) aplica a versão nova assim
+      que a revalidação termina e mantém o período escolhido;
+      `tests/cache.test.js`. `src/pos-validacao-init.js` tem o mesmo padrão e
+      ficou como estava
 - [ ] **Deploy no CI** — a Action atual só valida; o GitHub Pages continua servindo `main` direto. Avaliar job de deploy explícito (`actions/deploy-pages`) para desacoplar publicação de push
 
 ### 🟡 Alta — Automação da lista de grupos de pesquisa (SUAP → DGP)
