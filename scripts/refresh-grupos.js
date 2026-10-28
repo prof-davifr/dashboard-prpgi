@@ -5,7 +5,7 @@
  * brutos de `dados/` (que são gitignored e não existem no checkout do CI).
  *
  * É o mesmo mapeamento do `build.js` (linha ~815): o CSV do DGP vira objetos
- * { Situacao, AnoFormacao, Pesquisadores, Estudantes, Area, UltimoEnvio, Unidade }.
+ * { Situacao, AnoFormacao, Pesquisadores, Estudantes, Tecnicos, Area, UltimoEnvio, Unidade }.
  *
  * Uso:
  *   node scripts/refresh-grupos.js <coletor_dgp_*.csv>
@@ -50,6 +50,7 @@ function main() {
     AnoFormacao: r['AnoFormacao'],
     Pesquisadores: r['Pesquisadores'],
     Estudantes: r['Estudantes'],
+    Tecnicos: r['Tecnicos'],
     Area: r['Area'],
     UltimoEnvio: r['UltimoEnvio'],
     Unidade: normalizarUnidade(r['Unidade']),

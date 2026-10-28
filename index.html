@@ -182,10 +182,14 @@
                 <div class="chart-title">Evolução dos Grupos de Pesquisa</div>
                 <div class="chart-wrapper large"><canvas id="chart-grupos-evo-combined" role="img" aria-label="Gráfico: Evolução dos Grupos de Pesquisa"></canvas></div>
             </div>
-            <div class="chart-row-split chart-row-solo">
+            <div class="chart-row-split">
                 <div class="chart-card">
                     <div class="chart-title">Grupos por Área</div>
                     <div class="chart-wrapper"><canvas id="chart-grupos-pie" role="img" aria-label="Gráfico: Grupos por Área"></canvas></div>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-title" title="Vínculos nos grupos não excluídos. Docentes = pesquisadores do DGP; TAE = técnicos do DGP; Alunos = estudantes do DGP.">Docentes, TAE e Alunos nos Grupos</div>
+                    <div class="chart-wrapper"><canvas id="chart-grupos-composicao" role="img" aria-label="Gráfico: Percentual de docentes, TAE e alunos nos grupos de pesquisa"></canvas></div>
                 </div>
             </div>
             <div class="chart-row-full chart-card">
@@ -522,6 +526,7 @@
                         <li>Produções mais recentes podem não estar completamente registradas.</li>
                         <li>A classificação Qualis é específica para cada área de avaliação da CAPES.</li>
                         <li>Grupos de pesquisa excluídos ou em situação irregular no DGP não são considerados nas contagens de grupos ativos.</li>
+                        <li>No gráfico "Docentes, TAE e Alunos nos Grupos", Docentes são os pesquisadores do DGP, TAE são os técnicos e Alunos são os estudantes. O DGP não informa se o pesquisador é docente ou técnico-administrativo, nem se é do IFBA: um TAE cadastrado como pesquisador conta como docente, e membros de outras instituições também entram. O gráfico conta vínculos, não pessoas — quem participa de dois grupos conta duas vezes — e deixa de fora os grupos excluídos.</li>
                         <li>Na pós-graduação, o ano utilizado é o de ingresso do ciclo de matrícula; desfechos podem ocorrer em anos posteriores.</li>
                         <li>Status acadêmicos podem variar em granularidade entre exportações e períodos, exigindo agrupamentos para análise executiva.</li>
                     </ul>

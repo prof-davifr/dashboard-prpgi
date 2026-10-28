@@ -172,6 +172,15 @@ Grupos de pesquisa certificados do IFBA no Diretório de Grupos de Pesquisa do C
 | `Pesquisadores (Nomes)` | `PesquisadoresNomes` | string | Nomes separados por `;` |
 | `Linhas de Pesquisa` | `LinhasdePesquisa` | string | Linhas de pesquisa |
 | `Instituições Parceiras` | `InstituicoesParceiras` | string | Instituições parceiras |
+| `Estudantes (Nomes)` | `EstudantesNomes` | string | Nomes dos estudantes atuais, separados por `;` (desde out/2026) |
+| `Técnicos (Nomes)` | `TecnicosNomes` | string | Nomes dos técnicos atuais, separados por `;` (desde out/2026) |
+
+As colunas de nomes vão só para `data-groups.json`, que não é publicado. O
+`data.json` não leva nome nenhum: `validate()` recusa qualquer chave com
+`nome`. O coletor lê os nomes da tabela de membros atuais de cada categoria;
+os egressos e os indicadores por formação, que repetem o mesmo título na
+página do DGP, ficam de fora. CSVs coletados antes de out/2026 não têm as duas
+colunas, e o build grava `EstudantesNomes`/`TecnicosNomes` vazios.
 
 #### Período e volume
 - **Registros**: ~197 grupos (incluindo ativos, excluídos e em preenchimento)
@@ -922,7 +931,7 @@ Decisões de fusão tomadas em 04/09/2026:
   "inovacao": [...],
   "concluidas": [...],
   "andamento": [...],
-  "grupos": [{ "Situacao": "...", "AnoFormacao": "...", "Pesquisadores": "...", "Estudantes": "...", "Area": "...", "Unidade": "..." }],
+  "grupos": [{ "Situacao": "...", "AnoFormacao": "...", "Pesquisadores": "...", "Estudantes": "...", "Tecnicos": "...", "Area": "...", "Unidade": "..." }],
   "posgraduacao": [{ "nome": "...", "matricula": "...", "curso": "...", "campus": "...", "ano": N, "semestre": N, "situacao": "...", "categoria": "..." }],
   "ic": [{ "ano": N, "campus": "...", "orientador": "...", "bolsista": "...", "modalidade": "...", "area_conhecimento": "...", "progresso": "...", "fomento": "..." }]
 }

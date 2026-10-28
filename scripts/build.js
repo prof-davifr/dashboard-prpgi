@@ -490,6 +490,16 @@ function isDgpGroupsCsv(filePath, fileName) {
   return getSourceKey(filePath) === 'scraper-DGP' && !isPostGraduationCsv(fileName);
 }
 
+// Lista de nomes do coletor DGP ("A; B; A") → nomes únicos. O coletor grava
+// 'N/A' quando a página não tem a tabela e '?' quando a coleta do grupo falhou;
+// nenhum dos dois é nome. CSVs de antes de out/2026 não têm as colunas de
+// nomes de estudantes e técnicos, e a lista sai vazia.
+function nomesUnicosDgp(valor) {
+  return [...new Set(
+    String(valor || "").split(";").map(n => n.trim()).filter(n => n && n !== "N/A" && n !== "?")
+  )];
+}
+
 function selectDgpGroupsCsvFiles(csvFiles) {
   const dgpGroupFiles = csvFiles.filter(({ filePath, fileName }) => isDgpGroupsCsv(filePath, fileName));
   if (dgpGroupFiles.length === 0) {
@@ -995,6 +1005,7 @@ function main() {
              AnoFormacao: r["AnoFormacao"],
              Pesquisadores: r["Pesquisadores"],
              Estudantes: r["Estudantes"],
+             Tecnicos: r["Tecnicos"],
              Area: r["Area"],
              UltimoEnvio: r["UltimoEnvio"],
              Unidade: unidade
@@ -1236,13 +1247,10 @@ function main() {
             unidade.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').startsWith("instituto federal de educacao")) {
           unidade = "Salvador";
         }
-        const pesquisadoresNomes = r["Pesquisadores(Nomes)"] || "";
         // Resolve DGP researcher names → Servidor IDs using the name map
         // built during XLSX pass. Normalizes accents and case for fuzzy match.
         // Deduplicate both names and resolved IDs to avoid inflating counts.
-        const uniqueNomes = [...new Set(
-          pesquisadoresNomes.split(";").map(n => n.trim()).filter(Boolean)
-        )];
+        const uniqueNomes = nomesUnicosDgp(r["Pesquisadores(Nomes)"]);
         const membrosMap = uniqueNomes.map(n => ({
           nome: n,
           siape: servidorNameToId[normalizeName(n)] || null
@@ -1263,7 +1271,9 @@ function main() {
           ViceLider: r["Vice-Lder"] || r["ViceLider"] || "",
           Contato: r["Contato"] || "",
           Tecnicos: r["Tcnicos"] || r["Tecnicos"] || "",
+          TecnicosNomes: nomesUnicosDgp(r["Tecnicos(Nomes)"]).join("; "),
           Estudantes: r["Estudantes"],
+          EstudantesNomes: nomesUnicosDgp(r["Estudantes(Nomes)"]).join("; "),
           Area: r["Area"],
           UltimoEnvio: r["UltimoEnvio"],
           Unidade: unidade,
@@ -1320,6 +1330,7 @@ module.exports = {
   isPostGraduationCsv,
   isDgpGroupsCsv,
   selectDgpGroupsCsvFiles,
+  nomesUnicosDgp,
   selectPosGraduacaoCsvFiles,
   SHEET_MAP,
   SHEET_MAP_DETALHADO,

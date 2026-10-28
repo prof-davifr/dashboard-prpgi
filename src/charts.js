@@ -397,8 +397,66 @@ function renderChartsGrupos() {
     datasets: [{ data: Object.values(areaMap), backgroundColor: ["#9C27B0","#E91E63","#FF9800","#00BCD4","#4CAF50"] }]
   });
 
+  renderGruposComposicao(data);
+
   // Map - For grupos, use pesquisadores count from groups data
   renderGenericMap(data, 'map-grupos', "#00BCD4", "Grupos de Pesquisa");
+}
+
+// Composição dos grupos pelas três categorias de membro do DGP. Os rótulos são
+// os do IFBA (escolha de 28/10/2026): o DGP não diz se um pesquisador é docente ou
+// TAE, nem se é do IFBA, então "Docentes" e "TAE" são aproximações (ver o modal
+// de metodologia). Ordem e cor fixas, para a cor não trocar entre recortes.
+const GRUPOS_COMPOSICAO = [
+  { rotulo: 'Docentes', campo: 'Pesquisadores', cor: '#1976D2' },
+  { rotulo: 'TAE', campo: 'Tecnicos', cor: '#E65100' },
+  { rotulo: 'Alunos', campo: 'Estudantes', cor: '#00897B' }
+];
+
+// Soma os vínculos de cada categoria. Grupo excluído do DGP fica de fora: os
+// membros dele não estão mais em grupo nenhum. Conta vínculos, não pessoas —
+// quem participa de dois grupos entra duas vezes.
+function composicaoGrupos(grupos) {
+  const ativos = grupos.filter(r => (r["Situacao"] || "") !== "Excluído");
+  const itens = GRUPOS_COMPOSICAO.map(c => ({
+    ...c,
+    total: ativos.reduce((s, r) => s + (parseInt(r[c.campo], 10) || 0), 0)
+  }));
+  const total = itens.reduce((s, i) => s + i.total, 0);
+  itens.forEach(i => { i.percentual = total ? (100 * i.total) / total : 0; });
+  return { itens, total };
+}
+
+function formatarPercentual(valor) {
+  return valor.toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + '%';
+}
+
+function renderGruposComposicao(data) {
+  const { itens } = composicaoGrupos(data);
+  // O percentual vai na legenda, e não só no tooltip: a categoria não depende
+  // da cor, e o número fica visível sem passar o mouse.
+  createChart('chart-grupos-composicao', 'doughnut', {
+    labels: itens.map(i => `${i.rotulo} — ${formatarPercentual(i.percentual)}`),
+    datasets: [{
+      data: itens.map(i => i.total),
+      backgroundColor: itens.map(i => i.cor),
+      borderColor: '#ffffff',
+      borderWidth: 2
+    }]
+  }, {
+    plugins: {
+      legend: { labels: { color: '#444' } },
+      title: { display: false },
+      tooltip: {
+        callbacks: {
+          label: ctx => {
+            const i = itens[ctx.dataIndex];
+            return ` ${i.rotulo}: ${i.total.toLocaleString('pt-BR')} vínculos (${formatarPercentual(i.percentual)})`;
+          }
+        }
+      }
+    }
+  });
 }
 
 function renderKPIsGrupos() {

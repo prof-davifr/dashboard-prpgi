@@ -296,6 +296,21 @@ Frontend estático (Chart.js + Leaflet + SheetJS) + pipeline ETL em `scripts/bui
 - [x] **Mapa da aba Orientações mostra grupos, não orientações** — resolvido em 20/09/2026: o mapa recebe `[...concluidas, ...andamento]` com o rótulo "Orientações" e o divisor de `getServidoresPerCampus`. Os 28.676 registros têm `campus`, e Itabuna passa a mostrar as suas 6 orientações. Texto original: `src/charts.js:444` chamava `renderGenericMap(STATE.filtered.grupos, 'map-orientacoes', …)` com o rótulo "Pesquisadores (aprox.)", enquanto o título do card diz "Distribuição Geográfica" numa aba de orientações. Filtrar por Itabuna deixa o mapa vazio, porque o campus não tem grupo do DGP
 - [ ] **Automação dos scrapers** — Lattes/SUAP/DGP/IC ainda exigem exportação manual por campus (citado no slide 11 da apresentação). Pipeline CI/CD completo com os scrapers, agora que o CI base existe
       **19/10/2026 — SUAP automatizado; falta a IC.** `scripts/atualizar-suap.sh` + `systemd/coleta-suap.timer` (verificação diária, cadência de 30 dias por fonte) coletam a Pós-Graduação e o Lattes na máquina do assessor, fazem o build, testam e publicam — ver `docs/proveniencia-dados.md` §2.1.1. O DGP já roda no `refresh-grupos.yml` e o INPI no timer do `scraper-INPI`. A IC continua manual: a planilha PNP/SETEC vem da Coordenação de IC, sem coletor. O mesmo trabalho corrigiu `npm run build`, que trocava os grupos publicados pelo CSV local do DGP, semanas mais antigo (`preservarGrupos()`)
+- [x] **Grupos: nomes de estudantes e técnicos + gráfico docentes/TAE/alunos** —
+      **28/10/2026, coleta feita.** O `scraper-DGP` (`cli/parser.js`,
+      `getMemberNames`) passou a gravar `Estudantes (Nomes)` e `Técnicos (Nomes)`
+      ao lado de cada contagem (colunas do CSV reordenadas), lidos só da tabela de membros atuais (sem egressos nem
+      indicadores). Coleta de 28/10: 212 grupos, 1724 nomes de estudantes e 200 de
+      técnicos, iguais às contagens do DGP. O build leva os nomes a
+      `data-groups.json` (`EstudantesNomes`, `TecnicosNomes`), nunca ao
+      `data.json`. **Gráfico feito em 28/10:** rosca "Docentes, TAE e Alunos nos
+      Grupos" (`renderGruposComposicao`, `composicaoGrupos` em `src/charts.js`)
+      com Docentes = `Pesquisadores`, TAE = `Tecnicos`, Alunos = `Estudantes`
+      do DGP. Rótulos aproximados por decisão de 28/10, explicados no modal
+      de metodologia. Conta vínculos dos grupos não excluídos: 49,0% / 5,3% /
+      45,7% em 28/10. `build.js` e `refresh-grupos.js` passaram a emitir
+      `Tecnicos`; `tests/grupos-composicao.test.js` acusa se um dos dois perder
+      o campo
 - [ ] **Deploy no CI** — a Action atual só valida; o GitHub Pages continua servindo `main` direto. Avaliar job de deploy explícito (`actions/deploy-pages`) para desacoplar publicação de push
 
 ### 🟡 Alta — Automação da lista de grupos de pesquisa (SUAP → DGP)

@@ -12,7 +12,7 @@ const TABS = [
   { btn: '#aba-cientifica', panel: '#tab-cientifica', canvases: ['chart-cientifica-evolucao'] },
   { btn: '#aba-tecnica', panel: '#tab-tecnica', canvases: ['chart-tecnica-evolucao', 'chart-tecnica-pie'] },
   { btn: '#aba-inovacao', panel: '#tab-inovacao', canvases: ['chart-inovacao-evo-1', 'chart-inovacao-pie'] },
-  { btn: '#aba-grupos', panel: '#tab-grupos', canvases: ['chart-grupos-evo-combined', 'chart-grupos-pie'] },
+  { btn: '#aba-grupos', panel: '#tab-grupos', canvases: ['chart-grupos-evo-combined', 'chart-grupos-pie', 'chart-grupos-composicao'] },
   { btn: '#aba-pesquisadores', panel: '#tab-pesquisadores', canvases: ['chart-pesquisadores-evolucao', 'chart-pesquisadores-area'] },
   { btn: '#aba-orientacoes', panel: '#tab-orientacoes', canvases: ['chart-orientacoes-evo-1', 'chart-orientacoes-pie'] },
   { btn: '#aba-posgraduacao', panel: '#tab-posgraduacao', canvases: ['chart-posgraduacao-campus', 'chart-posgraduacao-situacao', 'chart-posgraduacao-programas'] },

@@ -12,6 +12,7 @@ const {
   isPostGraduationCsv,
   isDgpGroupsCsv,
   selectDgpGroupsCsvFiles,
+  nomesUnicosDgp,
   selectPosGraduacaoCsvFiles,
   normalizeCampusCode,
   normalizePolo,
@@ -589,6 +590,22 @@ describe('selectPosGraduacaoCsvFiles', () => {
     expect(selectPosGraduacaoCsvFiles([]).selected).toBeNull();
     const dgp = makeCsv('coletor_dgp_ifba.csv');
     expect(selectPosGraduacaoCsvFiles([dgp]).selected).toBeNull();
+  });
+});
+
+describe('nomesUnicosDgp', () => {
+  test('separa por ponto e vírgula, apara e remove repetidos', () => {
+    expect(nomesUnicosDgp(' Ana Souza; Bruno Lima ;Ana Souza;')).toEqual(['Ana Souza', 'Bruno Lima']);
+  });
+
+  test("descarta os marcadores do coletor ('N/A' sem tabela, '?' coleta falhou)", () => {
+    expect(nomesUnicosDgp('N/A')).toEqual([]);
+    expect(nomesUnicosDgp('?')).toEqual([]);
+  });
+
+  test('coluna ausente (CSV anterior a out/2026) vira lista vazia', () => {
+    expect(nomesUnicosDgp(undefined)).toEqual([]);
+    expect(nomesUnicosDgp('')).toEqual([]);
   });
 });
 
