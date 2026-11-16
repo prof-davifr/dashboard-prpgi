@@ -3,7 +3,7 @@
  * (scripts/inventores-inpi.js). Os nomes abaixo são inventados.
  */
 
-const { tokens, chaveNome, acharPessoa, porPrenomeUltimo } = require('../scripts/inventores-inpi');
+const { tokens, chaveNome, acharPessoa, porPrenomeUltimo, ehAluno, mapaDeAlunos } = require('../scripts/inventores-inpi');
 
 function base(...nomes) {
   const pessoas = new Map(nomes.map((n) => [chaveNome(n), { nome: n }]));
@@ -71,5 +71,28 @@ describe('leitura das listas do SUAP', () => {
     const ler = (caminho) => (caminho.includes('servidor') ? servidor : '');
     expect(buscar('Tereza Quirino Albuquerque', ler).tipo).toBe('servidor');
     expect(buscar('Tereza Albuquerque', ler).tipo).toBe('nenhum');
+  });
+});
+
+describe('mapaDeAlunos', () => {
+  const linha = (numero, inventor, vinculo, siape = '') =>
+    ({ 'Número INPI': numero, Inventor: inventor, 'Vínculo': vinculo, SIAPE: siape, 'Método': 'exato' });
+
+  test('aluno é quem tem vínculo de aluno e não tem SIAPE', () => {
+    expect(ehAluno(linha('1', 'X', 'Aluno (Formado)'))).toBe(true);
+    expect(ehAluno(linha('1', 'X', 'Bolsista de IC'))).toBe(true);
+    expect(ehAluno(linha('1', 'X', 'Aluno de pós-graduação', '1234567'))).toBe(false);
+    expect(ehAluno(linha('1', 'X', 'Servidor'))).toBe(false);
+  });
+
+  test('um aluno em dois registros dá o mesmo pseudônimo, e nenhum nome sai', () => {
+    const mapa = mapaDeAlunos([
+      linha('BR 51 2026 000001 0', 'Caio Teixeira Lemos', 'Aluno (Formado)'),
+      linha('BR 51 2026 000002 0', 'CAIO TEIXEIRA LEMOS', 'Estudante (DGP)'),
+      linha('BR 51 2026 000002 0', 'Tereza Quirino Albuquerque', 'Servidor', '1234567'),
+    ]);
+    expect(Object.keys(mapa)).toEqual(['5120260000010', '5120260000020']);
+    expect(mapa['5120260000010']).toEqual(mapa['5120260000020']);
+    expect(JSON.stringify(mapa)).not.toMatch(/caio|tereza/i);
   });
 });

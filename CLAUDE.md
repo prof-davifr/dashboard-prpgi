@@ -93,6 +93,10 @@ someone else's intellectual property. The source is now the INPI itself.
   (PI)". It skips records with `Inativo: true`, which `refresh-inovacao.js`
   writes from the NIT `situacao` (`lerInativosNit`). The INPI gives a situação
   only for trademarks. Charts, map and table still show inactive assets.
+- **Alunos Inventores** (second KPI): distinct salted pseudonyms in each
+  record's `Alunos`, copied by `refresh-inovacao.js` from the committed
+  `inpi-alunos.json`, which `inventores-inpi.js` writes locally (it needs
+  `dados/` and the SUAP search cache, which CI lacks).
 - **`inpi-campus.json`** (committed) carries the cascade's result so CI can
   attribute campus without `dados/`. Level 1 erases itself after the first run —
   it queries the very Lattes records the run replaces — so the map is not an

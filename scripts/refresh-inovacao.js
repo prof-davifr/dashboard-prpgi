@@ -53,6 +53,7 @@ const RAIZ = path.resolve(__dirname, '..');
 const DATA_JSON = path.join(RAIZ, 'data.json');
 const MAPA_JSON = path.join(RAIZ, 'inpi-campus.json');
 const NIT_JSON = path.join(RAIZ, 'nit-estrutura.json');
+const ALUNOS_JSON = path.join(RAIZ, 'inpi-alunos.json');
 const DIR_LATTES = path.join(RAIZ, 'dados', 'scraper-SUAPCNPQ');
 
 /** Rótulo do CSV do robô → `Tipo` que a aba Inovação exibe. */
@@ -184,6 +185,15 @@ function lerInativosNit() {
   return inativos;
 }
 
+/**
+ * `chaveINPI -> [pseudônimos dos alunos inventores]`, de `inpi-alunos.json`
+ * (gerado por `inventores-inpi.js`). Vazio se o arquivo não existe.
+ */
+function lerAlunosInpi() {
+  if (!fs.existsSync(ALUNOS_JSON)) return {};
+  return JSON.parse(fs.readFileSync(ALUNOS_JSON, 'utf-8')).alunos || {};
+}
+
 // ─── a cascata ───────────────────────────────────────────────────────────────
 
 /**
@@ -223,6 +233,7 @@ function converter(linhas, contexto) {
   const porNivel = { 0: 0, 1: 0, 2: 0, 3: 0 };
   const estruturaNit = contexto.estruturaNit || {};
   const inativosNit = contexto.inativosNit || new Set();
+  const alunosInpi = contexto.alunosInpi || {};
 
   for (const linha of linhas) {
     const tipo = TIPO_POR_BASE[linha.base];
@@ -243,6 +254,7 @@ function converter(linhas, contexto) {
     const base = { Ano: anoDe(linha.dataDeposito), Tipo: tipo, dedupKey: chave };
     if (linha.situacao) base.Situacao = linha.situacao;
     if (inativosNit.has(chave)) base.Inativo = true;
+    if (alunosInpi[chave] && alunosInpi[chave].length) base.Alunos = alunosInpi[chave];
     if (campusNit && !vinculos.length) base.campus = campusNit;
 
     if (!vinculos.length) {
@@ -313,9 +325,11 @@ function main() {
   console.log(`  ${Object.keys(estruturaNit).length} números com estrutura no nit-estrutura.json`);
   const inativosNit = lerInativosNit();
   console.log(`  ${inativosNit.size} ativos inativos no nit-estrutura.json`);
+  const alunosInpi = lerAlunosInpi();
+  console.log(`  ${Object.keys(alunosInpi).length} registros com alunos no inpi-alunos.json`);
 
   const { inovacao, vinculosNovos, porNivel } =
-    converter(linhas, { idxLattes, mapaNomes, mapaSalvo, estruturaNit, inativosNit });
+    converter(linhas, { idxLattes, mapaNomes, mapaSalvo, estruturaNit, inativosNit, alunosInpi });
 
   conferirLGPD(inovacao);
 
@@ -381,6 +395,6 @@ if (require.main === module) main();
 
 module.exports = {
   TIPO_POR_BASE, anoDe, chaveINPI, normalizeName,
-  indexarLattes, resolverVinculos, converter, conferirLGPD, lerEstruturaNit, lerInativosNit,
+  indexarLattes, resolverVinculos, converter, conferirLGPD, lerEstruturaNit, lerInativosNit, lerAlunosInpi,
   MAPA_JSON, DATA_JSON, NIT_JSON,
 };

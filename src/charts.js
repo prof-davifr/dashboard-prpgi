@@ -238,8 +238,12 @@ function renderKPIsInovacao() {
   // `Inativo` vem da situação que o setor de PI da PRPGI registrou para o ativo
   // (arquivado, indeferido, extinto). O INPI só informa a das marcas.
   const ativos = STATE.filtered.inovacao.filter(r => !r["Inativo"]).length;
+  // `Alunos` traz pseudônimos, um por aluno inventor do ativo. Os registros de
+  // um ativo repetem a lista, e o Set conta cada aluno uma vez só.
+  const alunos = new Set(STATE.filtered.inovacao.flatMap(r => r["Alunos"] || [])).size;
   $('kpi-inovacao').innerHTML = `
     <div class="kpi-card"><div class="kpi-label">Total de Registros Ativos (PI)</div><div class="kpi-value">${ativos}</div></div>
+    <div class="kpi-card"><div class="kpi-label">Alunos Inventores</div><div class="kpi-value">${alunos}</div></div>
   `;
 }
 

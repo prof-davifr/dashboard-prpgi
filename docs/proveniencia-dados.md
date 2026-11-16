@@ -465,6 +465,20 @@ pessoa com campus. As marcas não têm inventor, e 19 programas antigos
 A planilha e o cache do SUAP têm nomes, SIAPE e matrículas e ficam em `dados/`,
 fora do git.
 
+#### Card "Alunos Inventores"
+
+`inventores-inpi.js` grava também `inpi-alunos.json` (versionado): número INPI
+→ pseudônimos dos alunos entre os inventores. Aluno é a pessoa achada com
+vínculo de aluno, estudante ou bolsista e sem SIAPE; quem tem SIAPE conta como
+servidor. O pseudônimo vem de `pseudonymize()` sobre o nome normalizado, o
+mesmo tratamento dos bolsistas de IC, e serve só para contar alunos distintos.
+
+`refresh-inovacao.js` copia a lista para o campo `Alunos` de cada registro do
+ativo, e o card conta os pseudônimos distintos nos registros do filtro. O
+arquivo versionado existe pelo mesmo motivo do `inpi-campus.json`: o CI não tem
+`dados/` nem acesso ao SUAP. Para atualizar, rode `inventores-inpi.js` (e, se
+houver nomes novos, `buscar-inventores-suap.js`) e depois `refresh-inovacao.js`.
+
 #### Frequência de atualização
 
 Mensal, pelo workflow `.github/workflows/refresh-inovacao.yml` (dia 1, 07:00

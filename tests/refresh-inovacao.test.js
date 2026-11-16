@@ -8,7 +8,7 @@
 
 const {
   TIPO_POR_BASE, anoDe, chaveINPI, normalizeName,
-  indexarLattes, resolverVinculos, converter, conferirLGPD, lerEstruturaNit, lerInativosNit,
+  indexarLattes, resolverVinculos, converter, conferirLGPD, lerEstruturaNit, lerInativosNit, lerAlunosInpi,
 } = require('../scripts/refresh-inovacao');
 
 // ─── utilidades ──────────────────────────────────────────────────────────────
@@ -229,6 +229,32 @@ describe('converter', () => {
     expect(inativos.size).toBe(esperado);
     // As três marcas arquivadas e o modelo de utilidade de 2010 (SSA).
     for (const k of ['819210110', '821444689', '901437174', '90027523']) expect(inativos.has(k)).toBe(true);
+  });
+
+  // ─── alunos inventores ──────────────────────────────────────────────────────
+
+  test('os pseudônimos de inpi-alunos.json vão para todos os registros do ativo', () => {
+    const mapaNomes = new Map([
+      ['ana carolina', { Servidor: '111', campus: 'SSA' }],
+      ['joao silva', { Servidor: '222', campus: 'VC' }],
+    ]);
+    const { inovacao } = converter(
+      [{ base: 'programa', numeroPedido: 'BR 51 2026 000001 0', dataDeposito: '13/08/2026',
+         autores: 'ANA CAROLINA / JOÃO SILVA / ALUNA QUALQUER' },
+       { base: 'marca', numeroPedido: '942841395', dataDeposito: '25/02/2026' }],
+      { idxLattes: new Map(), mapaNomes, mapaSalvo: {}, alunosInpi: { '5120260000010': ['ab12cd34ef56ab78'] } });
+    const doPrograma = inovacao.filter((r) => r.dedupKey === '5120260000010');
+    expect(doPrograma.map((r) => r.Alunos)).toEqual([['ab12cd34ef56ab78'], ['ab12cd34ef56ab78']]);
+    expect(inovacao.find((r) => r.dedupKey === '942841395')).not.toHaveProperty('Alunos');
+    // Pseudônimo é hex: passa pela guarda de dado pessoal.
+    expect(() => conferirLGPD(inovacao)).not.toThrow();
+  });
+
+  test('inpi-alunos.json só traz pseudônimos de 16 hex, nunca nome', () => {
+    const alunos = lerAlunosInpi();
+    const todos = Object.values(alunos).flat();
+    expect(todos.length).toBeGreaterThan(0);
+    for (const p of todos) expect(p).toMatch(/^[0-9a-f]{16}$/);
   });
 
   test('base desconhecida no CSV aborta em vez de sumir com a linha', () => {

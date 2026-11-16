@@ -42,7 +42,7 @@ const fs = require('fs');
 const path = require('path');
 const XLSX = require('xlsx');
 
-const { parseCSV, extrairVinculos, SHEET_MAP_DETALHADO, normalizeCampusCode } = require('./build');
+const { parseCSV, extrairVinculos, SHEET_MAP_DETALHADO, normalizeCampusCode, pseudonymize } = require('./build');
 const { chaveINPI, TIPO_POR_BASE } = require('./refresh-inovacao');
 const { mapUnidadeToCampus } = require('../src/shared');
 
@@ -53,6 +53,33 @@ const DIR_POS = path.join(RAIZ, 'dados', 'scraper-SUAPPos');
 const GRUPOS_JSON = path.join(RAIZ, 'data-groups.json');
 const DIR_IC = path.join(RAIZ, 'dados', 'ic');
 const CACHE_SUAP = path.join(RAIZ, 'dados', 'inpi', 'suap-busca.json');
+const ALUNOS_JSON = path.join(RAIZ, 'inpi-alunos.json');
+
+/**
+ * Diz se a pessoa achada é aluno: tem vínculo de aluno, estudante ou bolsista
+ * e não tem SIAPE. Quem tem SIAPE conta como servidor, mesmo que também estude.
+ */
+const ehAluno = (linha) => !linha.SIAPE && /Aluno|Estudante|Bolsista/.test(linha['Vínculo'] || '');
+
+/**
+ * `chaveINPI -> [pseudônimos dos alunos]`, só com o que o data.json pode
+ * publicar: o pseudônimo é salgado (o mesmo `pseudonymize` dos bolsistas de
+ * IC) e serve só para contar alunos distintos. Nenhum nome sai daqui.
+ */
+function mapaDeAlunos(detalhe) {
+  const mapa = {};
+  for (const l of detalhe) {
+    if (!l.Inventor || l['Método'] === 'não encontrado' || !ehAluno(l)) continue;
+    const chave = chaveINPI(l['Número INPI']);
+    if (!chave) continue;
+    const pseudo = pseudonymize(chaveNome(l.Inventor));
+    if (!mapa[chave]) mapa[chave] = [];
+    if (!mapa[chave].includes(pseudo)) mapa[chave].push(pseudo);
+  }
+  const ordenado = {};
+  for (const k of Object.keys(mapa).sort()) ordenado[k] = mapa[k].sort();
+  return ordenado;
+}
 
 const PARTICULAS = new Set(['DE', 'DA', 'DO', 'DOS', 'DAS', 'E', 'D']);
 
@@ -394,6 +421,17 @@ function main() {
   fs.mkdirSync(path.dirname(saida), { recursive: true });
   XLSX.writeFile(wb, saida);
 
+  // Versionado: o CI do refresh-inovacao não tem `dados/` nem o SUAP.
+  const alunos = mapaDeAlunos(detalhe);
+  fs.writeFileSync(ALUNOS_JSON, JSON.stringify({
+    _leia_me: 'Gerado por scripts/inventores-inpi.js. Número INPI -> pseudônimos (salgados) dos alunos entre ' +
+      'os inventores. Só serve para contar alunos distintos no card "Alunos Inventores". Sem nomes.',
+    csv: path.basename(csv),
+    alunos,
+  }, null, 1) + '\n');
+  const totalAlunos = new Set(Object.values(alunos).flat()).size;
+  console.log(`${totalAlunos} alunos inventores em ${Object.keys(alunos).length} registros -> ${path.relative(RAIZ, ALUNOS_JSON)}`);
+
   console.log(`\n${pessoas.length} pessoas distintas em ${linhas.length} registros`);
   console.log(`  exato: ${contar('exato')}  aproximado: ${contar('aproximado')}  não encontrado: ${contar('não encontrado')}`);
   console.log(`Planilha: ${path.relative(RAIZ, saida)}`);
@@ -401,4 +439,4 @@ function main() {
 
 if (require.main === module) main();
 
-module.exports = { tokens, chaveNome, acharPessoa, porPrenomeUltimo };
+module.exports = { tokens, chaveNome, acharPessoa, porPrenomeUltimo, ehAluno, mapaDeAlunos, ALUNOS_JSON };
