@@ -448,12 +448,22 @@ em planilhas Lattes de vários campi porque a planilha de um campus lista os
 coautores de outros; vale o campus mais frequente, e a coluna `Conferir` marca
 os casos em que ele tem menos de 60% das ocorrências.
 
-Primeira coleta (16/11/2026): 184 registros, 375 pessoas distintas, 194 com
-campus e 181 sem. As sem campus são, em geral, alunos de graduação e de curso
-técnico sem IC, coautores externos e ex-servidores. As marcas não têm inventor,
-e 19 programas antigos (2011–2018) vêm do INPI sem autor.
+Quem não casa com as bases locais é buscado pelo nome completo no SUAP, com
+`scripts/buscar-inventores-suap.js <inventores.xlsx>` (comando `suap`, só de
+leitura; busca autorizada pelo usuário em 16/11/2026). A lista de servidores dá
+o campus pela lotação; a de alunos, pelo campus do curso. Só conta o resultado
+cujo nome normalizado é igual ao do INPI. O resultado fica em
+`dados/inpi/suap-busca.json`, e `inventores-inpi.js` o lê como mais uma fonte.
 
-A planilha tem nomes de pessoas e fica em `dados/`, fora do git.
+Primeira coleta (16/11/2026): 184 registros e 375 pessoas distintas. As bases
+locais acharam 194; a busca no SUAP achou mais 116 (6 servidores e 110 alunos,
+a maioria já formada ou com curso concluído). Ficaram 65 sem campus, em geral
+coautores de fora do IFBA. Todos os 160 registros com autor têm pelo menos uma
+pessoa com campus. As marcas não têm inventor, e 19 programas antigos
+(2011–2018) vêm do INPI sem autor.
+
+A planilha e o cache do SUAP têm nomes, SIAPE e matrículas e ficam em `dados/`,
+fora do git.
 
 #### Frequência de atualização
 

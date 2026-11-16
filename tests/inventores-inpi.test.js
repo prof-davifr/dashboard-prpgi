@@ -45,3 +45,31 @@ describe('acharPessoa', () => {
     expect(acharPessoa('Tereza', pessoas, idx)).toBeNull();
   });
 });
+
+describe('leitura das listas do SUAP', () => {
+  const { lerServidores, lerAlunos, buscar } = require('../scripts/buscar-inventores-suap');
+
+  const servidor = '| [Visualizar](/rh/servidor/1234567/ "Ver Tereza Quirino Albuquerque (1234567)") |  | ' +
+    'Tereza Quirino Albuquerque (1234567)  [t@x](mailto:t@x) | Cargo:  PROFESSOR  Situação:  ATIVO PERMANENTE - 01 | ' +
+    'SIAPE Lotação:  DEPEN/VDC  SIAPE Exercício:  DEPEN/VDC  SUAP:  DEPEN/VDC |';
+  const aluno = '| [Visualizar](/edu/aluno/202312340001/ "Ver Caio Teixeira Lemos (202312340001)") |  | ' +
+    'CAIO TEIXEIRA LEMOS  Matrícula:  202312340001  Curso:  374 - Eletromecânica (Simões Filho)  Situação:  Matriculado | 2 | 2023 | - |';
+
+  test('servidor: SIAPE, situação e campus da lotação', () => {
+    expect(lerServidores(`## Servidores\n${servidor}\n`)).toEqual([{
+      nome: 'Tereza Quirino Albuquerque', siape: '1234567', situacao: 'ATIVO PERMANENTE - 01',
+      setor: 'DEPEN/VDC', campus: 'VC',
+    }]);
+  });
+
+  test('aluno: matrícula, curso e campus pela cidade do curso', () => {
+    const [a] = lerAlunos(aluno);
+    expect(a).toMatchObject({ matricula: '202312340001', campus: 'SF', situacao: 'Matriculado' });
+  });
+
+  test('a busca só aceita nome igual: trecho parecido não conta', () => {
+    const ler = (caminho) => (caminho.includes('servidor') ? servidor : '');
+    expect(buscar('Tereza Quirino Albuquerque', ler).tipo).toBe('servidor');
+    expect(buscar('Tereza Albuquerque', ler).tipo).toBe('nenhum');
+  });
+});

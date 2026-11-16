@@ -26,7 +26,10 @@
  *   - pós-graduação do SUAP (`dados/scraper-SUAPPos/`): aluno e campus;
  *   - iniciação científica (`dados/ic/`): orientador e bolsista, com o campus
  *     do projeto;
- *   - `inpi-campus.json`: SIAPE e campus que a cascata já resolveu.
+ *   - `inpi-campus.json`: SIAPE e campus que a cascata já resolveu;
+ *   - busca no SUAP (`dados/inpi/suap-busca.json`, de
+ *     `buscar-inventores-suap.js`): servidores pela lotação, alunos pelo campus
+ *     do curso.
  *
  * A comparação é por nome inteiro (sem acento, caixa e partículas). Quando o
  * INPI abrevia ou omite um sobrenome, aceita-se a pessoa cujo prenome e último
@@ -49,6 +52,7 @@ const DIRS_LATTES = ['scraper-SUAPCNPQ', 'old'].map((d) => path.join(RAIZ, 'dado
 const DIR_POS = path.join(RAIZ, 'dados', 'scraper-SUAPPos');
 const GRUPOS_JSON = path.join(RAIZ, 'data-groups.json');
 const DIR_IC = path.join(RAIZ, 'dados', 'ic');
+const CACHE_SUAP = path.join(RAIZ, 'dados', 'inpi', 'suap-busca.json');
 
 const PARTICULAS = new Set(['DE', 'DA', 'DO', 'DOS', 'DAS', 'E', 'D']);
 
@@ -164,6 +168,29 @@ function carregarIc(indice) {
   return n;
 }
 
+/**
+ * Resultado da busca por nome no SUAP. O servidor vale pela lotação; o aluno,
+ * pelo campus do curso, e a matrícula mais recente entra primeiro, para ganhar
+ * o empate quando o aluno tem cursos em campi diferentes.
+ */
+function carregarSuap(indice, campusPorSiape) {
+  if (!fs.existsSync(CACHE_SUAP)) return 0;
+  let n = 0;
+  for (const r of Object.values(JSON.parse(fs.readFileSync(CACHE_SUAP, 'utf-8')))) {
+    for (const s of r.servidores || []) {
+      indice.add(r.nome, { siape: s.siape, campus: s.campus, vinculo: `Servidor (${s.situacao || 'SUAP'})`, fonte: 'SUAP' });
+      if (s.siape && s.campus && !campusPorSiape.has(s.siape)) campusPorSiape.set(s.siape, new Map([[s.campus, 1]]));
+      n++;
+    }
+    const alunos = [...(r.alunos || [])].sort((a, b) => String(b.matricula).localeCompare(String(a.matricula)));
+    for (const a of alunos) {
+      indice.add(r.nome, { campus: a.campus, vinculo: `Aluno (${a.situacao || 'SUAP'})`, fonte: 'SUAP' });
+      n++;
+    }
+  }
+  return n;
+}
+
 /** SIAPE -> campus que a cascata já gravou em inpi-campus.json. */
 function carregarMapaInpi(campusPorSiape) {
   const arquivo = path.join(RAIZ, 'inpi-campus.json');
@@ -245,6 +272,7 @@ function main() {
   console.log(`DGP: ${carregarDgp(indice)} membros`);
   console.log(`Pós-graduação: ${carregarPos(indice)} alunos`);
   console.log(`Iniciação científica: ${carregarIc(indice)} projetos`);
+  console.log(`Busca no SUAP: ${carregarSuap(indice, campusPorSiape)} vínculos`);
   carregarMapaInpi(campusPorSiape);
   console.log(`${indice.pessoas.size} pessoas no índice`);
   const idxPU = porPrenomeUltimo(indice.pessoas);
@@ -350,11 +378,12 @@ function main() {
       .map(([c, v]) => [c, v.pessoas.size, v.registros.size]),
     [],
     ['Leitura'],
-    ['"Campus do inventor" é o campus da pessoa nas bases do SUAP, DGP e pós-graduação, não o do ativo.'],
+    ['"Campus do inventor" é o campus da própria pessoa (Lattes, DGP, pós-graduação, IC ou busca no SUAP), não o do ativo.'],
+    ['Aluno achado no SUAP: campus do curso; com cursos em campi diferentes, vale o da matrícula mais recente e "Conferir" fica "sim".'],
     ['"Campus do ativo (NIT)" é o campus que o setor de PI da PRPGI registrou para o ativo.'],
     ['"Fatia do campus": parte das ocorrências da pessoa nas bases que cai no campus principal. Abaixo de 0,6, "Conferir" fica "sim".'],
     ['"aproximado": o INPI abrevia ou omite um sobrenome; prenome e último sobrenome casam com uma só pessoa. Confira.'],
-    ['"não encontrado": coautor de fora do IFBA, aluno de graduação ou de curso técnico sem IC, ex-servidor ou nome escrito de outro jeito.'],
+    ['"não encontrado": a pessoa não está nas bases locais nem na busca por nome no SUAP. Em geral, coautor de fora do IFBA ou nome escrito de outro jeito.'],
     ['Dado pessoal: não publique esta planilha nem a coloque no git.'],
   ];
 
