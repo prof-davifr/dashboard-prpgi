@@ -227,3 +227,47 @@ describe('resumoPosGraduacao', () => {
     expect(ctx.resumoPosGraduacao(undefined).campi).toBe(0);
   });
 });
+
+// ─── Inovação: exportação para validação ─────────────────────────────────────
+
+describe('abasInovacao', () => {
+  // Um programa com dois autores servidores (fan-out), uma patente inativa e
+  // uma marca sem campus. Os alunos repetem entre os registros do mesmo ativo.
+  const REGISTROS = [
+    { Ano: '2024', Tipo: 'Software', dedupKey: '5120240039597', Servidor: '111', campus: 'BAR', Alunos: ['aa11', 'bb22'] },
+    { Ano: '2024', Tipo: 'Software', dedupKey: '5120240039597', Servidor: '222', campus: 'BAR', Alunos: ['aa11', 'bb22'] },
+    { Ano: '2010', Tipo: 'Patente', dedupKey: '08057230', Inativo: true, campus: 'SSA', Alunos: ['aa11'] },
+    { Ano: '2026', Tipo: 'Marca', dedupKey: '942841395', Situacao: 'Aguardando exame de mérito' }
+  ];
+  const FILTROS = [['Período', 'Todos'], ['Campus', 'Todos os campi']];
+
+  test('uma linha por número INPI, com o número como texto', () => {
+    const { aoa } = aba(ctx.abasInovacao(REGISTROS, FILTROS, '16/11/2026'), 'Registros');
+    expect(aoa[0]).toEqual(['Número INPI', 'Tipo', 'Base no pePI', 'Ano de depósito', 'Campus', 'Ativo', 'Alunos inventores']);
+    expect(aoa).toHaveLength(4);
+    expect(aoa[1]).toEqual(['08057230', 'Patente', 'Patentes', 2010, 'SSA', 'Não', 1]);
+    expect(aoa[2]).toEqual(['5120240039597', 'Software', 'Programas de Computador', 2024, 'BAR', 'Sim', 2]);
+    expect(aoa[3]).toEqual(['942841395', 'Marca', 'Marcas', 2026, '', 'Sim', 0]);
+  });
+
+  test('a capa repete os dois cards: ativos e alunos distintos', () => {
+    const { aoa } = aba(ctx.abasInovacao(REGISTROS, FILTROS, '16/11/2026'), 'Filtros');
+    const valor = rotulo => (aoa.find(l => l[0] === rotulo) || [])[1];
+    expect(valor('Registros no recorte')).toBe(3);
+    expect(valor('Total de Registros Ativos (PI)')).toBe(2);
+    expect(valor('Alunos Inventores')).toBe(2);
+    expect(valor('Fonte')).toMatch(/busca\.inpi\.gov\.br\/pePI/);
+  });
+
+  test('nenhum SIAPE nem pseudônimo de aluno sai na planilha', () => {
+    const texto = JSON.stringify(ctx.abasInovacao(REGISTROS, FILTROS, '16/11/2026'));
+    expect(texto).not.toMatch(/"111"|"222"|aa11|bb22/);
+  });
+
+  test('a tabela campus × ano da tela entra como terceira aba, quando existe', () => {
+    const tabela = [['Campus', '2024'], ['BAR', 1]];
+    const abas = ctx.abasInovacao(REGISTROS, FILTROS, '16/11/2026', tabela);
+    expect(abas.map(a => a.nome)).toEqual(['Filtros', 'Registros', 'Campus x Ano']);
+    expect(ctx.abasInovacao(REGISTROS, FILTROS, '16/11/2026').map(a => a.nome)).toEqual(['Filtros', 'Registros']);
+  });
+});

@@ -165,7 +165,7 @@
         <div class="table-section">
             <div class="table-actions">
             <button class="table-toggle-btn" onclick="toggleTable('table-inovacao-container', this)">Exibir Tabela Detalhada por Campus/Ano</button>
-            <button id="btn-export-inovacao" class="export-btn" onclick="exportTableToExcel('table-inovacao-container', 'Inovacao_IFBA')">Exportar para Excel</button>
+            <button id="btn-export-inovacao" class="export-btn" aria-label="Exportar os registros do INPI para Excel, com o número de cada registro para validação" onclick="exportarInovacao()">Exportar para Excel</button>
             </div>
             <div id="table-inovacao-container" class="table-container">
                 <div id="table-inovacao-content"></div>
@@ -424,7 +424,7 @@
                     <div class="data-source-card">
                         <strong>INPI — Instituto Nacional da Propriedade Industrial</strong><br>
                         <em>Inovação</em><br>
-                        Fonte: pePI — Busca de Propriedade Intelectual do INPI (busca.inpi.gov.br/pePI), o sistema público de consulta do órgão. São consultadas as bases de patentes, programas de computador, desenhos industriais e marcas, pelo CNPJ do IFBA (10.764.307/0001-12) e pelo do CEFET-BA (13.941.232/0001-96), o nome anterior da instituição. Só entram os registros em que o IFBA é o titular ou o depositante. O INPI não informa o campus: ele vem da estrutura que o setor de propriedade intelectual da PRPGI registrou para cada ativo. "Total de Registros Ativos" deixa de fora os ativos que esse setor marcou como inativos (arquivados ou indeferidos). "Alunos Inventores" conta os alunos distintos entre os inventores e autores dos registros do filtro: o nome que o INPI publica é comparado com as bases de alunos do SUAP, da pós-graduação, da iniciação científica e dos grupos do DGP. Coautores que não estão nessas bases não entram na conta.
+                        Fonte: pePI — Busca de Propriedade Intelectual do INPI (busca.inpi.gov.br/pePI), o sistema público de consulta do órgão. São consultadas as bases de patentes, programas de computador, desenhos industriais e marcas, pelo CNPJ do IFBA (10.764.307/0001-12) e pelo do CEFET-BA (13.941.232/0001-96), o nome anterior da instituição. Só entram os registros em que o IFBA é o titular ou o depositante. O INPI não informa o campus: ele vem da estrutura que o setor de propriedade intelectual da PRPGI registrou para cada ativo. "Total de Registros Ativos" deixa de fora os ativos que esse setor marcou como inativos (arquivados ou indeferidos). "Alunos Inventores" conta os alunos distintos entre os inventores e autores dos registros do filtro: o nome que o INPI publica é comparado com as bases de alunos do SUAP, da pós-graduação, da iniciação científica e dos grupos do DGP. Coautores que não estão nessas bases não entram na conta. O botão "Exportar para Excel" traz o número INPI de cada registro do filtro, para que qualquer pessoa confira os dados no pePI.
                     </div>
                     <div class="data-source-card">
                         <strong>Diretório de Grupos de Pesquisa (DGP/CNPq)</strong><br>

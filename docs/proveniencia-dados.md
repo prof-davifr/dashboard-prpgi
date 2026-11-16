@@ -479,6 +479,15 @@ arquivo versionado existe pelo mesmo motivo do `inpi-campus.json`: o CI não tem
 `dados/` nem acesso ao SUAP. Para atualizar, rode `inventores-inpi.js` (e, se
 houver nomes novos, `buscar-inventores-suap.js`) e depois `refresh-inovacao.js`.
 
+#### Exportação para validação
+
+O botão "Exportar para Excel" da aba chama `exportarInovacao()` (`src/export.js`).
+A aba `Registros` tem uma linha por número INPI do filtro, com tipo, base do
+pePI, ano de depósito, campus, ativo e número de alunos inventores. A capa
+repete os dois cards e diz como pesquisar cada número no pePI. Assim, um
+pesquisador de fora confere cada registro na fonte. O arquivo não traz SIAPE nem
+pseudônimo.
+
 #### Frequência de atualização
 
 Mensal, pelo workflow `.github/workflows/refresh-inovacao.yml` (dia 1, 07:00

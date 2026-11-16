@@ -142,3 +142,102 @@ function baixarPastaExcel(nomeBase, abas) {
   showToast(`Arquivo ${nomeArquivo} exportado.`);
   return nomeArquivo;
 }
+
+// ─── Inovação: exportação para validação independente ────────────────────────
+//
+// A tabela campus × ano da tela não deixa ninguém conferir nada: não diz quais
+// registros entraram na conta. Esta exportação dá uma linha por registro do
+// INPI, com o número que qualquer pessoa pesquisa no pePI, e os poucos campos
+// que decidem cada indicador da aba (tipo, ano, campus, ativo, nº de alunos).
+// Nenhum nome, SIAPE ou pseudônimo sai daqui.
+
+// Base do pePI em que cada tipo se pesquisa.
+const BASE_PEPI_POR_TIPO = {
+  'Patente': 'Patentes',
+  'Software': 'Programas de Computador',
+  'Desenho Industrial': 'Desenhos Industriais',
+  'Marca': 'Marcas'
+};
+
+// Os registros chegam um por autor (fan-out de coautoria). Aqui voltam a ser um
+// por número INPI, que é a unidade que o INPI conhece.
+function registrosInovacaoPorNumero(registros) {
+  const porNumero = new Map();
+  (registros || []).forEach(r => {
+    const numero = String(r.dedupKey || '');
+    if (!numero) return;
+    if (!porNumero.has(numero)) {
+      porNumero.set(numero, {
+        numero,
+        tipo: r.Tipo || '',
+        ano: r.Ano || '',
+        campi: new Set(),
+        inativo: false,
+        alunos: new Set()
+      });
+    }
+    const item = porNumero.get(numero);
+    if (r.campus) item.campi.add(r.campus);
+    if (r.Inativo) item.inativo = true;
+    (r.Alunos || []).forEach(a => item.alunos.add(a));
+  });
+  return Array.from(porNumero.values()).sort((a, b) =>
+    String(a.ano).localeCompare(String(b.ano)) || a.numero.localeCompare(b.numero));
+}
+
+function abasInovacao(registros, filtrosGlobais, dataDados, tabelaCampusAno) {
+  const itens = registrosInovacaoPorNumero(registros);
+  const ativos = itens.filter(i => !i.inativo).length;
+  const alunos = new Set(itens.flatMap(i => Array.from(i.alunos))).size;
+
+  const capa = abaDeCapa('Filtros', 'INOVAÇÃO — REGISTROS DO INPI (IFBA)', [
+    ...filtrosGlobais,
+    ['Dados gerados em', dataDados],
+    [null],
+    ['Registros no recorte', itens.length],
+    ['Total de Registros Ativos (PI)', ativos],
+    ['Alunos Inventores', alunos],
+    [null],
+    ['COMO VALIDAR', ''],
+    ['Fonte', 'pePI — Busca de Propriedade Intelectual do INPI: https://busca.inpi.gov.br/pePI/'],
+    ['Titular', 'CNPJ 10.764.307/0001-12 (IFBA) ou 13.941.232/0001-96 (CEFET-BA, nome anterior)'],
+    ['Passo 1', 'Na aba "Registros", copie o "Número INPI".'],
+    ['Passo 2', 'No pePI, abra a base da coluna "Base no pePI" e pesquise pelo número do pedido.'],
+    ['Passo 3', 'Confira o titular, a data de depósito e os inventores na página de detalhe.'],
+    [null],
+    ['Observações', ''],
+    ['Número INPI', 'Só os dígitos, sem o prefixo (BR, PI, MU) e sem pontuação.'],
+    ['Campus', 'O INPI não informa campus. Ele vem do setor de propriedade intelectual da PRPGI e, na falta, do campus dos autores servidores.'],
+    ['Ativo', '"Não" quando o setor de propriedade intelectual da PRPGI marcou o ativo como inativo (arquivado ou indeferido).'],
+    ['Alunos inventores', 'Inventores do registro achados nas bases de alunos do SUAP, da pós-graduação, da IC e do DGP. O total da capa conta cada aluno uma vez, por isso é menor que a soma da coluna.']
+  ]);
+
+  const dados = abaDeObjetos('Registros', [
+    { titulo: 'Número INPI', valor: i => i.numero },
+    { titulo: 'Tipo', valor: i => i.tipo },
+    { titulo: 'Base no pePI', valor: i => BASE_PEPI_POR_TIPO[i.tipo] || '' },
+    { titulo: 'Ano de depósito', valor: i => (i.ano ? Number(i.ano) : '') },
+    { titulo: 'Campus', valor: i => Array.from(i.campi).sort().join(', ') },
+    { titulo: 'Ativo', valor: i => (i.inativo ? 'Não' : 'Sim') },
+    { titulo: 'Alunos inventores', valor: i => i.alunos.size }
+  ], itens);
+
+  const abas = [capa, dados];
+  if (tabelaCampusAno && tabelaCampusAno.length) abas.push({ nome: 'Campus x Ano', aoa: tabelaCampusAno });
+  return abas;
+}
+
+function exportarInovacao() {
+  const registros = (STATE.filtered && STATE.filtered.inovacao) || [];
+  if (registros.length === 0) {
+    showToast('Nenhum registro no recorte atual. Ajuste os filtros e exporte de novo.');
+    return;
+  }
+  const tabela = document.querySelector('#table-inovacao-container table');
+  baixarPastaExcel('Inovacao_IFBA', abasInovacao(
+    registros,
+    resumoDosFiltrosGlobais(),
+    dataDosDados(),
+    tabela ? matrizDeTabelaHtml(tabela) : null
+  ));
+}

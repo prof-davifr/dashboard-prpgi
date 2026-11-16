@@ -218,7 +218,13 @@ sheet reuses the aggregator the screen uses (`resumoPosGraduacao`, `matrizCampus
 tab. **`dedupKey` is never exported** — it is a salted pseudonym and one record is
 already one student.
 
-The other seven tabs still call `exportTableToExcel(containerId, filename)`, which
+Inovação uses `exportarInovacao()` (set up for independent validation, nov/2026):
+Filtros (cover with the two KPIs and the steps to check each record in the INPI
+pePI), Registros (one row per INPI number — digits as text, tipo, pePI base, ano,
+campus, ativo, nº of student inventors) and the on-screen Campus x Ano table. No
+SIAPE and no student pseudonym leaves in the file.
+
+The other six tabs still call `exportTableToExcel(containerId, filename)`, which
 now routes through the same engine (one `Dados` sheet scraped from the rendered
 table). Do not add `src/export.js` to `pos-validacao-f85b5515.html`:
 `tests/acessibilidade.test.js` asserts that page loads no SheetJS.
