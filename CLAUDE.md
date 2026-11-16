@@ -87,6 +87,10 @@ someone else's intellectual property. The source is now the INPI itself.
   number against the Lattes record; level 2 resolves the author's name to a
   SIAPE; level 3 omits `campus` entirely (never invent an `NA` code —
   `CODIGOS_VALIDOS` in `scripts/validate-data.js` would reject it).
+- **Ativos vs. inativos**: the tab's only KPI is "Total de Registros Ativos
+  (PI)". It skips records with `Inativo: true`, which `refresh-inovacao.js`
+  writes from the NIT `situacao` (`lerInativosNit`). The INPI gives a situação
+  only for trademarks. Charts, map and table still show inactive assets.
 - **`inpi-campus.json`** (committed) carries the cascade's result so CI can
   attribute campus without `dados/`. Level 1 erases itself after the first run —
   it queries the very Lattes records the run replaces — so the map is not an

@@ -8,7 +8,7 @@
 
 const {
   TIPO_POR_BASE, anoDe, chaveINPI, normalizeName,
-  indexarLattes, resolverVinculos, converter, conferirLGPD, lerEstruturaNit,
+  indexarLattes, resolverVinculos, converter, conferirLGPD, lerEstruturaNit, lerInativosNit,
 } = require('../scripts/refresh-inovacao');
 
 // ─── utilidades ──────────────────────────────────────────────────────────────
@@ -203,6 +203,32 @@ describe('converter', () => {
     const cobertos = [...publicados].filter((k) => estrutura[k]);
     // Três marcas trazem situação, não campus, na coluna de estrutura.
     expect(cobertos.length).toBeGreaterThanOrEqual(publicados.size - 3);
+  });
+
+  // ─── situação do NIT ────────────────────────────────────────────────────────
+
+  test('o ativo que o NIT marcou como Inativo leva Inativo em todos os registros', () => {
+    const mapaNomes = new Map([
+      ['ana carolina', { Servidor: '111', campus: 'SSA' }],
+      ['joao silva', { Servidor: '222', campus: 'VC' }],
+    ]);
+    const { inovacao } = converter(
+      [{ base: 'patente', numeroPedido: 'MU 9002752-3', dataDeposito: '10/05/2010',
+         autores: 'ANA CAROLINA / JOÃO SILVA' },
+       { base: 'marca', numeroPedido: '942841395', dataDeposito: '25/02/2026' }],
+      { idxLattes: new Map(), mapaNomes, mapaSalvo: {}, inativosNit: new Set(['90027523']) });
+    expect(inovacao.filter((r) => r.dedupKey === '90027523').map((r) => r.Inativo)).toEqual([true, true]);
+    // Fora da lista do NIT o ativo conta como ativo, e o campo nem é emitido.
+    expect(inovacao.find((r) => r.dedupKey === '942841395')).not.toHaveProperty('Inativo');
+  });
+
+  test('lerInativosNit lê só a situação Inativo da planilha do NIT', () => {
+    const { ativos } = require('../nit-estrutura.json');
+    const esperado = Object.values(ativos).filter((a) => a.situacao === 'Inativo').length;
+    const inativos = lerInativosNit();
+    expect(inativos.size).toBe(esperado);
+    // As três marcas arquivadas e o modelo de utilidade de 2010 (SSA).
+    for (const k of ['819210110', '821444689', '901437174', '90027523']) expect(inativos.has(k)).toBe(true);
   });
 
   test('base desconhecida no CSV aborta em vez de sumir com a linha', () => {

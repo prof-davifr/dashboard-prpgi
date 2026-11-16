@@ -235,17 +235,11 @@ function renderKPIsTecnica() {
 }
 
 function renderKPIsInovacao() {
-  const data = STATE.filtered.inovacao;
-  const total = data.length;
-  // A fonte é o INPI, que dá o titular e os autores mas nunca o campus. O campus
-  // vem da estrutura registrada pelo setor de PI da PRPGI e, na falta dela, dos
-  // autores. Sem nenhum dos dois, o registro fica sem campus: some do mapa e da
-  // tabela por campus, mas continua no total. O KPI abaixo torna essa
-  // diferença visível, em vez de deixar a soma do mapa parecer errada.
-  const semCampus = data.filter(r => !r["campus"]).length;
+  // `Inativo` vem da situação que o setor de PI da PRPGI registrou para o ativo
+  // (arquivado, indeferido, extinto). O INPI só informa a das marcas.
+  const ativos = STATE.filtered.inovacao.filter(r => !r["Inativo"]).length;
   $('kpi-inovacao').innerHTML = `
-    <div class="kpi-card"><div class="kpi-label">Total de Registros (PI)</div><div class="kpi-value">${total}</div></div>
-    <div class="kpi-card"><div class="kpi-label">Sem Campus Atribuído</div><div class="kpi-value">${semCampus}</div></div>
+    <div class="kpi-card"><div class="kpi-label">Total de Registros Ativos (PI)</div><div class="kpi-value">${ativos}</div></div>
   `;
 }
 

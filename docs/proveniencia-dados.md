@@ -396,9 +396,16 @@ O INPI dá o titular (a instituição) e os autores (pessoas), **nunca o campus*
 | 2 | O nome do autor casa com a base do SUAP | Resolve o SIAPE e o campus |
 | 3 | Nenhum dos dois | O campo `campus` não é emitido |
 
-No nível 3 o registro conta nos KPIs e some do mapa e da tabela por campus. Um
-KPI próprio, "Sem Campus Atribuído", torna a diferença visível. **Não invente um
-código como `NA`**: `CODIGOS_VALIDOS` em `scripts/validate-data.js` o recusaria.
+No nível 3 o registro some do mapa e da tabela por campus, mas continua nos
+gráficos de evolução e no KPI. **Não invente um código como `NA`**:
+`CODIGOS_VALIDOS` em `scripts/validate-data.js` o recusaria.
+
+O único KPI da aba é "Total de Registros Ativos (PI)" (nov/2026). Ele exclui os
+registros com `Inativo: true`, que `refresh-inovacao.js` grava nos ativos que o
+NIT marcou como `Inativo` (§2.6). O INPI só informa a situação das marcas, por
+isso a situação de patentes, programas e desenhos vem da planilha do NIT. Um
+ativo fora da planilha conta como ativo. Os gráficos, o mapa e a tabela mostram
+também os inativos.
 
 Um registro com vários autores vira **um registro por autor**, o mesmo fan-out
 de coautoria de `build.js`. É o que mantém o KPI "p/ Servidor" correto.
@@ -467,6 +474,10 @@ gera `nit-estrutura.json` (versionado), com uma entrada por número INPI:
 | `situacao` | `sit_registro_ativo_pesq` | Ativo, Inativo, Pedido em análise |
 | `estrutura` | `estrutura` | valor bruto, como o setor escreveu |
 | `campus` | `estrutura` | código do painel; ausente quando a célula não traz campus |
+
+O campo `situacao` decide o KPI de ativos: `Inativo` grava `Inativo: true` nos
+registros do ativo em `data.json` (§2.5). Em nov/2026 eram quatro: as três marcas
+do CEFET-BA e o modelo de utilidade 90027523 (SSA, 2010).
 
 Conversões: `FSA`→`FS` e `VDC`→`VC` (via `normalizeCampusCode`), `Seabra`→`SEA`.
 `REI` (Reitoria) fica como está, porque já é código válido no painel. Três marcas

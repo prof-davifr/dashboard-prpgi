@@ -166,6 +166,24 @@ function lerEstruturaNit() {
   return campusPorChave;
 }
 
+/**
+ * Chaves INPI dos ativos que o NIT marcou como `Inativo` (arquivados,
+ * indeferidos, extintos). Saem do KPI "Total de Registros Ativos (PI)".
+ *
+ * O INPI só informa a situação das marcas; a das patentes, programas e
+ * desenhos vem desta planilha. Ativo fora do NIT conta como ativo.
+ */
+function lerInativosNit() {
+  if (!fs.existsSync(NIT_JSON)) return new Set();
+  const { ativos = {} } = JSON.parse(fs.readFileSync(NIT_JSON, 'utf-8'));
+  const inativos = new Set();
+  for (const [numero, ativo] of Object.entries(ativos)) {
+    const chave = chaveINPI(numero);
+    if (chave && ativo.situacao === 'Inativo') inativos.add(chave);
+  }
+  return inativos;
+}
+
 // ─── a cascata ───────────────────────────────────────────────────────────────
 
 /**
@@ -204,6 +222,7 @@ function converter(linhas, contexto) {
   const vinculosNovos = {};
   const porNivel = { 0: 0, 1: 0, 2: 0, 3: 0 };
   const estruturaNit = contexto.estruturaNit || {};
+  const inativosNit = contexto.inativosNit || new Set();
 
   for (const linha of linhas) {
     const tipo = TIPO_POR_BASE[linha.base];
@@ -223,6 +242,7 @@ function converter(linhas, contexto) {
 
     const base = { Ano: anoDe(linha.dataDeposito), Tipo: tipo, dedupKey: chave };
     if (linha.situacao) base.Situacao = linha.situacao;
+    if (inativosNit.has(chave)) base.Inativo = true;
     if (campusNit && !vinculos.length) base.campus = campusNit;
 
     if (!vinculos.length) {
@@ -291,8 +311,11 @@ function main() {
   console.log(`  ${Object.keys(mapaSalvo).length} números no inpi-campus.json`);
   const estruturaNit = lerEstruturaNit();
   console.log(`  ${Object.keys(estruturaNit).length} números com estrutura no nit-estrutura.json`);
+  const inativosNit = lerInativosNit();
+  console.log(`  ${inativosNit.size} ativos inativos no nit-estrutura.json`);
 
-  const { inovacao, vinculosNovos, porNivel } = converter(linhas, { idxLattes, mapaNomes, mapaSalvo, estruturaNit });
+  const { inovacao, vinculosNovos, porNivel } =
+    converter(linhas, { idxLattes, mapaNomes, mapaSalvo, estruturaNit, inativosNit });
 
   conferirLGPD(inovacao);
 
@@ -358,6 +381,6 @@ if (require.main === module) main();
 
 module.exports = {
   TIPO_POR_BASE, anoDe, chaveINPI, normalizeName,
-  indexarLattes, resolverVinculos, converter, conferirLGPD, lerEstruturaNit,
+  indexarLattes, resolverVinculos, converter, conferirLGPD, lerEstruturaNit, lerInativosNit,
   MAPA_JSON, DATA_JSON, NIT_JSON,
 };
