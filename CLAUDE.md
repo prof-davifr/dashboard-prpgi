@@ -18,6 +18,7 @@ Any new data source integration **must** verify the `Instituição` field contai
 
 - `npm run build` — process `.xlsx`/`.csv` files from `dados/` into `data.json` and `data-groups.json`
 - `node scripts/refresh-inovacao.js <inpi.csv>` — **required after every build**: fills the `inovacao` array from the INPI CSV. The build leaves it empty on purpose (see below)
+- `node scripts/inventores-inpi.js <inpi.csv>` — local spreadsheet (`dados/inpi/inventores-<data>.xlsx`) with every INPI inventor/author and their own campus, matched by name against Lattes (`scraper-SUAPCNPQ/` + `old/`), DGP (`data-groups.json`), SUAP Pós and IC. Carries names: it stays in `dados/`, never in `data.json`
 - `npm run validate` — check the committed `data.json` (structure, campus codes, absence of personal data)
 - `scripts/atualizar-suap.sh` — collects Pós-Graduação and Lattes from the SUAP through the sibling scrapers, rebuilds, tests and publishes. Run daily by `systemd/coleta-suap.timer`; each source is due after 30 days. `MAX_IDADE_DIAS=0` forces, `FONTES=pos|lattes` narrows, `PUBLICAR=0` skips commit/push
 - `npm start` — dev server on port 8080 (`live-server`)

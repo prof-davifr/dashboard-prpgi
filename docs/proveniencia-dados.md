@@ -435,6 +435,26 @@ versionado**, e os nomes servem só para resolver o SIAPE dentro do
 `refresh-inovacao.js`. `conferirLGPD()` recusa qualquer valor com espaço ou
 letra acentuada nos campos de `inovacao` — a assinatura de um nome próprio.
 
+#### Inventores com o campus de cada pessoa
+
+`scripts/inventores-inpi.js <inpi.csv>` gera uma planilha local,
+`dados/inpi/inventores-<data>.xlsx`, com uma linha por inventor ou autor de cada
+registro. O campus é o da pessoa, não o do ativo. O nome do INPI é comparado com
+o Lattes do SUAP (`scraper-SUAPCNPQ/` e `old/`), os membros dos grupos do DGP
+(`data-groups.json`), os alunos de pós-graduação e os orientadores e bolsistas
+de IC. A comparação aceita o nome inteiro ou, quando o INPI abrevia um
+sobrenome, o prenome e o último sobrenome de uma pessoa só. Uma pessoa aparece
+em planilhas Lattes de vários campi porque a planilha de um campus lista os
+coautores de outros; vale o campus mais frequente, e a coluna `Conferir` marca
+os casos em que ele tem menos de 60% das ocorrências.
+
+Primeira coleta (16/11/2026): 184 registros, 375 pessoas distintas, 194 com
+campus e 181 sem. As sem campus são, em geral, alunos de graduação e de curso
+técnico sem IC, coautores externos e ex-servidores. As marcas não têm inventor,
+e 19 programas antigos (2011–2018) vêm do INPI sem autor.
+
+A planilha tem nomes de pessoas e fica em `dados/`, fora do git.
+
 #### Frequência de atualização
 
 Mensal, pelo workflow `.github/workflows/refresh-inovacao.yml` (dia 1, 07:00
